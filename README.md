@@ -12,13 +12,12 @@ cd ~/dotfiles
 
 ```
 dotfiles/
-├── home/
-│   └── config/         # -> ~/.config/
-│       ├── git/        # Git configuration
-│       ├── nvim/       # Neovim (LazyVim)
-│       ├── profile     # XDG environment variables
-│       ├── wget/       # Wget configuration
-│       └── zsh/        # Zsh configuration (zinit auto-install)
+├── config/             # -> ~/.config/
+│   ├── git/            # Git configuration
+│   ├── nvim/           # Neovim (LazyVim)
+│   ├── profile         # XDG environment variables
+│   ├── wget/           # Wget configuration
+│   └── zsh/            # Zsh configuration (zinit auto-install)
 ├── scripts/
 │   ├── create-dirs.sh
 │   ├── install-deps.sh
