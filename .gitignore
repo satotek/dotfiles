@@ -1,0 +1,11 @@
+# Zsh completion cache
+.zcompdump*
+
+# Git credentials
+.git-credentials
+
+# Local secrets
+secrets
+
+# Local zsh configuration
+local.zsh

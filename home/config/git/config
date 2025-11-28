@@ -1,0 +1,11 @@
+# @file ~/.config/git/config
+
+[user]
+  name = Konosuke Sato
+  email = konosuke.s0912@gmail.com
+[credential]
+	helper = store --file ~/.config/git/.git-credentials
+[color]
+  ui = true
+[init]
+defaultBranch  = main
