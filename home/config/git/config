@@ -1,0 +1,11 @@
+# @file ~/.config/git/config
+
+[user]
+  name = Your Name
+  email = your@email.com
+[credential]
+	helper = store --file ~/.config/git/.git-credentials
+[color]
+  ui = true
+[init]
+defaultBranch  = main
