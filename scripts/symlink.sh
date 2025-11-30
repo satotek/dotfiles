@@ -31,6 +31,11 @@ for item in "${DOTPATH}/config"/*; do
   ln -fvns "$item" "$target"
 done
 
+# Ensure legacy tmux path (~/.tmux.conf) points to XDG config
+if [[ -f "${DOTPATH}/config/tmux/tmux.conf" ]]; then
+  ln -fvns "${DOTPATH}/config/tmux/tmux.conf" "${HOME}/.tmux.conf"
+fi
+
 # Make directories with reference to Filesystem Hierarchy Standard
 mkdir -p "${HOME}/bin" # for original commands
 mkdir -p "${HOME}/src" # for code repositories
