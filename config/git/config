@@ -1,11 +1,26 @@
-# @file ~/.config/git/config
-
 [user]
   name = Your Name
   email = your@email.com
+
 [credential]
 	helper = store --file ~/.config/git/.git-credentials
+
 [color]
   ui = true
+
 [init]
-defaultBranch  = main
+  defaultBranch  = main
+
+[core]
+  pager = delta  --side-by-side
+
+[interactive]
+  diffFilter = delta --color-only
+
+[delta]
+  navigate = true
+  dark = true
+
+[merge]
+  conflictstyle = zdiff3
+
