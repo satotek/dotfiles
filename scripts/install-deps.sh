@@ -8,13 +8,14 @@ echo "📦 Installing dependencies..."
 sudo apt update
 
 # Core CLI (always in apt)
-echo "Installing core CLI tools (zsh, curl, wget, git, fzf, ripgrep, fd)..."
+echo "Installing core CLI tools (zsh, curl, wget, git, tmux, fzf, ripgrep, fd)..."
 sudo apt install -y \
-  zsh \
-  curl \
-  wget \
-  git \
-  fzf \
+    zsh \
+    curl \
+    wget \
+    git \
+    tmux \
+    fzf \
   ripgrep \
   fd-find
 
