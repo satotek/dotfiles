@@ -38,7 +38,6 @@ brew install \
   neovim \
   lazygit \
   git-delta \
-  node \
   python3 \
   yazi
 
