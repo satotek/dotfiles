@@ -21,7 +21,8 @@ elif [[ -d "/usr/local/Homebrew" ]]; then
 fi
 
 # PATH extensions
-export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/bin:$PATH"
+export PNPM_HOME="$HOME/Library/pnpm"
+export PATH="$PNPM_HOME:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/bin:$PATH"
 
 # Load local secrets (not tracked by git)
 [ -f "$XDG_CONFIG_HOME/secrets" ] && . "$XDG_CONFIG_HOME/secrets"
