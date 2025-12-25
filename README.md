@@ -1,5 +1,7 @@
 # dotfiles
 
+Supports **macOS** and **Linux** (Ubuntu/Debian).
+
 ## Installation
 
 ```bash
@@ -20,7 +22,9 @@ dotfiles/
 │   └── zsh/            # Zsh configuration (zinit auto-install)
 ├── scripts/
 │   ├── create-dirs.sh
-│   ├── install-deps.sh
+│   ├── install-deps.sh        # OS auto-detection wrapper
+│   ├── install-deps-linux.sh  # Linux (apt)
+│   ├── install-deps-macos.sh  # macOS (Homebrew)
 │   ├── setup-xdg.sh
 │   └── symlink.sh
 └── install.sh
