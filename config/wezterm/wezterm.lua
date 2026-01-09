@@ -1,6 +1,15 @@
 local wezterm = require("wezterm")
 local config = wezterm.config_builder()
 
+-- OS別のデフォルトシェル設定
+if wezterm.target_triple == "x86_64-pc-windows-msvc" then
+	config.default_prog = { "pwsh.exe" }
+elseif wezterm.target_triple == "aarch64-apple-darwin" then
+	config.default_prog = { "zsh" }
+elseif wezterm.target_triple == "x86_64-unknown-linux-gnu" then
+	config.default_prog = { "zsh" }
+end
+
 config.automatically_reload_config = true
 config.font = wezterm.font("HackGen Console NF")
 config.font_size = 12.0
