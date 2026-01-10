@@ -10,6 +10,9 @@ secrets
 # Local zsh configuration
 local.zsh
 
+# Local git configuration
+config.local
+
 # Zsh session files
 .zsh_sessions/
 

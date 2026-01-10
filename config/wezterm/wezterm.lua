@@ -5,9 +5,9 @@ local config = wezterm.config_builder()
 if wezterm.target_triple == "x86_64-pc-windows-msvc" then
 	config.default_prog = { "pwsh.exe" }
 elseif wezterm.target_triple == "aarch64-apple-darwin" then
-	config.default_prog = { "zsh" }
+	config.default_prog = { "zsh", "-l" }
 elseif wezterm.target_triple == "x86_64-unknown-linux-gnu" then
-	config.default_prog = { "zsh" }
+	config.default_prog = { "zsh", "-l" }
 end
 
 config.automatically_reload_config = true

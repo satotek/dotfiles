@@ -1,0 +1,6 @@
+# Copy this file to config.local and edit with your information
+# cp config.local.example config.local
+
+[user]
+  name = Your Name
+  email = your@email.com
