@@ -32,12 +32,18 @@ dotfiles/
 
 ## Post-installation
 
-Set your name and email in `~/.config/git/config`:
+Copy the git config template and set your name and email:
+
+```bash
+cp ~/.config/git/config.local.example ~/.config/git/config.local
+```
+
+Then edit `~/.config/git/config.local`:
 
 ```ini
 [user]
-    name = <your_name>
-    email = <your_email>
+    name = Your Name
+    email = your@email.com
 ```
 
 Create `~/.config/secrets` for API keys and other sensitive data (not tracked by git):
