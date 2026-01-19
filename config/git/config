@@ -18,6 +18,8 @@
 [core]
   pager = delta  --side-by-side
 
+  editor = vim
+  autocrlf = input
 [interactive]
   diffFilter = delta --color-only
 
@@ -28,3 +30,14 @@
 [merge]
   conflictstyle = zdiff3
 
+[alias]
+  st = status
+  ss = status -s
+  co = checkout
+  br = branch
+  sw = switch
+  pr = pull -r
+  ps = push
+  fixit = commit --amend --no-edit
+  fixmsg = commit --amend
+  
