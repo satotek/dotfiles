@@ -5,13 +5,20 @@ set -euo pipefail
 echo "Installing Haskell toolchain with ghcup..."
 
 export GHCUP_USE_XDG_DIRS=1
+: "${XDG_BIN_HOME:=$HOME/.local/bin}"
 
-readonly GHCUP_XDG_BIN="$HOME/.local/share/ghcup/bin"
+readonly GHCUP_XDG_BIN="$XDG_BIN_HOME"
+readonly GHCUP_XDG_DATA_BIN="$HOME/.local/share/ghcup/bin"
 readonly GHCUP_LEGACY_BIN="$HOME/.ghcup/bin"
 
 resolve_ghcup() {
   if [[ -x "$GHCUP_XDG_BIN/ghcup" ]]; then
     echo "$GHCUP_XDG_BIN/ghcup"
+    return 0
+  fi
+
+  if [[ -x "$GHCUP_XDG_DATA_BIN/ghcup" ]]; then
+    echo "$GHCUP_XDG_DATA_BIN/ghcup"
     return 0
   fi
 
@@ -30,7 +37,7 @@ resolve_ghcup() {
 
 if ! GHCUP_CMD="$(resolve_ghcup)"; then
   echo "Installing ghcup..."
-  curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | BOOTSTRAP_HASKELL_NONINTERACTIVE=1 BOOTSTRAP_HASKELL_ADJUST_BASHRC=0 sh
+  curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | GHCUP_USE_XDG_DIRS=1 BOOTSTRAP_HASKELL_CABAL_XDG=1 BOOTSTRAP_HASKELL_NONINTERACTIVE=1 BOOTSTRAP_HASKELL_ADJUST_BASHRC=0 sh
   if ! GHCUP_CMD="$(resolve_ghcup)"; then
     echo "Failed to locate ghcup after installation."
     exit 1
