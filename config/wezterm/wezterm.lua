@@ -12,7 +12,7 @@ end
 
 config.automatically_reload_config = true
 config.font = wezterm.font("HackGen Console NF")
-config.font_size = 12.0
+config.font_size = 13.0
 config.use_ime = true
 config.window_background_opacity = 0.80
 config.macos_window_background_blur = 10
