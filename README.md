@@ -25,6 +25,7 @@ dotfiles/
 │   ├── install-deps.sh        # OS auto-detection wrapper
 │   ├── install-deps-linux.sh  # Linux (apt)
 │   ├── install-deps-macos.sh  # macOS (Homebrew)
+│   ├── install-haskell-ghcup.sh # Haskell toolchain (ghcup)
 │   ├── setup-xdg.sh
 │   └── symlink.sh
 └── install.sh
@@ -59,3 +60,4 @@ export OTHER_SECRET='...'
 - Zsh with zinit (auto-installed on first launch)
 - Neovim with LazyVim
 - Powerlevel10k prompt
+- Haskell toolchain via ghcup (ghc/cabal/hls/stack)

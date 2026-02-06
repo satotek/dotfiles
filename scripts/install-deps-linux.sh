@@ -2,6 +2,8 @@
 
 set -eu
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 echo "📦 Installing dependencies..."
 
 # Update package lists
@@ -31,6 +33,9 @@ sudo apt install -y \
   python3-pip \
   python3-venv \
   pkg-config \
+  libffi-dev \
+  libgmp-dev \
+  libncurses-dev \
   xclip \
   wl-clipboard
 
@@ -166,6 +171,9 @@ curl -fsSL https://get.pnpm.io/install.sh | sh -
 # Install uv (Python package manager)
 echo "Installing uv..."
 curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install Haskell toolchain (ghcup, ghc, cabal, hls, stack)
+"${SCRIPT_DIR}/install-haskell-ghcup.sh"
 
 # Change default shell to Zsh if not already changed
 if [[ "$SHELL" != */zsh ]]; then

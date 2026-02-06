@@ -2,6 +2,8 @@
 
 set -eu
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 echo "📦 Installing dependencies for macOS..."
 
 # Check if Homebrew is installed
@@ -59,6 +61,9 @@ echo "Installing uv..."
 if ! command -v uv &>/dev/null; then
   curl -LsSf https://astral.sh/uv/install.sh | sh
 fi
+
+# Install Haskell toolchain (ghcup, ghc, cabal, hls, stack)
+"${SCRIPT_DIR}/install-haskell-ghcup.sh"
 
 # Setup fzf key bindings and fuzzy completion
 echo "Setting up fzf..."
