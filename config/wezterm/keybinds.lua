@@ -12,6 +12,14 @@ wezterm.on("update-right-status", function(window, pane)
 	window:set_right_status(name or "")
 end)
 
+local function shell_command_args(command)
+	if wezterm.target_triple == "x86_64-pc-windows-msvc" then
+		return { "pwsh.exe", "-NoLogo", "-Command", command }
+	end
+
+	return { "/bin/zsh", "-lc", command }
+end
+
 -- Helper function to spawn overlay pane
 local function spawn_overlay_pane(command)
 	return wezterm.action_callback(function(window, pane)
@@ -19,7 +27,7 @@ local function spawn_overlay_pane(command)
 			direction = "Bottom",
 			size = 1.0,
 			domain = "CurrentPaneDomain",
-			args = { command },
+			args = shell_command_args(command),
 		})
 		window:perform_action(act.TogglePaneZoomState, new_pane)
 	end)
