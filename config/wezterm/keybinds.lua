@@ -18,7 +18,8 @@ local function spawn_overlay_pane(command)
 		local new_pane = pane:split({
 			direction = "Bottom",
 			size = 1.0,
-			args = { os.getenv("SHELL"), "-lc", command },
+			domain = "CurrentPaneDomain",
+			args = { command },
 		})
 		window:perform_action(act.TogglePaneZoomState, new_pane)
 	end)
@@ -71,6 +72,7 @@ return {
 			}),
 		},
 		-- Overlay applications
+		{ key = "b", mods = "LEADER", action = spawn_overlay_pane("btop") },
 		{ key = "g", mods = "LEADER", action = spawn_overlay_pane("lazygit") },
 		{ key = "v", mods = "LEADER", action = spawn_overlay_pane("nvim") },
 		{ key = "y", mods = "LEADER", action = spawn_overlay_pane("yazi") },
