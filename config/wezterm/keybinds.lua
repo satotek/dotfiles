@@ -12,6 +12,18 @@ wezterm.on("update-right-status", function(window, pane)
 	window:set_right_status(name or "")
 end)
 
+-- Helper function to spawn overlay pane
+local function spawn_overlay_pane(command)
+	return wezterm.action_callback(function(window, pane)
+		local new_pane = pane:split({
+			direction = "Bottom",
+			size = 1.0,
+			args = { os.getenv("SHELL"), "-lc", command },
+		})
+		window:perform_action(act.TogglePaneZoomState, new_pane)
+	end)
+end
+
 return {
 	keys = {
 		{
@@ -33,6 +45,8 @@ return {
 				end),
 			}),
 		},
+		-- Lazygit overlay
+		{ key = "g", mods = "LEADER", action = spawn_overlay_pane("lazygit") },
 		{
 			key = "W",
 			mods = "LEADER|SHIFT",
@@ -69,11 +83,14 @@ return {
 		-- 画面フルスクリーン切り替え
 		{ key = "Enter", mods = "ALT", action = act.ToggleFullScreen },
 		-- Shift+Enter（Claude Code等で改行入力用）
-		{ key = "Enter", mods = "SHIFT", action = act.SendString("\x1b[13;2u") },
+		{ key = "Enter", mods = "SHIFT", action = act.SendString("\x1b\r") },
 
 		-- コピーモード
 		-- { key = 'X', mods = 'LEADER', action = act.ActivateKeyTable{ name = 'copy_mode', one_shot =false }, },
 		{ key = "[", mods = "LEADER", action = act.ActivateCopyMode },
+		-- サーチモード
+		{ key = "f", mods = "SUPER", action = act.Search("CurrentSelectionOrEmptyString") },
+		{ key = "f", mods = "SHIFT|CTRL", action = act.Search("CurrentSelectionOrEmptyString") },
 		-- コピー
 		{ key = "c", mods = "SUPER", action = act.CopyTo("Clipboard") },
 		{ key = "c", mods = "SHIFT|CTRL", action = act.CopyTo("Clipboard") },
@@ -81,9 +98,9 @@ return {
 		{ key = "v", mods = "SUPER", action = act.PasteFrom("Clipboard") },
 		{ key = "v", mods = "SHIFT|CTRL", action = act.PasteFrom("Clipboard") },
 
-		-- Pane作成 leader + r or d
-		{ key = "d", mods = "LEADER", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
-		{ key = "r", mods = "LEADER", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
+		-- Pane作成 leader + \ or -
+		{ key = "-", mods = "LEADER", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
+		{ key = "\\", mods = "LEADER", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
 		-- Paneを閉じる leader + x
 		{ key = "x", mods = "LEADER", action = act({ CloseCurrentPane = { confirm = true } }) },
 		-- Pane移動 leader + hlkj
@@ -124,6 +141,9 @@ return {
 
 		-- 設定再読み込み
 		{ key = "r", mods = "SHIFT|CTRL", action = act.ReloadConfiguration },
+		-- Debug overlay
+		{ key = "l", mods = "SUPER|SHIFT", action = act.ShowDebugOverlay },
+		{ key = "l", mods = "SHIFT|CTRL", action = act.ShowDebugOverlay },
 		-- キーテーブル用
 		{ key = "s", mods = "LEADER", action = act.ActivateKeyTable({ name = "resize_pane", one_shot = false }) },
 		{
