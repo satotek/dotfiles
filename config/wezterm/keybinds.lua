@@ -45,8 +45,10 @@ return {
 				end),
 			}),
 		},
-		-- Lazygit overlay
+		-- Overlay applications
 		{ key = "g", mods = "LEADER", action = spawn_overlay_pane("lazygit") },
+		{ key = "v", mods = "LEADER", action = spawn_overlay_pane("nvim") },
+		{ key = "y", mods = "LEADER", action = spawn_overlay_pane("yazi") },
 		{
 			key = "W",
 			mods = "LEADER|SHIFT",
