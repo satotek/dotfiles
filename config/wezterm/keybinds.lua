@@ -24,6 +24,31 @@ local function spawn_overlay_pane(command)
 	end)
 end
 
+wezterm.on("augment-command-palette", function(window, pane)
+	return {
+		{
+			brief = "Launch: Lazygit",
+			icon = "md_source_repository",
+			action = spawn_overlay_pane("lazygit"),
+		},
+		{
+			brief = "Launch: Neovim",
+			icon = "md_code_braces",
+			action = spawn_overlay_pane("nvim"),
+		},
+		{
+			brief = "Launch: Yazi",
+			icon = "md_folder",
+			action = spawn_overlay_pane("yazi"),
+		},
+		{
+			brief = "Launch: Ghost",
+			icon = "md_ghost",
+			action = spawn_overlay_pane("ghost"),
+		},
+	}
+end)
+
 return {
 	keys = {
 		{
