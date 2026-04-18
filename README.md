@@ -141,6 +141,9 @@ dotfiles/
 │   │   ├── linux.nix
 │   │   └── home/
 │   └── programs/
+│       ├── common.nix
+│       ├── darwin.nix
+│       ├── linux.nix
 │       ├── git/
 │       ├── lazygit/
 │       ├── nvim/
@@ -157,7 +160,9 @@ dotfiles/
 - macOS は `nix-darwin` ベースで運用可能です
 - Linux は standalone `Home Manager` 出力を用意しています
 - 共通の Home Manager 構成は `nix/home-manager/` にあります
-- 各アプリ設定は `nix/programs/<tool>/` に寄せています
+- 汎用 package と OS 固有 package は `nix/programs/common.nix` と `nix/programs/darwin.nix` / `linux.nix` にあります
+- 各アプリ設定は `nix/programs/common.nix` と OS 別の `darwin.nix` / `linux.nix` から束ねています
+- tool 固有の package は対応する `nix/programs/<tool>/` で管理します
 - `git`、`tmux`、`wget`、Zsh の主要部分は native option 化済みです
 - `lazygit`、`nvim`、`wezterm` などは tool ごとの `files/` を Home Manager から参照します
 

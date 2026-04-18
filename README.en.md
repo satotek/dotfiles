@@ -139,6 +139,9 @@ dotfiles/
 │   │   ├── linux.nix
 │   │   └── home/
 │   └── programs/
+│       ├── common.nix
+│       ├── darwin.nix
+│       ├── linux.nix
 │       ├── git/
 │       ├── lazygit/
 │       ├── nvim/
@@ -155,7 +158,9 @@ dotfiles/
 - macOS is usable with `nix-darwin`
 - Linux uses standalone `Home Manager` outputs
 - Shared Home Manager logic lives under `nix/home-manager/`
-- Each app is grouped under `nix/programs/<tool>/`
+- Shared and OS-specific packages live in `nix/programs/common.nix` and `nix/programs/darwin.nix` / `linux.nix`
+- `nix/programs/common.nix` plus the OS-specific `darwin.nix` / `linux.nix` files bundle the per-tool modules under `nix/programs/<tool>/`
+- Tool-specific packages live alongside each tool module under `nix/programs/<tool>/`
 - `git`, `tmux`, `wget`, and most of `zsh` are already managed with native Home Manager options
 - `lazygit`, `nvim`, and `wezterm` use tool-local `files/` directories referenced by Home Manager
 

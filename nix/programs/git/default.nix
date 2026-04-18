@@ -1,5 +1,7 @@
-{ ... }:
+{ pkgs, ... }:
 {
+  home.packages = [ pkgs.delta ];
+
   programs.git = {
     enable = true;
     includes = [

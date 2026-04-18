@@ -1,2 +1,6 @@
 { ... }:
-{ }
+{
+  imports = [
+    ../programs/darwin.nix
+  ];
+}

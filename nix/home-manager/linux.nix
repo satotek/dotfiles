@@ -1,7 +1,6 @@
-{ pkgs, ... }:
+{ ... }:
 {
-  home.packages = with pkgs; [
-    wl-clipboard
-    xclip
+  imports = [
+    ../programs/linux.nix
   ];
 }
