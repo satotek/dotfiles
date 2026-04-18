@@ -14,8 +14,10 @@ macOS では `nix-darwin + Home Manager`、Linux では standalone の `Home Man
 
 ## 方針
 
-- `config/*` に各アプリの設定ファイルを置く
-- `Home Manager` で `~/dotfiles` 配下の設定をリンクして使う
+- Nix 関連の構成は `nix/` 配下にまとめる
+- 各ツールの設定は `nix/programs/<tool>/` に寄せる
+- `git`、`tmux`、`wget`、Zsh の主要部分は Home Manager の native option で管理する
+- repo-backed な設定ファイルも `Home Manager` 経由で使う
 - 依存ツールの導入は shell script ではなく Nix で管理する
 - ローカル専用設定や secrets は repo の外に置く
 
@@ -88,7 +90,7 @@ nix run home-manager/master -- switch --flake "path:$PWD#azureuser@linux-aarch64
 Git の個人設定:
 
 ```bash
-cp ~/dotfiles/config/git.local.example ~/.config/git.local
+cp ~/dotfiles/nix/programs/git/git.local.example ~/.config/git.local
 ```
 
 `~/.config/git.local` を編集:
@@ -102,7 +104,7 @@ cp ~/dotfiles/config/git.local.example ~/.config/git.local
 Zsh のローカル上書き設定:
 
 ```bash
-cp ~/dotfiles/config/zsh.local.example ~/.config/zsh.local
+cp ~/dotfiles/nix/programs/zsh/zsh.local.example ~/.config/zsh.local
 ```
 
 secrets:
@@ -127,25 +129,25 @@ export OTHER_SECRET='...'
 
 ```text
 dotfiles/
-├── config/             # 実際のアプリ設定
-│   ├── git/
-│   ├── lazygit/
-│   ├── nvim/
-│   ├── profile
-│   ├── tmux/
-│   ├── wezterm/
-│   ├── wget/
-│   └── zsh/
-├── hosts/
-│   └── darwin/
-│       └── default.nix
-├── modules/
+├── nix/
+│   ├── hosts/
+│   │   ├── darwin/
+│   │   └── linux/
 │   ├── darwin/
 │   │   └── system.nix
-│   └── home/
-│       ├── common.nix
-│       ├── darwin.nix
-│       └── linux.nix
+│   ├── home-manager/
+│   │   ├── default.nix
+│   │   ├── darwin.nix
+│   │   ├── linux.nix
+│   │   └── home/
+│   └── programs/
+│       ├── git/
+│       ├── lazygit/
+│       ├── nvim/
+│       ├── tmux/
+│       ├── wezterm/
+│       ├── wget/
+│       └── zsh/
 ├── flake.nix
 └── flake.lock
 ```
@@ -154,8 +156,10 @@ dotfiles/
 
 - macOS は `nix-darwin` ベースで運用可能です
 - Linux は standalone `Home Manager` 出力を用意しています
-- 共有設定は `modules/home/common.nix` に寄せています
-- 一部アプリ設定はまだ Nix option 化ではなく、既存 `config/*` をリンクする方式です
+- 共通の Home Manager 構成は `nix/home-manager/` にあります
+- 各アプリ設定は `nix/programs/<tool>/` に寄せています
+- `git`、`tmux`、`wget`、Zsh の主要部分は native option 化済みです
+- `lazygit`、`nvim`、`wezterm` などは tool ごとの `files/` を Home Manager から参照します
 
 ## 主な内容
 

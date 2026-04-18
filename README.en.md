@@ -14,8 +14,10 @@ This repo uses `nix-darwin + Home Manager` on macOS and standalone `Home Manager
 
 ## Approach
 
-- Keep application configs under `config/*`
-- Link repo-backed configs from `~/dotfiles` through `Home Manager`
+- Keep Nix-related configuration under `nix/`
+- Group each tool under `nix/programs/<tool>/`
+- Manage `git`, `tmux`, `wget`, and most of `zsh` with native Home Manager options
+- Use `Home Manager` for repo-backed configs as well
 - Manage CLI tools with Nix instead of shell installer scripts
 - Keep local-only settings and secrets outside the repo
 
@@ -88,7 +90,7 @@ nix run home-manager/master -- switch --flake "path:$PWD#azureuser@linux-aarch64
 Git identity:
 
 ```bash
-cp ~/dotfiles/config/git.local.example ~/.config/git.local
+cp ~/dotfiles/nix/programs/git/git.local.example ~/.config/git.local
 ```
 
 Edit `~/.config/git.local`:
@@ -102,7 +104,7 @@ Edit `~/.config/git.local`:
 Optional local Zsh overrides:
 
 ```bash
-cp ~/dotfiles/config/zsh.local.example ~/.config/zsh.local
+cp ~/dotfiles/nix/programs/zsh/zsh.local.example ~/.config/zsh.local
 ```
 
 Secrets:
@@ -125,25 +127,25 @@ You can also keep them in `~/.config/secrets`.
 
 ```text
 dotfiles/
-├── config/             # actual app configs
-│   ├── git/
-│   ├── lazygit/
-│   ├── nvim/
-│   ├── profile
-│   ├── tmux/
-│   ├── wezterm/
-│   ├── wget/
-│   └── zsh/
-├── hosts/
-│   └── darwin/
-│       └── default.nix
-├── modules/
+├── nix/
+│   ├── hosts/
+│   │   ├── darwin/
+│   │   └── linux/
 │   ├── darwin/
 │   │   └── system.nix
-│   └── home/
-│       ├── common.nix
-│       ├── darwin.nix
-│       └── linux.nix
+│   ├── home-manager/
+│   │   ├── default.nix
+│   │   ├── darwin.nix
+│   │   ├── linux.nix
+│   │   └── home/
+│   └── programs/
+│       ├── git/
+│       ├── lazygit/
+│       ├── nvim/
+│       ├── tmux/
+│       ├── wezterm/
+│       ├── wget/
+│       └── zsh/
 ├── flake.nix
 └── flake.lock
 ```
@@ -152,8 +154,10 @@ dotfiles/
 
 - macOS is usable with `nix-darwin`
 - Linux uses standalone `Home Manager` outputs
-- Shared logic lives in `modules/home/common.nix`
-- Some apps are still managed by linking the existing `config/*` files rather than rewriting everything into native Nix options
+- Shared Home Manager logic lives under `nix/home-manager/`
+- Each app is grouped under `nix/programs/<tool>/`
+- `git`, `tmux`, `wget`, and most of `zsh` are already managed with native Home Manager options
+- `lazygit`, `nvim`, and `wezterm` use tool-local `files/` directories referenced by Home Manager
 
 ## Included tools and configs
 

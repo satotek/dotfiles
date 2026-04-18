@@ -16,6 +16,22 @@
       darwinUsername = "nosuke";
       darwinHostname = "nosuke-M5-MBP";
       darwinSystem = "aarch64-darwin";
+      linuxNosukeX86_64 = import ./nix/hosts/linux/nosuke.nix {
+        system = "x86_64-linux";
+        hostname = "linux-x86_64";
+      };
+      linuxNosukeAarch64 = import ./nix/hosts/linux/nosuke.nix {
+        system = "aarch64-linux";
+        hostname = "linux-aarch64";
+      };
+      linuxAzureuserX86_64 = import ./nix/hosts/linux/azureuser.nix {
+        system = "x86_64-linux";
+        hostname = "linux-x86_64";
+      };
+      linuxAzureuserAarch64 = import ./nix/hosts/linux/azureuser.nix {
+        system = "aarch64-linux";
+        hostname = "linux-aarch64";
+      };
       mkPkgs = system:
         import nixpkgs {
           inherit system;
@@ -37,7 +53,7 @@
           };
           modules =
             [
-              ./modules/home/common.nix
+              ./nix/home-manager/default.nix
               {
                 home.username = userName;
                 home.homeDirectory = homeDirectory;
@@ -60,7 +76,7 @@
           hostname = darwinHostname;
         };
         modules = [
-          ./hosts/darwin
+          ./nix/hosts/darwin
           home-manager.darwinModules.home-manager
           {
             users.users.${darwinUsername} = {
@@ -78,8 +94,8 @@
             };
             home-manager.users.${darwinUsername} = {
               imports = [
-                ./modules/home/common.nix
-                ./modules/home/darwin.nix
+                ./nix/home-manager/default.nix
+                ./nix/home-manager/darwin.nix
               ];
 
               home.username = darwinUsername;
@@ -98,48 +114,16 @@
         homeDirectory = "/Users/${darwinUsername}";
         hostname = darwinHostname;
         extraModules = [
-          ./modules/home/darwin.nix
+          ./nix/home-manager/darwin.nix
         ];
       };
 
-      homeConfigurations."nosuke@linux-x86_64" = mkHomeConfiguration {
-        system = "x86_64-linux";
-        userName = "nosuke";
-        homeDirectory = "/home/nosuke";
-        hostname = "linux-x86_64";
-        extraModules = [
-          ./modules/home/linux.nix
-        ];
-      };
+      homeConfigurations."nosuke@linux-x86_64" = mkHomeConfiguration linuxNosukeX86_64;
 
-      homeConfigurations."nosuke@linux-aarch64" = mkHomeConfiguration {
-        system = "aarch64-linux";
-        userName = "nosuke";
-        homeDirectory = "/home/nosuke";
-        hostname = "linux-aarch64";
-        extraModules = [
-          ./modules/home/linux.nix
-        ];
-      };
+      homeConfigurations."nosuke@linux-aarch64" = mkHomeConfiguration linuxNosukeAarch64;
 
-      homeConfigurations."azureuser@linux-x86_64" = mkHomeConfiguration {
-        system = "x86_64-linux";
-        userName = "azureuser";
-        homeDirectory = "/home/azureuser";
-        hostname = "linux-x86_64";
-        extraModules = [
-          ./modules/home/linux.nix
-        ];
-      };
+      homeConfigurations."azureuser@linux-x86_64" = mkHomeConfiguration linuxAzureuserX86_64;
 
-      homeConfigurations."azureuser@linux-aarch64" = mkHomeConfiguration {
-        system = "aarch64-linux";
-        userName = "azureuser";
-        homeDirectory = "/home/azureuser";
-        hostname = "linux-aarch64";
-        extraModules = [
-          ./modules/home/linux.nix
-        ];
-      };
+      homeConfigurations."azureuser@linux-aarch64" = mkHomeConfiguration linuxAzureuserAarch64;
     };
 }

@@ -1,7 +1,0 @@
-##
-# OS created files
-#
-.DS_Store
-thumbs.db
-
-**/.claude/settings.local.json
