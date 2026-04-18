@@ -13,46 +13,77 @@
 
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, ... }:
     let
-      username = "nosuke";
-      hostname = "nosuke-M5-MBP";
-      system = "aarch64-darwin";
+      darwinUsername = "nosuke";
+      darwinHostname = "nosuke-M5-MBP";
+      darwinSystem = "aarch64-darwin";
       mkPkgs = system:
         import nixpkgs {
           inherit system;
           config.allowUnfree = true;
         };
+      mkHomeConfiguration =
+        {
+          system,
+          userName,
+          homeDirectory,
+          hostname ? null,
+          extraModules ? [ ],
+        }:
+        home-manager.lib.homeManagerConfiguration {
+          pkgs = mkPkgs system;
+          extraSpecialArgs = {
+            inherit inputs self hostname;
+            username = userName;
+          };
+          modules =
+            [
+              ./modules/home/common.nix
+              {
+                home.username = userName;
+                home.homeDirectory = homeDirectory;
+                home.stateVersion = "25.05";
+
+                programs.home-manager.enable = true;
+              }
+            ]
+            ++ extraModules;
+        };
     in
     {
-      formatter.${system} = (mkPkgs system).nixfmt-rfc-style;
+      formatter.${darwinSystem} = (mkPkgs darwinSystem).nixfmt-rfc-style;
 
-      darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
-        inherit system;
+      darwinConfigurations.${darwinHostname} = nix-darwin.lib.darwinSystem {
+        system = darwinSystem;
         specialArgs = {
-          inherit inputs self username hostname;
+          inherit inputs self;
+          username = darwinUsername;
+          hostname = darwinHostname;
         };
         modules = [
           ./hosts/darwin
           home-manager.darwinModules.home-manager
           {
-            users.users.${username} = {
-              name = username;
-              home = "/Users/${username}";
+            users.users.${darwinUsername} = {
+              name = darwinUsername;
+              home = "/Users/${darwinUsername}";
             };
 
             home-manager.backupFileExtension = "pre-home-manager";
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = {
-              inherit inputs self username hostname;
+              inherit inputs self;
+              username = darwinUsername;
+              hostname = darwinHostname;
             };
-            home-manager.users.${username} = {
+            home-manager.users.${darwinUsername} = {
               imports = [
                 ./modules/home/common.nix
                 ./modules/home/darwin.nix
               ];
 
-              home.username = username;
-              home.homeDirectory = "/Users/${username}";
+              home.username = darwinUsername;
+              home.homeDirectory = "/Users/${darwinUsername}";
               home.stateVersion = "25.05";
 
               programs.home-manager.enable = true;
@@ -61,21 +92,53 @@
         ];
       };
 
-      homeConfigurations."${username}@${hostname}" = home-manager.lib.homeManagerConfiguration {
-        pkgs = mkPkgs system;
-        extraSpecialArgs = {
-          inherit inputs self username hostname;
-        };
-        modules = [
-          ./modules/home/common.nix
+      homeConfigurations."${darwinUsername}@${darwinHostname}" = mkHomeConfiguration {
+        system = darwinSystem;
+        userName = darwinUsername;
+        homeDirectory = "/Users/${darwinUsername}";
+        hostname = darwinHostname;
+        extraModules = [
           ./modules/home/darwin.nix
-          {
-            home.username = username;
-            home.homeDirectory = "/Users/${username}";
-            home.stateVersion = "25.05";
+        ];
+      };
 
-            programs.home-manager.enable = true;
-          }
+      homeConfigurations."nosuke@linux-x86_64" = mkHomeConfiguration {
+        system = "x86_64-linux";
+        userName = "nosuke";
+        homeDirectory = "/home/nosuke";
+        hostname = "linux-x86_64";
+        extraModules = [
+          ./modules/home/linux.nix
+        ];
+      };
+
+      homeConfigurations."nosuke@linux-aarch64" = mkHomeConfiguration {
+        system = "aarch64-linux";
+        userName = "nosuke";
+        homeDirectory = "/home/nosuke";
+        hostname = "linux-aarch64";
+        extraModules = [
+          ./modules/home/linux.nix
+        ];
+      };
+
+      homeConfigurations."azureuser@linux-x86_64" = mkHomeConfiguration {
+        system = "x86_64-linux";
+        userName = "azureuser";
+        homeDirectory = "/home/azureuser";
+        hostname = "linux-x86_64";
+        extraModules = [
+          ./modules/home/linux.nix
+        ];
+      };
+
+      homeConfigurations."azureuser@linux-aarch64" = mkHomeConfiguration {
+        system = "aarch64-linux";
+        userName = "azureuser";
+        homeDirectory = "/home/azureuser";
+        hostname = "linux-aarch64";
+        extraModules = [
+          ./modules/home/linux.nix
         ];
       };
     };

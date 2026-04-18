@@ -47,6 +47,9 @@ source $XDG_CONFIG_HOME/zsh/p10k.zsh
 # Local overrides live outside the managed repo-backed directory.
 [[ -f $XDG_CONFIG_HOME/zsh.local ]] && source $XDG_CONFIG_HOME/zsh.local
 
+# Refresh command lookup after PATH changes during startup.
+rehash
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 

@@ -2,15 +2,8 @@
 
 # pnpm
 export PNPM_HOME="$XDG_DATA_HOME/pnpm"
-[[ ":$PATH:" != *":$PNPM_HOME:"* ]] && export PATH="$PNPM_HOME:$PATH"
+[[ ":$PATH:" != *":$PNPM_HOME:"* ]] && export PATH="$PATH:$PNPM_HOME"
 
-# uv (Python package manager)
-[[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
-
-# ghcup use XDG_DATA_HOME
-export GHCUP_USE_XDG_DIRS=1
-
-# haskell
+# User-local binaries
 : "${XDG_BIN_HOME:=$HOME/.local/bin}"
-[[ ":$PATH:" != *":$XDG_BIN_HOME:"* ]] && export PATH="$XDG_BIN_HOME:$PATH"
-[[ ":$PATH:" != *":$HOME/.cabal/bin:"* ]] && export PATH="$HOME/.cabal/bin:$PATH"
+[[ ":$PATH:" != *":$XDG_BIN_HOME:"* ]] && export PATH="$PATH:$XDG_BIN_HOME"

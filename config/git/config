@@ -43,3 +43,6 @@
   fixit = commit --amend --no-edit
   fixmsg = commit --amend
   
+[user]
+	name = Konosuke Sato
+	email = konosuke.s0912@gmail.com
