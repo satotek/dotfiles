@@ -1,0 +1,5 @@
+# Copy this file to ~/.config/git.local and edit with your information.
+
+[user]
+  name = Your Name
+  email = your@email.com

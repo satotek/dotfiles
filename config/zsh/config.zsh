@@ -8,7 +8,10 @@ setopt inc_append_history   # Append history incrementally
 setopt share_history        # Share history between sessions
 
 #################################  COMPLETION  #################################
-autoload -Uz compinit && compinit
+autoload -Uz compinit
+ZSH_COMPDUMP=${ZSH_COMPDUMP:-${XDG_CACHE_HOME:-$HOME/.cache}/zsh/.zcompdump}
+[[ -d "${ZSH_COMPDUMP:h}" ]] || mkdir -p "${ZSH_COMPDUMP:h}"
+compinit -d "$ZSH_COMPDUMP"
 
 # Case-insensitive completion
 zstyle ':completion:*' matcher-list '' 'm:{[:lower:]}={[:upper:]}' '+m:{[:upper:]}={[:lower:]}'

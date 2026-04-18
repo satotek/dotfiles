@@ -1,13 +1,15 @@
-# User settings are in local config (not tracked by git)
-# Create ~/.config/git/config.local with:
+# User settings are in local config (not tracked by git).
+# Preferred path:
+#   ~/.config/git.local
+# Example contents:
 #   [user]
 #     name = Your Name
 #     email = your@email.com
 [include]
-  path = ~/.config/git/config.local
+  path = ~/.config/git.local
 
 [credential]
-	helper = store --file ~/.config/git/.git-credentials
+	helper = store --file ~/.local/state/git/credentials
 
 [color]
   ui = true

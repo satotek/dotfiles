@@ -1,19 +1,26 @@
+# macOS metadata
+.DS_Store
+
 # Zsh completion cache
 .zcompdump*
 
 # Git credentials
 .git-credentials
 
+# Local editor state
+.neoconf.json
+
 # Local secrets
 secrets
-
-# Local zsh configuration
-local.zsh
-
-# Local git configuration
-config.local
 
 # Zsh session files
 .zsh_sessions/
 
 .serena
+
+# Nix build outputs
+result
+result-*
+
+# Home Manager backup files
+*.pre-home-manager

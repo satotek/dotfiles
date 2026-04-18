@@ -1,10 +1,10 @@
 # Source XDG Base Directory configuration
 [ -f "$HOME/.config/profile" ] && . "$HOME/.config/profile"
 
-# Auto-move additions to local.zsh
+# Auto-move additions to zsh.local
 _zshrc_cleanup() {
     local zshrc="$XDG_CONFIG_HOME/zsh/.zshrc"
-    local localzsh="$XDG_CONFIG_HOME/zsh/local.zsh"
+    local localzsh="$XDG_CONFIG_HOME/zsh.local"
 
     # Find the marker line number (must start at beginning of line)
     local line_num=$(grep -n "^### DO NOT ADD ANYTHING BELOW THIS LINE ###$" "$zshrc" 2>/dev/null | tail -1 | cut -d: -f1)
@@ -20,7 +20,7 @@ _zshrc_cleanup() {
         # Keep only up to the comment line
         head -n "$marker_comment_line" "$zshrc" > "${zshrc}.tmp"
         mv "${zshrc}.tmp" "$zshrc"
-        echo "Moved new configurations to local.zsh"
+        echo "Moved new configurations to zsh.local"
     fi
 }
 _zshrc_cleanup
@@ -43,11 +43,12 @@ source $XDG_CONFIG_HOME/zsh/aliases.zsh
 source $XDG_CONFIG_HOME/zsh/tools.zsh
 source $XDG_CONFIG_HOME/zsh/p10k.zsh
 
-# Load local configuration (not tracked by git)
-[[ -f $XDG_CONFIG_HOME/zsh/local.zsh ]] && source $XDG_CONFIG_HOME/zsh/local.zsh
+# Load local configuration (not tracked by git).
+# Local overrides live outside the managed repo-backed directory.
+[[ -f $XDG_CONFIG_HOME/zsh.local ]] && source $XDG_CONFIG_HOME/zsh.local
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 ### DO NOT ADD ANYTHING BELOW THIS LINE ###
-# Any lines added below will be moved to local.zsh automatically
+# Any lines added below will be moved to zsh.local automatically
