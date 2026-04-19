@@ -66,6 +66,8 @@ NIX_CONFIG='experimental-features = nix-command flakes' \
 
 This is not Ubuntu-specific. It can happen on any fresh Nix install on macOS or Linux before `nix-command` / `flakes` are enabled and picked up.
 
+After one successful `home-manager switch`, this repo also manages `~/.config/nix/nix.conf`, so you normally do not need to keep prefixing commands with `NIX_CONFIG=...`.
+
 ## Setup
 
 ### macOS
@@ -92,6 +94,7 @@ sudo darwin-rebuild switch --flake "path:$PWD#nosuke-M5-MBP"
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+NIX_CONFIG='experimental-features = nix-command flakes' \
 nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-x86_64"
 ```
 
@@ -100,6 +103,7 @@ nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+NIX_CONFIG='experimental-features = nix-command flakes' \
 nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@linux-x86_64"
 ```
 
@@ -110,6 +114,7 @@ nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@lin
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+NIX_CONFIG='experimental-features = nix-command flakes' \
 nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-aarch64"
 ```
 
@@ -118,6 +123,7 @@ nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+NIX_CONFIG='experimental-features = nix-command flakes' \
 nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@linux-aarch64"
 ```
 

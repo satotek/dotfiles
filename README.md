@@ -66,6 +66,8 @@ NIX_CONFIG='experimental-features = nix-command flakes' \
 
 これは Ubuntu 固有ではなく、fresh install 直後で `nix-command` / `flakes` がまだ有効になっていない環境なら macOS / Linux のどちらでも起こりえます。
 
+この repo を 1 度 `home-manager switch` できれば、以後は `~/.config/nix/nix.conf` も Home Manager で管理されるため、通常は毎回 `NIX_CONFIG=...` を付けなくて大丈夫です。
+
 ## セットアップ
 
 ### macOS
@@ -92,6 +94,7 @@ sudo darwin-rebuild switch --flake "path:$PWD#nosuke-M5-MBP"
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+NIX_CONFIG='experimental-features = nix-command flakes' \
 nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-x86_64"
 ```
 
@@ -100,6 +103,7 @@ nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+NIX_CONFIG='experimental-features = nix-command flakes' \
 nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@linux-x86_64"
 ```
 
@@ -110,6 +114,7 @@ nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@lin
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+NIX_CONFIG='experimental-features = nix-command flakes' \
 nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-aarch64"
 ```
 
@@ -118,6 +123,7 @@ nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+NIX_CONFIG='experimental-features = nix-command flakes' \
 nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@linux-aarch64"
 ```
 
