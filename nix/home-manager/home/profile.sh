@@ -16,11 +16,29 @@ export PNPM_HOME="$XDG_DATA_HOME/pnpm"
 
 # Homebrew (macOS only)
 if [[ "$OSTYPE" == darwin* ]]; then
-  if [[ -d "/opt/homebrew" ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  elif [[ -d "/usr/local/Homebrew" ]]; then
-    eval "$(/usr/local/bin/brew shellenv)"
+  if [[ -x "/opt/homebrew/bin/brew" ]]; then
+    brew_bin="/opt/homebrew/bin/brew"
+  elif [[ -x "/usr/local/bin/brew" ]]; then
+    brew_bin="/usr/local/bin/brew"
+  else
+    brew_bin=""
   fi
+
+  if [[ -n "$brew_bin" ]]; then
+    brew_cache="$XDG_CACHE_HOME/shell/brew-shellenv.sh"
+    mkdir -p "${brew_cache%/*}"
+    if [[ ! -r "$brew_cache" || "$brew_bin" -nt "$brew_cache" ]]; then
+      _brew_tmp="$brew_cache.tmp.$$"
+      if "$brew_bin" shellenv >| "$_brew_tmp"; then
+        mv -f "$_brew_tmp" "$brew_cache"
+      else
+        rm -f "$_brew_tmp"
+      fi
+    fi
+    [ -r "$brew_cache" ] && . "$brew_cache"
+    unset brew_cache _brew_tmp
+  fi
+  unset brew_bin
 fi
 
 # Append to PATH only when the entry is missing so repeated sourcing stays clean.

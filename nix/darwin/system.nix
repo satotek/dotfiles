@@ -14,6 +14,10 @@
     vim
   ];
 
+  fonts.packages = with pkgs; [
+    hackgen-nf-font
+  ];
+
   programs.zsh.enable = true;
 
   system.configurationRevision = self.rev or self.dirtyRev or null;

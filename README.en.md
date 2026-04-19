@@ -26,9 +26,45 @@ The old shell-based installer flow has been removed.
 ## Assumptions
 
 - This repo is cloned to `~/dotfiles`
-- Nix is already installed
+- This repo uses flakes, so `nix-command` and `flakes` must be enabled
 - Linux outputs are currently provided for `nosuke` and `azureuser`
 - If you use another username, add another output in `flake.nix`
+
+## Install Nix
+
+This repo assumes the official multi-user install.
+
+macOS / Linux:
+
+```bash
+curl -L https://nixos.org/nix/install | sh -s -- --daemon
+```
+
+After installation, restart your shell or reload the Nix profile script.
+
+Since this repo uses flakes, enable `nix-command` and `flakes` if they are not enabled yet.
+
+```bash
+mkdir -p ~/.config/nix
+grep -qxF 'experimental-features = nix-command flakes' ~/.config/nix/nix.conf 2>/dev/null \
+  || printf '%s\n' 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
+```
+
+Check:
+
+```bash
+nix --version
+nix show-config | grep experimental-features
+```
+
+If `nix run` still fails with `experimental Nix feature 'nix-command' is disabled` or `flakes is disabled`, the config has not taken effect yet. Restart your shell, or set `NIX_CONFIG` once. This is more reliable than `--extra-experimental-features` here because `home-manager` invokes `nix` internally as well.
+
+```bash
+NIX_CONFIG='experimental-features = nix-command flakes' \
+  nix run home-manager/master -- switch --flake "path:$PWD#nosuke@linux-aarch64"
+```
+
+This is not Ubuntu-specific. It can happen on any fresh Nix install on macOS or Linux before `nix-command` / `flakes` are enabled and picked up.
 
 ## Setup
 
@@ -56,7 +92,7 @@ sudo darwin-rebuild switch --flake "path:$PWD#nosuke-M5-MBP"
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-nix run home-manager/master -- switch --flake "path:$PWD#nosuke@linux-x86_64"
+nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-x86_64"
 ```
 
 `azureuser`:
@@ -64,7 +100,7 @@ nix run home-manager/master -- switch --flake "path:$PWD#nosuke@linux-x86_64"
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-nix run home-manager/master -- switch --flake "path:$PWD#azureuser@linux-x86_64"
+nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@linux-x86_64"
 ```
 
 ### Linux aarch64
@@ -74,7 +110,7 @@ nix run home-manager/master -- switch --flake "path:$PWD#azureuser@linux-x86_64"
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-nix run home-manager/master -- switch --flake "path:$PWD#nosuke@linux-aarch64"
+nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-aarch64"
 ```
 
 `azureuser`:
@@ -82,7 +118,7 @@ nix run home-manager/master -- switch --flake "path:$PWD#nosuke@linux-aarch64"
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-nix run home-manager/master -- switch --flake "path:$PWD#azureuser@linux-aarch64"
+nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@linux-aarch64"
 ```
 
 ## Local configuration
@@ -143,12 +179,17 @@ dotfiles/
 │       ├── darwin.nix
 │       ├── linux.nix
 │       ├── git/
+│       ├── karabiner/
 │       ├── lazygit/
 │       ├── nvim/
+│       ├── sheldon/
+│       ├── starship/
 │       ├── tmux/
 │       ├── wezterm/
 │       ├── wget/
 │       └── zsh/
+├── config/
+│   └── nvim/
 ├── flake.nix
 └── flake.lock
 ```
@@ -162,14 +203,19 @@ dotfiles/
 - `nix/programs/common.nix` plus the OS-specific `darwin.nix` / `linux.nix` files bundle the per-tool modules under `nix/programs/<tool>/`
 - Tool-specific packages live alongside each tool module under `nix/programs/<tool>/`
 - `git`, `tmux`, `wget`, and most of `zsh` are already managed with native Home Manager options
-- `lazygit`, `nvim`, and `wezterm` use tool-local `files/` directories referenced by Home Manager
+- Zsh plugins are managed with `sheldon`, and the prompt is managed with `starship`
+- macOS GUI apps are managed through the `nix-darwin` Homebrew module
+- `lazygit`, `nvim`, `wezterm`, and `karabiner` use tool-local `files/` directories referenced by Home Manager
 
 ## Included tools and configs
 
 - XDG Base Directory support
 - Zsh
+- Sheldon
+- Starship
 - Neovim
 - tmux
 - WezTerm
+- Karabiner-Elements
 - Git / lazygit
 - CLI tools such as ripgrep, fd, fzf, and yazi

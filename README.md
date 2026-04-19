@@ -26,9 +26,45 @@ macOS では `nix-darwin + Home Manager`、Linux では standalone の `Home Man
 ## 前提
 
 - この repo は `~/dotfiles` に clone する前提です
-- 事前に Nix がインストールされている必要があります
+- この repo は flake を使うため `nix-command` と `flakes` が必要です
 - Linux 側は現在 `nosuke` と `azureuser` の出力を用意しています
 - それ以外の username で使う場合は `flake.nix` にエントリ追加が必要です
+
+## Nix の導入
+
+公式の multi-user install を前提にしています。
+
+macOS / Linux:
+
+```bash
+curl -L https://nixos.org/nix/install | sh -s -- --daemon
+```
+
+インストール後はいったん shell を開き直すか、Nix の profile script を読み直してください。
+
+flake を使うので、未設定なら `nix-command` と `flakes` を有効にします。
+
+```bash
+mkdir -p ~/.config/nix
+grep -qxF 'experimental-features = nix-command flakes' ~/.config/nix/nix.conf 2>/dev/null \
+  || printf '%s\n' 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
+```
+
+確認:
+
+```bash
+nix --version
+nix show-config | grep experimental-features
+```
+
+もし `nix run` 実行時に `experimental Nix feature 'nix-command' is disabled` や `flakes is disabled` が出たら、まだ設定が反映されていません。shell を開き直すか、初回だけ `NIX_CONFIG` で明示します。`home-manager` は内部でも `nix` を呼ぶため、`--extra-experimental-features` よりこちらの方が確実です。
+
+```bash
+NIX_CONFIG='experimental-features = nix-command flakes' \
+  nix run home-manager/master -- switch --flake "path:$PWD#nosuke@linux-aarch64"
+```
+
+これは Ubuntu 固有ではなく、fresh install 直後で `nix-command` / `flakes` がまだ有効になっていない環境なら macOS / Linux のどちらでも起こりえます。
 
 ## セットアップ
 
@@ -56,7 +92,7 @@ sudo darwin-rebuild switch --flake "path:$PWD#nosuke-M5-MBP"
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-nix run home-manager/master -- switch --flake "path:$PWD#nosuke@linux-x86_64"
+nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-x86_64"
 ```
 
 `azureuser`:
@@ -64,7 +100,7 @@ nix run home-manager/master -- switch --flake "path:$PWD#nosuke@linux-x86_64"
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-nix run home-manager/master -- switch --flake "path:$PWD#azureuser@linux-x86_64"
+nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@linux-x86_64"
 ```
 
 ### Linux aarch64
@@ -74,7 +110,7 @@ nix run home-manager/master -- switch --flake "path:$PWD#azureuser@linux-x86_64"
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-nix run home-manager/master -- switch --flake "path:$PWD#nosuke@linux-aarch64"
+nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-aarch64"
 ```
 
 `azureuser`:
@@ -82,7 +118,7 @@ nix run home-manager/master -- switch --flake "path:$PWD#nosuke@linux-aarch64"
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-nix run home-manager/master -- switch --flake "path:$PWD#azureuser@linux-aarch64"
+nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@linux-aarch64"
 ```
 
 ## ローカル設定
@@ -145,12 +181,17 @@ dotfiles/
 │       ├── darwin.nix
 │       ├── linux.nix
 │       ├── git/
+│       ├── karabiner/
 │       ├── lazygit/
 │       ├── nvim/
+│       ├── sheldon/
+│       ├── starship/
 │       ├── tmux/
 │       ├── wezterm/
 │       ├── wget/
 │       └── zsh/
+├── config/
+│   └── nvim/
 ├── flake.nix
 └── flake.lock
 ```
@@ -164,14 +205,19 @@ dotfiles/
 - 各アプリ設定は `nix/programs/common.nix` と OS 別の `darwin.nix` / `linux.nix` から束ねています
 - tool 固有の package は対応する `nix/programs/<tool>/` で管理します
 - `git`、`tmux`、`wget`、Zsh の主要部分は native option 化済みです
-- `lazygit`、`nvim`、`wezterm` などは tool ごとの `files/` を Home Manager から参照します
+- Zsh plugin は `sheldon`、prompt は `starship` で管理しています
+- macOS の GUI アプリは `nix-darwin` の Homebrew module 経由で管理しています
+- `lazygit`、`nvim`、`wezterm`、`karabiner` などは tool ごとの `files/` を Home Manager から参照します
 
 ## 主な内容
 
 - XDG Base Directory 対応
 - Zsh
+- Sheldon
+- Starship
 - Neovim
 - tmux
 - WezTerm
+- Karabiner-Elements
 - Git / lazygit
 - ripgrep / fd / fzf / yazi などの CLI ツール

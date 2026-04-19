@@ -1,15 +1,8 @@
-{ config, ... }:
+{ config, lib, ... }:
 let
   homeDirectory = config.home.homeDirectory;
-  dotfilesDir = "${homeDirectory}/dotfiles";
-  mkSource = path: config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/${path}";
 in
 {
-  xdg.configFile."zsh/p10k.zsh" = {
-    source = mkSource "nix/programs/zsh/files/p10k.zsh";
-    force = true;
-  };
-
   programs.zsh = {
     enable = true;
     dotDir = "${config.xdg.configHome}/zsh";
@@ -38,48 +31,97 @@ in
       [ -f "$HOME/.config/profile" ] && . "$HOME/.config/profile"
     '';
 
-    initContent = ''
-      ### Zinit installer
-      ZINIT_HOME="''${XDG_CONFIG_HOME:-$HOME/.config}/zinit"
-      if [[ ! -f "$ZINIT_HOME/zinit.zsh" ]]; then
-          echo "Installing zinit..."
-          mkdir -p "$ZINIT_HOME"
-          git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
-      fi
-      source "$ZINIT_HOME/zinit.zsh"
-      autoload -Uz _zinit
-      (( ''${+_comps} )) && _comps[zinit]=_zinit
+    initContent = lib.mkMerge [
+      (lib.mkBefore ''
+        ensure_zcompiled() {
+          local src="$1"
+          local zwc="$src.zwc"
+          local dir="''${src:h}"
 
-      # Powerlevel10k theme
-      zinit ice depth=1; zinit light romkatv/powerlevel10k
+          if [[ ! -r "$src" || ! -w "$dir" ]]; then
+            return
+          fi
 
-      # Command completions
-      zinit ice wait'0' silent; zinit light zsh-users/zsh-completions
+          if [[ ! -r "$zwc" || "$src" -nt "$zwc" ]]; then
+            zcompile "$src" 2>/dev/null || true
+          fi
+        }
 
-      # Syntax highlighting
-      zinit light zsh-users/zsh-syntax-highlighting
+        source() {
+          ensure_zcompiled "$1"
+          builtin source "$1"
+        }
+      '')
 
-      # Autosuggestions
-      zinit light zsh-users/zsh-autosuggestions
-      ### End of Zinit installer
+      ''
+        zstyle ':completion:*' matcher-list "" "m:{[:lower:]}={[:upper:]}" "+m:{[:upper:]}={[:lower:]}"
+        zstyle ':completion:*' format '%B%F{blue}%d%f%b'
+        zstyle ':completion:*' group-name ""
+        zstyle ':completion:*:default' menu select=2
 
-      ZSH_COMPDUMP="''${ZSH_COMPDUMP:-''${XDG_CACHE_HOME:-$HOME/.cache}/zsh/.zcompdump}"
-      [[ -d "''${ZSH_COMPDUMP:h}" ]] || mkdir -p "''${ZSH_COMPDUMP:h}"
-      autoload -Uz compinit
-      compinit -d "$ZSH_COMPDUMP"
+        cache_dir="''${XDG_CACHE_HOME:-$HOME/.local/cache}/zsh"
+        sheldon_cache="$cache_dir/sheldon.zsh"
+        sheldon_toml="''${XDG_CONFIG_HOME:-$HOME/.config}/sheldon/plugins.toml"
+        sheldon_lock="''${XDG_CONFIG_HOME:-$HOME/.config}/sheldon/plugins.lock"
+        _sheldon_bin="$(command -v sheldon)"
 
-      zstyle ':completion:*' matcher-list "" "m:{[:lower:]}={[:upper:]}" "+m:{[:upper:]}={[:lower:]}"
-      zstyle ':completion:*' format '%B%F{blue}%d%f%b'
-      zstyle ':completion:*' group-name ""
-      zstyle ':completion:*:default' menu select=2
+        if [[ -n "$_sheldon_bin" && ( ! -r "$sheldon_cache" || "$sheldon_toml" -nt "$sheldon_cache" || ( -r "$sheldon_lock" && "$sheldon_lock" -nt "$sheldon_cache" ) ) ]]; then
+          mkdir -p "$cache_dir"
+          _sheldon_tmp="$sheldon_cache.tmp.$$"
+          if "$_sheldon_bin" --quiet source >| "$_sheldon_tmp"; then
+            mv -f "$_sheldon_tmp" "$sheldon_cache"
+          else
+            rm -f "$_sheldon_tmp"
+          fi
+        fi
 
-      source "$XDG_CONFIG_HOME/zsh/p10k.zsh"
+        [[ -r "$sheldon_cache" ]] && source "$sheldon_cache"
+        unset _sheldon_tmp _sheldon_bin sheldon_toml sheldon_lock
 
-      [[ -f $XDG_CONFIG_HOME/zsh.local ]] && source "$XDG_CONFIG_HOME/zsh.local"
+        _deferred_compinit() {
+          autoload -Uz compinit
+          _comp_dump="''${XDG_CACHE_HOME:-$HOME/.local/cache}/zsh/.zcompdump"
+          _comp_zwc="$_comp_dump.zwc"
 
-      rehash
+          if [[ -r "$_comp_zwc" && "$_comp_zwc" -nt "$_comp_dump" ]]; then
+            source "$_comp_dump"
+          elif [[ -r "$_comp_dump" ]]; then
+            source "$_comp_dump"
+            ensure_zcompiled "$_comp_dump"
+          else
+            compinit -d "$_comp_dump"
+            ensure_zcompiled "$_comp_dump"
+          fi
 
-      [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-    '';
+          unset _comp_dump _comp_zwc
+        }
+
+        if (( $+functions[zsh-defer] )); then
+          zsh-defer _deferred_compinit
+        else
+          _deferred_compinit
+        fi
+
+        [[ -f $XDG_CONFIG_HOME/zsh.local ]] && source "$XDG_CONFIG_HOME/zsh.local"
+
+        rehash
+
+        _starship_cache="$cache_dir/starship.zsh"
+        _starship_config="''${XDG_CONFIG_HOME:-$HOME/.config}/starship.toml"
+        _starship_bin="$(command -v starship)"
+        if [[ -n "$_starship_bin" && ( ! -r "$_starship_cache" || ( -r "$_starship_config" && "$_starship_config" -nt "$_starship_cache" ) || "$_starship_bin" -nt "$_starship_cache" ) ]]; then
+          "$_starship_bin" init zsh >| "$_starship_cache"
+        fi
+        [[ -r "$_starship_cache" ]] && source "$_starship_cache"
+
+        if (( $+functions[zsh-defer] )); then
+          zsh-defer unfunction source ensure_zcompiled _deferred_compinit
+        else
+          unfunction source ensure_zcompiled _deferred_compinit 2>/dev/null
+        fi
+
+        unset cache_dir sheldon_cache _starship_bin _starship_cache _starship_config
+      ''
+    ];
   };
 }
