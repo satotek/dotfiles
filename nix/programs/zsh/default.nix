@@ -1,6 +1,7 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   homeDirectory = config.home.homeDirectory;
+  deferCompinit = !pkgs.stdenv.isLinux;
 in
 {
   programs.zsh = {
@@ -96,7 +97,7 @@ in
           unset _comp_dump _comp_zwc
         }
 
-        if (( $+functions[zsh-defer] )); then
+        if ${lib.boolToString deferCompinit} && (( $+functions[zsh-defer] )); then
           zsh-defer _deferred_compinit
         else
           _deferred_compinit
