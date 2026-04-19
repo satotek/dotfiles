@@ -4,6 +4,6 @@
   userName = "azureuser";
   homeDirectory = "/home/azureuser";
   extraModules = [
-    ../../home-manager/linux.nix
+    ../../home-manager/linux-azureuser.nix
   ];
 }

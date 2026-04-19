@@ -4,6 +4,6 @@
   userName = "nosuke";
   homeDirectory = "/home/nosuke";
   extraModules = [
-    ../../home-manager/linux.nix
+    ../../home-manager/linux-nosuke.nix
   ];
 }

@@ -1,7 +1,7 @@
 { ... }:
 {
   imports = [
-    ../programs/darwin.nix
+    ./linux.nix
     ../programs/devtools.nix
     ../programs/webdevtools.nix
   ];
