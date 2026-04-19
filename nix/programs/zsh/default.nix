@@ -82,19 +82,15 @@ in
         _deferred_compinit() {
           autoload -Uz compinit
           _comp_dump="''${XDG_CACHE_HOME:-$HOME/.local/cache}/zsh/.zcompdump"
-          _comp_zwc="$_comp_dump.zwc"
 
-          if [[ -r "$_comp_zwc" && "$_comp_zwc" -nt "$_comp_dump" ]]; then
-            source "$_comp_dump"
-          elif [[ -r "$_comp_dump" ]]; then
-            source "$_comp_dump"
-            ensure_zcompiled "$_comp_dump"
+          if [[ -r "$_comp_dump" ]]; then
+            compinit -C -d "$_comp_dump"
           else
             compinit -d "$_comp_dump"
-            ensure_zcompiled "$_comp_dump"
           fi
 
-          unset _comp_dump _comp_zwc
+          ensure_zcompiled "$_comp_dump"
+          unset _comp_dump
         }
 
         if ${lib.boolToString deferCompinit} && (( $+functions[zsh-defer] )); then
