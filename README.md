@@ -220,4 +220,4 @@ dotfiles/
 - WezTerm
 - Karabiner-Elements
 - Git / lazygit
-- ripgrep / fd / fzf / yazi などの CLI ツール
+- ripgrep / fd / fzf / yazi / zoxide などの CLI ツール

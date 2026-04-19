@@ -18,6 +18,7 @@
     ./tmux
     ./wezterm
     ./wget
+    ./zoxide
     ./zsh
   ];
 }

@@ -218,4 +218,4 @@ dotfiles/
 - WezTerm
 - Karabiner-Elements
 - Git / lazygit
-- CLI tools such as ripgrep, fd, fzf, and yazi
+- CLI tools such as ripgrep, fd, fzf, yazi, and zoxide

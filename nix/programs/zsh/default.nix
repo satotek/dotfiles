@@ -114,13 +114,20 @@ in
         fi
         [[ -r "$_starship_cache" ]] && source "$_starship_cache"
 
+        _zoxide_cache="$cache_dir/zoxide.zsh"
+        _zoxide_bin="$(command -v zoxide)"
+        if [[ -n "$_zoxide_bin" && ( ! -r "$_zoxide_cache" || "$_zoxide_bin" -nt "$_zoxide_cache" ) ]]; then
+          "$_zoxide_bin" init zsh >| "$_zoxide_cache"
+        fi
+        [[ -r "$_zoxide_cache" ]] && source "$_zoxide_cache"
+
         if (( $+functions[zsh-defer] )); then
           zsh-defer unfunction source ensure_zcompiled _deferred_compinit
         else
           unfunction source ensure_zcompiled _deferred_compinit 2>/dev/null
         fi
 
-        unset cache_dir sheldon_cache _starship_bin _starship_cache _starship_config
+        unset cache_dir sheldon_cache _starship_bin _starship_cache _starship_config _zoxide_bin _zoxide_cache
       ''
     ];
   };

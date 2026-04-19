@@ -2,8 +2,8 @@ add_newline = false
 command_timeout = 200
 scan_timeout = 10
 
-format = """$os$directory$azure$git_branch$git_status$fill$cmd_duration$time$line_break$character"""
-right_format = ""
+format = """$os$directory$nodejs$python$azure$git_branch$git_status$fill$memory_usage$battery$time$line_break$character"""
+right_format = "$cmd_duration"
 
 [fill]
 symbol = " "
@@ -25,6 +25,17 @@ read_only = " "
 format = "[  $path]($style)[$read_only]($read_only_style) "
 style = "bold cyan"
 read_only_style = "bold cyan"
+
+[nodejs]
+format = "[$symbol]($style) "
+symbol = ""
+style = "bold green"
+
+[python]
+format = '[${symbol} \($virtualenv\)]($style) '
+symbol = ""
+style = "bold yellow"
+python_binary = "python3"
 
 [azure]
 disabled = false
@@ -57,13 +68,33 @@ min_time = 500
 format = "took [  $duration]($style) "
 style = "bold yellow"
 
+[memory_usage]
+disabled = false
+threshold = -1
+format = "[$symbol$ram_pct]($style) "
+symbol = "󰍛 "
+style = "bold white"
+
+[battery]
+disabled = false
+format = "[$symbol$percentage]($style) "
+full_symbol = "󰁹 "
+charging_symbol = "󰂄 "
+discharging_symbol = "󰂃 "
+unknown_symbol = "󰂑 "
+empty_symbol = "󰂎 "
+
+[[battery.display]]
+threshold = 100
+style = "bold white"
+
 [time]
 disabled = false
 time_format = "%T"
-format = "at [  $time]($style)"
+format = "[  $time]($style)"
 style = "bold blue"
 
 [character]
-success_symbol = "[❯](bold green) "
-error_symbol = "[❯](bold red) "
-vimcmd_symbol = "[V](bold green) "
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[V](bold green)"
