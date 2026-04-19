@@ -1,5 +1,6 @@
 { pkgs, self, username, ... }:
 {
+  imports = [ ./homebrew.nix ];
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfree = true;
 
