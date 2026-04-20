@@ -10,7 +10,7 @@ symbol = " "
 
 [os]
 disabled = false
-format = "[$symbol ]($style)"
+format = "[$symbol]($style)"
 style = "bold white"
 
 [os.symbols]
