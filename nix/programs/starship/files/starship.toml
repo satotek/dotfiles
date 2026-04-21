@@ -1,67 +1,134 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
 add_newline = false
 command_timeout = 200
 scan_timeout = 10
 
-format = """$os$directory$nodejs$python$azure$git_branch$git_status$fill$memory_usage$battery$time$line_break$character"""
-right_format = "$cmd_duration"
+format = """
+$os\
+$directory\
+$git_branch\
+$git_commit\
+$git_metrics\
+$git_state\
+$git_status\
+$fill\
+$python\
+$nodejs\
+$line_break\
+$character\
+"""
+
+right_format = """
+$cmd_duration\
+$memory_usage\
+$battery\
+$time\
+"""
 
 [fill]
 symbol = " "
 
 [os]
 disabled = false
-format = "[$symbol]($style)"
-style = "bold white"
+style = "bg:surface0 fg:text"
 
 [os.symbols]
-Macos = ""
+AIX = " "
+AlmaLinux = " "
+Alpaquita = " "
+Alpine = " "
+ALTLinux = " "
+Amazon = " "
+Android = " "
+AOSC = " "
+Arch = " "
+Artix = " "
+Bluefin = " "
+CachyOS = " "
+CentOS = " "
+Debian = " "
+DragonFly = " "
+Elementary = " "
+Emscripten = " "
+EndeavourOS = " "
+Fedora = " "
+FreeBSD = " "
+Garuda = " "
+Gentoo = " "
+HardenedBSD = "󰞌 "
+Illumos = " "
+InstantOS = " "
+Ios = "󰀷 "
+Kali = " "
+Linux = " "
+Mabox = " "
+Macos = " "
+Manjaro = " "
+Mariner = " "
+MidnightBSD = " "
+Mint = " "
+NetBSD = " "
+NixOS = " "
+Nobara = " "
+OpenBSD = " "
+OpenCloudOS = " "
+openEuler = " "
+openSUSE = " "
+OracleLinux = "󰺡 "
+PikaOS = " "
+Pop = " "
+Raspbian = " "
+Redhat = "󱄛 "
+RedHatEnterprise = "󱄛 "
+Redox = "󰀘 "
+RockyLinux = " "
+Solus = " "
+SUSE = " "
+Ubuntu = " "
+Ultramarine = " "
+Unknown = " "
+Uos = " "
+Void = " "
+Windows = "󰍲 "
+Zorin = " "
 
 [directory]
 truncate_to_repo = false
 truncation_length = 6
 truncation_symbol = "…/"
 home_symbol = "~"
-read_only = " "
+read_only = " 󰌾"
 format = "[  $path]($style)[$read_only]($read_only_style) "
 style = "bold cyan"
 read_only_style = "bold cyan"
 
 [nodejs]
 format = "[$symbol]($style) "
-symbol = ""
-style = "bold green"
+symbol = " "
+style = "green"
 
 [python]
-format = '[${symbol} \($virtualenv\)]($style) '
-symbol = ""
-style = "bold yellow"
+disabled = false
+format = '[${symbol}(\($virtualenv\))]($style) '
+symbol = " "
+style = "yellow"
 python_binary = "python3"
 
-[azure]
-disabled = false
-format = "[$symbol$subscription]($style) "
-symbol = "󰠅 "
-style = "bold blue"
-
 [git_branch]
-symbol = "   "
-format = "on [$symbol$branch]($style) "
-style = "bold green"
+disabled = false
+
+[git_commit]
+disabled = false
+
+[git_metrics]
+disabled = false
+
+[git_state]
+disabled = false
 
 [git_status]
-format = "[$staged$modified$untracked$deleted$renamed$conflicted$ahead_behind]($style)"
-style = "bold yellow"
-staged = "+${count} "
-modified = "!${count} "
-untracked = "?${count} "
-deleted = "x${count} "
-renamed = "»${count} "
-conflicted = "=${count} "
-ahead = "⇡${count} "
-behind = "⇣${count} "
-diverged = "⇕⇡${ahead_count}⇣${behind_count} "
-up_to_date = ""
-stashed = ""
+disabled = false
 
 [cmd_duration]
 min_time = 500
@@ -95,6 +162,4 @@ format = "[  $time]($style)"
 style = "bold blue"
 
 [character]
-success_symbol = "[❯](bold green)"
-error_symbol = "[❯](bold red)"
-vimcmd_symbol = "[V](bold green)"
+disabled = false

@@ -14,8 +14,13 @@ in
     history = {
       path = "${homeDirectory}/.local/state/zsh/history";
       size = 100000;
-      save = 1000000;
+      save = 100000;
+      extended = true;
+      ignoreDups = true;
+      ignoreAllDups = true;
+      ignoreSpace = true;
       share = true;
+      expireDuplicatesFirst = true;
     };
 
     shellAliases = {
@@ -26,6 +31,9 @@ in
       ll = "ls -l";
       la = "ls -al";
       lg = "lazygit";
+      "..." = "../../";
+      "...." = "../../../";
+      "....." = "../../../../";
     };
 
     envExtra = ''
