@@ -10,6 +10,7 @@
   ];
 
   imports = [
+    ./ghostty
     ./git
     ./lazygit
     ./nvim
