@@ -3,6 +3,7 @@
   home.packages = with pkgs; [
     btop
     curl
+    deno
     fd
     fzf
     ripgrep
@@ -19,6 +20,7 @@
     ./tmux
     ./wezterm
     ./wget
+    ./zeno
     ./zoxide
     ./zsh
   ];

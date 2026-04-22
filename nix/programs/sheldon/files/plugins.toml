@@ -18,6 +18,10 @@ apply = ["defer"]
 [plugins.zsh-autosuggestions.hooks]
 pre = "ZSH_AUTOSUGGEST_USE_ASYNC=1"
 
+[plugins.zeno]
+github = "yuki-yano/zeno.zsh"
+branch = "feature/sqlite-history-subsystem"
+
 [plugins.fast-syntax-highlighting]
 github = "zdharma-continuum/fast-syntax-highlighting"
 use = ["fast-syntax-highlighting.plugin.zsh"]

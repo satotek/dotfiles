@@ -42,6 +42,11 @@ in
 
     initContent = lib.mkMerge [
       (lib.mkBefore ''
+        export ZENO_HOME="$HOME/.config/zeno"
+        export ZENO_DISABLE_EXECUTE_CACHE_COMMAND=1
+        export ZENO_GIT_CAT="bat --color=always"
+        export ZENO_GIT_TREE="eza --tree"
+
         ensure_zcompiled() {
           local src="$1"
           local zwc="$src.zwc"
@@ -86,6 +91,18 @@ in
 
         [[ -r "$sheldon_cache" ]] && source "$sheldon_cache"
         unset _sheldon_tmp _sheldon_bin sheldon_toml sheldon_lock
+
+        if [[ -n $ZENO_LOADED ]]; then
+          bindkey ' '    zeno-auto-snippet
+          bindkey '^m'   zeno-auto-snippet-and-accept-line
+          bindkey '^i'   zeno-completion
+          bindkey '^x '  zeno-insert-space
+          bindkey '^x^m' accept-line
+          bindkey '^x^z' zeno-toggle-auto-snippet
+          bindkey '^r'   zeno-smart-history-selection
+          bindkey '^x^s' zeno-insert-snippet
+          bindkey '^x^f' zeno-snippet-next-placeholder
+        fi
 
         _deferred_compinit() {
           autoload -Uz compinit

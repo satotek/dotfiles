@@ -1,0 +1,27 @@
+snippets:
+  # nix-darwin (hostname is auto-detected)
+  - name: nix switch
+    keyword: nix-switch
+    snippet: sudo darwin-rebuild switch --flake ~/dotfiles#$(scutil --get LocalHostName)
+
+  - name: nix build
+    keyword: nix-build
+    snippet: darwin-rebuild build --flake ~/dotfiles#$(scutil --get LocalHostName)
+
+  - name: nix check
+    keyword: nix-check
+    snippet: darwin-rebuild check --flake ~/dotfiles#$(scutil --get LocalHostName)
+
+  # nix flake
+  - name: nix flake update
+    keyword: nfu
+    snippet: nix flake update --flake ~/dotfiles
+
+  - name: nix flake show
+    keyword: nfs
+    snippet: nix flake show ~/dotfiles
+
+  # garbage collection
+  - name: nix garbage collect
+    keyword: ngc
+    snippet: nix-collect-garbage -d
