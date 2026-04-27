@@ -7,5 +7,5 @@ in
   home.packages = [ pkgs.lazygit ];
 
   xdg.configFile."lazygit".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/nix/programs/lazygit/files";
+    config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/.config/lazygit";
 }

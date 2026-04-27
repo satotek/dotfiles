@@ -5,5 +5,5 @@ let
 in
 {
   xdg.configFile."ghostty".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/nix/programs/ghostty/files";
+    config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/.config/ghostty";
 }

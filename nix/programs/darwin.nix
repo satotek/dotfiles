@@ -1,4 +1,4 @@
 { ... }:
 {
-  imports = [ ./karabiner ];
+  imports = [ ./karabiner.nix ];
 }

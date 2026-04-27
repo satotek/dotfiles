@@ -5,5 +5,5 @@ let
 in
 {
   xdg.configFile."karabiner/karabiner.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/nix/programs/karabiner/files/karabiner.json";
+    config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/.config/karabiner/karabiner.json";
 }

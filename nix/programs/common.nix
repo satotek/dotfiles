@@ -11,18 +11,18 @@
   ];
 
   imports = [
-    ./codex
-    ./ghostty
-    ./git
-    ./lazygit
-    ./nvim
-    ./sheldon
-    ./starship
-    ./tmux
-    ./wezterm
-    ./wget
-    ./zeno
-    ./zoxide
-    ./zsh
+    ./codex.nix
+    ./ghostty.nix
+    ./git.nix
+    ./lazygit.nix
+    ./nvim.nix
+    ./sheldon.nix
+    ./starship.nix
+    ./tmux.nix
+    ./wezterm.nix
+    ./wget.nix
+    ./zeno.nix
+    ./zoxide.nix
+    ./zsh.nix
   ];
 }

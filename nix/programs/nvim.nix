@@ -7,5 +7,5 @@ in
   home.packages = [ pkgs.neovim ];
 
   xdg.configFile."nvim".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/nix/programs/nvim/files";
+    config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/.config/nvim";
 }

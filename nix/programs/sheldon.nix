@@ -7,5 +7,5 @@ in
   home.packages = [ pkgs.sheldon ];
 
   xdg.configFile."sheldon/plugins.toml".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/nix/programs/sheldon/files/plugins.toml";
+    config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/.config/sheldon/plugins.toml";
 }

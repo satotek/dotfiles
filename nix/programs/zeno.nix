@@ -5,5 +5,5 @@ let
 in
 {
   xdg.configFile."zeno".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/nix/programs/zeno/files";
+    config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/.config/zeno";
 }
