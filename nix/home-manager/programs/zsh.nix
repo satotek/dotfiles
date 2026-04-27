@@ -73,6 +73,12 @@ in
         zstyle ':completion:*' group-name ""
         zstyle ':completion:*:default' menu select=2
 
+        cghq() {
+          local dir
+          dir="$(ghq list -p 2>/dev/null | fzf --height 40% --reverse)" || return
+          [[ -n "$dir" ]] && cd "$dir"
+        }
+
         cache_dir="''${XDG_CACHE_HOME:-$HOME/.local/cache}/zsh"
         sheldon_cache="$cache_dir/sheldon.zsh"
         sheldon_toml="''${XDG_CONFIG_HOME:-$HOME/.config}/sheldon/plugins.toml"

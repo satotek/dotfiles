@@ -74,44 +74,11 @@
     {
       formatter.${darwinSystem} = (mkPkgs darwinSystem).nixfmt-rfc-style;
 
-      darwinConfigurations.${darwinHostname} = nix-darwin.lib.darwinSystem {
+      darwinConfigurations.${darwinHostname} = import ./nix/hosts/darwin {
+        inherit inputs self;
+        username = darwinUsername;
+        hostname = darwinHostname;
         system = darwinSystem;
-        specialArgs = {
-          inherit inputs self;
-          username = darwinUsername;
-          hostname = darwinHostname;
-        };
-        modules = [
-          ./nix/hosts/darwin
-          home-manager.darwinModules.home-manager
-          {
-            users.users.${darwinUsername} = {
-              name = darwinUsername;
-              home = "/Users/${darwinUsername}";
-            };
-
-            home-manager.backupFileExtension = "pre-home-manager";
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = {
-              inherit inputs self;
-              username = darwinUsername;
-              hostname = darwinHostname;
-            };
-            home-manager.users.${darwinUsername} = {
-              imports = [
-                ./nix/home-manager/default.nix
-                ./nix/home-manager/darwin.nix
-              ];
-
-              home.username = darwinUsername;
-              home.homeDirectory = "/Users/${darwinUsername}";
-              home.stateVersion = "25.05";
-
-              programs.home-manager.enable = true;
-            };
-          }
-        ];
       };
 
       homeConfigurations."${darwinUsername}@${darwinHostname}" = mkHomeConfiguration {
@@ -120,7 +87,10 @@
         homeDirectory = "/Users/${darwinUsername}";
         hostname = darwinHostname;
         extraModules = [
-          ./nix/home-manager/darwin.nix
+          ./nix/home-manager/platforms/darwin.nix
+          ./nix/home-manager/presets/base.nix
+          ./nix/home-manager/presets/devtools.nix
+          ./nix/home-manager/presets/webdevtools.nix
         ];
       };
 

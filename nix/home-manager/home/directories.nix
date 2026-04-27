@@ -10,6 +10,7 @@
       "$HOME/.local/state" \
       "$HOME/.local/state/git" \
       "$HOME/bin" \
+      "$HOME/ghq" \
       "$HOME/workspaces/develop" \
       "$HOME/workspaces/education" \
       "$HOME/workspaces/sandbox" \

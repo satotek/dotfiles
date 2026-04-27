@@ -1,0 +1,30 @@
+{ pkgs, ... }:
+{
+  home.packages = with pkgs; [
+    btop
+    curl
+    deno
+    fd
+    fzf
+    ghq
+    ripgrep
+    yazi
+  ];
+
+  imports = [
+    ../programs/claude-code.nix
+    ../programs/codex.nix
+    ../programs/ghostty.nix
+    ../programs/git.nix
+    ../programs/lazygit.nix
+    ../programs/nvim.nix
+    ../programs/sheldon.nix
+    ../programs/starship.nix
+    ../programs/tmux.nix
+    ../programs/wezterm.nix
+    ../programs/wget.nix
+    ../programs/zeno.nix
+    ../programs/zoxide.nix
+    ../programs/zsh.nix
+  ];
+}

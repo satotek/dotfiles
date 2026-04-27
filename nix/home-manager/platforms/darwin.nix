@@ -1,6 +1,6 @@
 { ... }:
 {
   imports = [
-    ../programs/linux.nix
+    ../programs/karabiner.nix
   ];
 }

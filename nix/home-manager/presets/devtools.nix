@@ -1,9 +1,11 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
-    wl-clipboard
-    xclip
+    cargo
+    ffmpeg
+    gh
+    go
+    gopls
+    rustc
   ];
-
-  imports = [ ];
 }
