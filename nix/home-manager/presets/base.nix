@@ -12,6 +12,7 @@
   ];
 
   imports = [
+    ../programs/agents-skills.nix
     ../programs/claude-code.nix
     ../programs/codex.nix
     ../programs/ghostty.nix

@@ -12,9 +12,40 @@
 
     llm-agents.url = "github:numtide/llm-agents.nix";
     llm-agents.inputs.nixpkgs.follows = "nixpkgs";
+
+    agent-skills.url = "github:Kyure-A/agent-skills-nix";
+    agent-skills.inputs.nixpkgs.follows = "nixpkgs";
+    agent-skills.inputs.home-manager.follows = "home-manager";
+
+    vercel-agent-skills = {
+      url = "github:vercel-labs/agent-skills";
+      flake = false;
+    };
+
+    vercel-skills = {
+      url = "github:vercel-labs/skills";
+      flake = false;
+    };
+
+    vercel-next-skills = {
+      url = "github:vercel-labs/next-skills";
+      flake = false;
+    };
+
+    anthropic-skills = {
+      url = "github:anthropics/skills";
+      flake = false;
+    };
   };
 
-  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, ... }:
+  outputs =
+    inputs@{
+      self,
+      nixpkgs,
+      nix-darwin,
+      home-manager,
+      ...
+    }:
     let
       darwinUsername = "nosuke";
       darwinHostname = "nosuke-M5-MBP";
@@ -35,7 +66,8 @@
         system = "aarch64-linux";
         hostname = "linux-aarch64";
       };
-      mkPkgs = system:
+      mkPkgs =
+        system:
         import nixpkgs {
           inherit system;
           config.allowUnfree = true;
@@ -57,18 +89,17 @@
             inherit inputs self hostname;
             username = userName;
           };
-          modules =
-            [
-              ./nix/home-manager/default.nix
-              {
-                home.username = userName;
-                home.homeDirectory = homeDirectory;
-                home.stateVersion = "25.05";
+          modules = [
+            ./nix/home-manager/default.nix
+            {
+              home.username = userName;
+              home.homeDirectory = homeDirectory;
+              home.stateVersion = "25.05";
 
-                programs.home-manager.enable = true;
-              }
-            ]
-            ++ extraModules;
+              programs.home-manager.enable = true;
+            }
+          ]
+          ++ extraModules;
         };
     in
     {
