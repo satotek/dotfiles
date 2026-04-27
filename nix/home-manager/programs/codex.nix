@@ -39,8 +39,9 @@ let
     model_verbosity = "medium";
     service_tier = "fast";
 
-    approval_policy = "never";
-    sandbox_mode = "danger-full-access";
+    approval_policy = "on-request";
+    features.guardian_approval = true;
+    sandbox_mode = "workspace-write";
     sandbox_workspace_write.writable_roots = [
       "/tmp"
       "/var/cache"
