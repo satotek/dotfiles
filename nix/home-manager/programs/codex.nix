@@ -23,6 +23,15 @@ let
     analytics.enabled = false;
     feedback.enabled = false;
 
+    tui.status_line = [
+      "model-with-reasoning"
+      "project-root"
+      "context-remaining"
+      "git-branch"
+      "five-hour-limit"
+      "weekly-limit"
+    ];
+
     # model setting
     model = "gpt-5.5";
     model_reasoning_effort = "medium";
@@ -32,7 +41,10 @@ let
 
     approval_policy = "never";
     sandbox_mode = "danger-full-access";
-    sandbox_workspace_write.writable_roots = [ "/tmp" "/var/cache" ];
+    sandbox_workspace_write.writable_roots = [
+      "/tmp"
+      "/var/cache"
+    ];
     sandbox_workspace_write.network_access = true;
 
     plugins = {
@@ -44,10 +56,12 @@ let
     };
   };
   baseConfigFile = tomlFormat.generate "codex-config-base.toml" codexConfig;
-  trustedProjectRootsScript =
-    lib.concatMapStringsSep " " (root: lib.escapeShellArg root) trustedProjectRoots;
-  extraTrustedProjectsScript =
-    lib.concatMapStringsSep " " (project: lib.escapeShellArg project) extraTrustedProjects;
+  trustedProjectRootsScript = lib.concatMapStringsSep " " (
+    root: lib.escapeShellArg root
+  ) trustedProjectRoots;
+  extraTrustedProjectsScript = lib.concatMapStringsSep " " (
+    project: lib.escapeShellArg project
+  ) extraTrustedProjects;
 in
 {
   programs.codex = {
