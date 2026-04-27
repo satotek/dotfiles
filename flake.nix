@@ -9,6 +9,9 @@
 
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    llm-agents.url = "github:numtide/llm-agents.nix";
+    llm-agents.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, ... }:
@@ -36,6 +39,9 @@
         import nixpkgs {
           inherit system;
           config.allowUnfree = true;
+          overlays = [
+            inputs.llm-agents.overlays.default
+          ];
         };
       mkHomeConfiguration =
         {

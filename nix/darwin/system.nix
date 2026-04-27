@@ -1,8 +1,11 @@
-{ pkgs, self, username, ... }:
+{ inputs, pkgs, self, username, ... }:
 {
   imports = [ ./homebrew.nix ];
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.overlays = [
+    inputs.llm-agents.overlays.default
+  ];
 
   # Determinate Nix manages the daemon and Nix installation itself, so
   # nix-darwin must not try to manage `nix.*` as well.
