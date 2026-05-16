@@ -57,6 +57,10 @@
         system = "aarch64-linux";
         hostname = "linux-aarch64";
       };
+      linuxNosukeWSL = import ./nix/hosts/linux/nosuke.nix {
+        system = "x86_64-linux";
+        hostname = "nosuke-windows";
+      };
       linuxAzureuserX86_64 = import ./nix/hosts/linux/azureuser.nix {
         system = "x86_64-linux";
         hostname = "linux-x86_64";
@@ -125,6 +129,8 @@
       };
 
       homeConfigurations."nosuke@linux-x86_64" = mkHomeConfiguration linuxNosukeX86_64;
+
+      homeConfigurations."nosuke@nosuke-windows" = mkHomeConfiguration linuxNosukeWSL;
 
       homeConfigurations."nosuke@linux-aarch64" = mkHomeConfiguration linuxNosukeAarch64;
 
