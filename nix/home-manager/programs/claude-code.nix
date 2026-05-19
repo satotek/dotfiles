@@ -23,6 +23,8 @@ in
       autoUpdates = false;
       includeCoAuthoredBy = false;
       outputStyle = "Explanatory";
+      model = "claude-opus-4-7";
+      effortLevel = "medium";
       enabledPlugins = {
         "rust-analyzer-lsp@claude-plugins-official" = true;
       };
