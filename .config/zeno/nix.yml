@@ -1,16 +1,8 @@
 snippets:
-  # nix-darwin (hostname is auto-detected)
+  # nix switch (OS-aware shell app)
   - name: nix switch
     keyword: nix-switch
-    snippet: sudo darwin-rebuild switch --flake ~/dotfiles#$(scutil --get LocalHostName)
-
-  - name: nix build
-    keyword: nix-build
-    snippet: darwin-rebuild build --flake ~/dotfiles#$(scutil --get LocalHostName)
-
-  - name: nix check
-    keyword: nix-check
-    snippet: darwin-rebuild check --flake ~/dotfiles#$(scutil --get LocalHostName)
+    snippet: nix-switch
 
   # nix flake
   - name: nix flake update

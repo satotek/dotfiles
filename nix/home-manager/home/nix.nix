@@ -4,10 +4,17 @@ let
   dotfilesDir = "${homeDirectory}/dotfiles";
   nixSwitch = pkgs.writeShellApplication {
     name = "nix-switch";
-    text = ''
-      cd "${dotfilesDir}"
-      exec nix run home-manager/master -- switch --flake ".#$(id -un)@$(hostname)" "$@"
-    '';
+    text =
+      if pkgs.stdenv.isDarwin then
+        ''
+          cd "${dotfilesDir}"
+          exec sudo darwin-rebuild switch --flake ".#$(scutil --get LocalHostName)" "$@"
+        ''
+      else
+        ''
+          cd "${dotfilesDir}"
+          exec nix run home-manager/master -- switch --flake ".#$(id -un)@$(hostname)" "$@"
+        '';
   };
 in
 {
