@@ -34,6 +34,11 @@ in
         input = "anthropic-skills";
         subdir = "skills";
       };
+
+      mattpocock-skills = {
+        input = "mattpocock-skills";
+        subdir = "skills";
+      };
     };
 
     skills.explicit = {
@@ -57,11 +62,22 @@ in
       web-design-guidelines = {
         from = "vercel-agent-skills";
       };
+
+      grill-me = {
+        from = "mattpocock-skills";
+        path = "productivity/grill-me";
+      };
     };
 
     targets.agents = {
       enable = true;
       dest = "${homeDir}/.agents/skills";
+      structure = "symlink-tree";
+    };
+
+    targets.claude = {
+      enable = true;
+      dest = "${homeDir}/.claude/skills";
       structure = "symlink-tree";
     };
 

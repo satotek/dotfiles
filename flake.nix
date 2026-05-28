@@ -35,6 +35,11 @@
       url = "github:anthropics/skills";
       flake = false;
     };
+
+    mattpocock-skills = {
+      url = "github:mattpocock/skills";
+      flake = false;
+    };
   };
 
   outputs =
@@ -68,6 +73,10 @@
       linuxAzureuserAarch64 = import ./nix/hosts/linux/azureuser.nix {
         system = "aarch64-linux";
         hostname = "linux-aarch64";
+      };
+      linuxAzureuserGemAi = import ./nix/hosts/linux/azureuser.nix {
+        system = "x86_64-linux";
+        hostname = "gem-ai";
       };
       mkPkgs =
         system:
@@ -137,5 +146,7 @@
       homeConfigurations."azureuser@linux-x86_64" = mkHomeConfiguration linuxAzureuserX86_64;
 
       homeConfigurations."azureuser@linux-aarch64" = mkHomeConfiguration linuxAzureuserAarch64;
+
+      homeConfigurations."azureuser@gem-ai" = mkHomeConfiguration linuxAzureuserGemAi;
     };
 }

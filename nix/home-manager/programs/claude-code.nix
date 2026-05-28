@@ -27,6 +27,9 @@ in
       effortLevel = "medium";
       enabledPlugins = {
         "rust-analyzer-lsp@claude-plugins-official" = true;
+        "gopls-lsp@claude-plugins-official" = true;
+        "pyright-lsp@claude-plugins-official" = true;
+        "typescript-lsp@claude-plugins-official" = true;
       };
       statusLine = {
         type = "command";
@@ -36,33 +39,25 @@ in
       };
     };
 
-    lspServers = {
-      go = {
-        command = "gopls";
-        args = [ "serve" ];
-        extensionToLanguage = {
-          ".go" = "go";
-        };
+    mcpServers = {
+      context7 = {
+        type = "stdio";
+        command = "npx";
+        args = [
+          "-y"
+          "@upstash/context7-mcp"
+        ];
       };
 
-      python = {
-        command = "pyright-langserver";
-        args = [ "--stdio" ];
-        extensionToLanguage = {
-          ".py" = "python";
-        };
-      };
-
-      typescript = {
-        command = "typescript-language-server";
-        args = [ "--stdio" ];
-        extensionToLanguage = {
-          ".js" = "javascript";
-          ".jsx" = "javascriptreact";
-          ".ts" = "typescript";
-          ".tsx" = "typescriptreact";
-        };
+      playwright = {
+        type = "stdio";
+        command = "npx";
+        args = [
+          "-y"
+          "@playwright/mcp@latest"
+        ];
       };
     };
+
   };
 }
