@@ -23,9 +23,9 @@ in
       autoUpdates = false;
       includeCoAuthoredBy = false;
       outputStyle = "Explanatory";
-      model = "claude-opus-4-7";
+      model = "claude-opus-4-8";
       effortLevel = "high";
-      fastModeEnabled = false;
+      fastModeEnabled = true;
       permissions.allow = [
         "Bash(pnpm typecheck)"
         "Bash(pnpm test)"
