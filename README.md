@@ -68,6 +68,17 @@ NIX_CONFIG='experimental-features = nix-command flakes' \
 
 この repo を 1 度 `home-manager switch` できれば、以後は `~/.config/nix/nix.conf` も Home Manager で管理されるため、通常は毎回 `NIX_CONFIG=...` を付けなくて大丈夫です。
 
+### バイナリキャッシュの信頼設定（codex の cargo build 回避）
+
+`llm-agents.nix` などの flake は `nixConfig.extra-substituters` で独自のバイナリキャッシュ（`cache.numtide.com`）を宣言しています。daemon がそれを trust していないと無視されてしまい、`codex` などの Rust パッケージが毎回ソースから `cargo build` されます。
+
+- **macOS**: `nix-darwin` が `/etc/nix/nix.custom.conf` に設定を書き込みます。`darwin-rebuild switch` 後に自動で有効になります。
+- **Linux**: 一度だけ以下を実行してください（`/etc/nix/nix.conf` に追記し、`nix-daemon` を再起動します）:
+
+  ```bash
+  sudo ~/dotfiles/nix/scripts/bootstrap-system-nix.sh
+  ```
+
 ## セットアップ
 
 ### macOS

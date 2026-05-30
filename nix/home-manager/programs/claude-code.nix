@@ -24,7 +24,18 @@ in
       includeCoAuthoredBy = false;
       outputStyle = "Explanatory";
       model = "claude-opus-4-7";
-      effortLevel = "medium";
+      effortLevel = "high";
+      fastModeEnabled = false;
+      permissions.allow = [
+        "Bash(pnpm typecheck)"
+        "Bash(pnpm test)"
+        "Bash(pnpm lint)"
+        "Bash(pnpm test:storybook)"
+        "mcp__plugin_claude-code-home-manager_playwright__browser_take_screenshot"
+        "mcp__plugin_claude-code-home-manager_playwright__browser_snapshot"
+        "mcp__plugin_claude-code-home-manager_context7__query-docs"
+        "mcp__plugin_claude-code-home-manager_context7__resolve-library-id"
+      ];
       enabledPlugins = {
         "rust-analyzer-lsp@claude-plugins-official" = true;
         "gopls-lsp@claude-plugins-official" = true;
