@@ -32,15 +32,21 @@ The old shell-based installer flow has been removed.
 
 ## Install Nix
 
-This repo assumes the official multi-user install.
+This repo assumes [Determinate Nix](https://docs.determinate.systems/). At install time we also inject the binary caches we trust via `--extra-conf`. Without this, the `cache.numtide.com` cache declared by flakes such as `llm-agents.nix` is treated as untrusted and ignored, so Rust packages like `codex` are rebuilt from source with `cargo` on every switch.
 
 macOS / Linux:
 
 ```bash
-curl -L https://nixos.org/nix/install | sh -s -- --daemon
+curl -fsSL https://install.determinate.systems/nix | sh -s -- install \
+  --extra-conf "trusted-users = root $(id -un)" \
+  --extra-conf "extra-substituters = https://cache.numtide.com" \
+  --extra-conf "extra-trusted-substituters = https://cache.numtide.com" \
+  --extra-conf "extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
 ```
 
-After installation, restart your shell or reload the Nix profile script.
+Trust is a property of the machine's Nix install, not of the dotfiles, so we pass it to the installer rather than declaring it in the repo. To inspect or add caches later, append to `/etc/nix/nix.custom.conf` and reload the daemon with `sudo launchctl kickstart -k system/systems.determinate.nix-daemon` (macOS).
+
+After installation, restart your shell or reload the Nix profile script. Determinate Nix enables `nix-command` / `flakes` by default, so the manual step below is usually unnecessary (kept as a fallback when a fresh install hasn't picked it up yet).
 
 Since this repo uses flakes, enable `nix-command` and `flakes` if they are not enabled yet.
 
@@ -54,7 +60,9 @@ Check:
 
 ```bash
 nix --version
-nix show-config | grep experimental-features
+nix config show | grep experimental-features
+# Is the trust in effect (avoids codex's cargo build)? If empty, you forgot --extra-conf at install time.
+nix config show | grep cache.numtide.com
 ```
 
 If `nix run` still fails with `experimental Nix feature 'nix-command' is disabled` or `flakes is disabled`, the config has not taken effect yet. Restart your shell, or set `NIX_CONFIG` once. This is more reliable than `--extra-experimental-features` here because `home-manager` invokes `nix` internally as well.

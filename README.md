@@ -32,15 +32,21 @@ macOS では `nix-darwin + Home Manager`、Linux では standalone の `Home Man
 
 ## Nix の導入
 
-公式の multi-user install を前提にしています。
+[Determinate Nix](https://docs.determinate.systems/) を前提にしています。インストール時に `--extra-conf` で「信頼するバイナリキャッシュ」も一緒に注入します。これをやっておかないと、`llm-agents.nix` などの flake が宣言する `cache.numtide.com` が untrusted 扱いされて無視され、`codex` などの Rust パッケージが毎回ソースから `cargo build` されてしまいます。
 
 macOS / Linux:
 
 ```bash
-curl -L https://nixos.org/nix/install | sh -s -- --daemon
+curl -fsSL https://install.determinate.systems/nix | sh -s -- install \
+  --extra-conf "trusted-users = root $(id -un)" \
+  --extra-conf "extra-substituters = https://cache.numtide.com" \
+  --extra-conf "extra-trusted-substituters = https://cache.numtide.com" \
+  --extra-conf "extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
 ```
 
-インストール後はいったん shell を開き直すか、Nix の profile script を読み直してください。
+trust 設定はマシンの Nix インストールに属する関心事なので、dotfiles 側ではなくインストーラに渡します。後から確認・追加したい場合は `/etc/nix/nix.custom.conf` に追記し、`sudo launchctl kickstart -k system/systems.determinate.nix-daemon`（macOS）で反映できます。
+
+インストール後はいったん shell を開き直すか、Nix の profile script を読み直してください。Determinate Nix は `nix-command` / `flakes` をデフォルトで有効化するため、次の手動設定は通常不要です（fresh install 直後に反映が間に合わないときの保険として残しています）。
 
 flake を使うので、未設定なら `nix-command` と `flakes` を有効にします。
 
@@ -54,7 +60,9 @@ grep -qxF 'experimental-features = nix-command flakes' ~/.config/nix/nix.conf 2>
 
 ```bash
 nix --version
-nix show-config | grep experimental-features
+nix config show | grep experimental-features
+# trust が効いているか（codex の cargo build 回避）。出なければ install 時の --extra-conf を忘れています
+nix config show | grep cache.numtide.com
 ```
 
 もし `nix run` 実行時に `experimental Nix feature 'nix-command' is disabled` や `flakes is disabled` が出たら、まだ設定が反映されていません。shell を開き直すか、初回だけ `NIX_CONFIG` で明示します。`home-manager` は内部でも `nix` を呼ぶため、`--extra-experimental-features` よりこちらの方が確実です。
@@ -67,17 +75,6 @@ NIX_CONFIG='experimental-features = nix-command flakes' \
 これは Ubuntu 固有ではなく、fresh install 直後で `nix-command` / `flakes` がまだ有効になっていない環境なら macOS / Linux のどちらでも起こりえます。
 
 この repo を 1 度 `home-manager switch` できれば、以後は `~/.config/nix/nix.conf` も Home Manager で管理されるため、通常は毎回 `NIX_CONFIG=...` を付けなくて大丈夫です。
-
-### バイナリキャッシュの信頼設定（codex の cargo build 回避）
-
-`llm-agents.nix` などの flake は `nixConfig.extra-substituters` で独自のバイナリキャッシュ（`cache.numtide.com`）を宣言しています。daemon がそれを trust していないと無視されてしまい、`codex` などの Rust パッケージが毎回ソースから `cargo build` されます。
-
-- **macOS**: `nix-darwin` が `/etc/nix/nix.custom.conf` に設定を書き込みます。`darwin-rebuild switch` 後に自動で有効になります。
-- **Linux**: 一度だけ以下を実行してください（`/etc/nix/nix.conf` に追記し、`nix-daemon` を再起動します）:
-
-  ```bash
-  sudo ~/dotfiles/nix/scripts/bootstrap-system-nix.sh
-  ```
 
 ## セットアップ
 
