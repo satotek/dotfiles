@@ -48,6 +48,10 @@ let
     ];
     sandbox_workspace_write.network_access = true;
 
+    # 共有 MCP サーバー定義（Claude Code と共通: ../data/mcp-servers.nix）。
+    # TOML では [mcp_servers.<name>] テーブルとして出力される。
+    mcp_servers = import ../data/mcp-servers.nix;
+
     plugins = {
       "computer-use@openai-bundled".enabled = false;
       "github@openai-curated".enabled = true;

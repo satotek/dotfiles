@@ -1,5 +1,6 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
+  sharedMcpServers = import ../data/mcp-servers.nix;
   claudeStatuslineLine3 = pkgs.writeShellApplication {
     name = "claude-statusline-line3";
     runtimeInputs = [ pkgs.jq ];
@@ -25,7 +26,7 @@ in
       outputStyle = "Explanatory";
       model = "claude-opus-4-8";
       effortLevel = "high";
-      fastModeEnabled = true;
+      fastMode = true;
       permissions.allow = [
         "Bash(pnpm typecheck)"
         "Bash(pnpm test)"
@@ -35,6 +36,15 @@ in
         "mcp__plugin_claude-code-home-manager_playwright__browser_snapshot"
         "mcp__plugin_claude-code-home-manager_context7__query-docs"
         "mcp__plugin_claude-code-home-manager_context7__resolve-library-id"
+        # chrome-devtools: 読み取り・検査系のみ許可（遷移/クリック/JS実行など副作用系は都度確認）
+        "mcp__plugin_claude-code-home-manager_chrome-devtools__take_snapshot"
+        "mcp__plugin_claude-code-home-manager_chrome-devtools__take_screenshot"
+        "mcp__plugin_claude-code-home-manager_chrome-devtools__list_pages"
+        "mcp__plugin_claude-code-home-manager_chrome-devtools__list_console_messages"
+        "mcp__plugin_claude-code-home-manager_chrome-devtools__get_console_message"
+        "mcp__plugin_claude-code-home-manager_chrome-devtools__list_network_requests"
+        "mcp__plugin_claude-code-home-manager_chrome-devtools__get_network_request"
+        "mcp__plugin_claude-code-home-manager_chrome-devtools__performance_analyze_insight"
       ];
       enabledPlugins = {
         "rust-analyzer-lsp@claude-plugins-official" = true;
@@ -50,25 +60,8 @@ in
       };
     };
 
-    mcpServers = {
-      context7 = {
-        type = "stdio";
-        command = "npx";
-        args = [
-          "-y"
-          "@upstash/context7-mcp"
-        ];
-      };
-
-      playwright = {
-        type = "stdio";
-        command = "npx";
-        args = [
-          "-y"
-          "@playwright/mcp@latest"
-        ];
-      };
-    };
+    # 共有定義（../data/mcp-servers.nix）に Claude 固有の type = "stdio" を付与。
+    mcpServers = lib.mapAttrs (_name: server: { type = "stdio"; } // server) sharedMcpServers;
 
   };
 }
