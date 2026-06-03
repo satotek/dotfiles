@@ -25,6 +25,11 @@
     args = [
       "-y"
       "chrome-devtools-mcp@latest"
+      # ヘッドレスサーバ（X server なし）で動かすため headless 必須。
+      "--headless=true"
+      # セッション毎に使い捨てプロファイルを使い、共有プロファイルの
+      # SingletonLock 堆積で "Target closed" になる事故を防ぐ。
+      "--isolated=true"
     ];
   };
 }
