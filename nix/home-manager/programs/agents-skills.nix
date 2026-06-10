@@ -1,6 +1,7 @@
 {
   config,
   inputs,
+  pkgs,
   ...
 }:
 let
@@ -10,6 +11,11 @@ in
   imports = [
     inputs.agent-skills.homeManagerModules.default
   ];
+
+  # agent-browser skill のランタイム本体 (Rust製CLI)。
+  # skill 定義 (skills.explicit.agent-browser) と同居させ、
+  # skill だけ入って CLI が無い状態を防ぐ。
+  home.packages = [ pkgs.llm-agents.agent-browser ];
 
   programs.agent-skills = {
     enable = true;
@@ -39,6 +45,11 @@ in
         input = "mattpocock-skills";
         subdir = "skills";
       };
+
+      agent-browser = {
+        input = "agent-browser";
+        subdir = "skills";
+      };
     };
 
     skills.explicit = {
@@ -66,6 +77,10 @@ in
       grill-me = {
         from = "mattpocock-skills";
         path = "productivity/grill-me";
+      };
+
+      agent-browser = {
+        from = "agent-browser";
       };
     };
 

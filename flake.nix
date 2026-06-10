@@ -40,6 +40,11 @@
       url = "github:mattpocock/skills";
       flake = false;
     };
+
+    agent-browser = {
+      url = "github:vercel-labs/agent-browser";
+      flake = false;
+    };
   };
 
   outputs =
