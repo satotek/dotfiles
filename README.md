@@ -1,38 +1,36 @@
 # dotfiles
 
-English version: [README.en.md](README.en.md)
+Personal dotfiles managed with Nix Flakes.
+This repo uses `nix-darwin + Home Manager` on macOS and standalone `Home Manager` on Linux.
 
-Nix Flakes を使って管理している個人用 dotfiles です。
-macOS では `nix-darwin + Home Manager`、Linux では standalone の `Home Manager` で使います。
-
-## 対応環境
+## Supported platforms
 
 - macOS
 - Linux
-  - Ubuntu / Debian 系を想定
-  - Azure VM や Linux desktop でも利用可能
+  - primarily Ubuntu / Debian-like environments
+  - intended to work on Azure VMs and Linux desktop environments
 
-## 方針
+## Approach
 
-- Nix 関連の構成は `nix/` 配下にまとめる
-- 各ツールの設定は `nix/programs/<tool>/` に寄せる
-- `git`、`tmux`、`wget`、Zsh の主要部分は Home Manager の native option で管理する
-- repo-backed な設定ファイルも `Home Manager` 経由で使う
-- 依存ツールの導入は shell script ではなく Nix で管理する
-- ローカル専用設定や secrets は repo の外に置く
+- Keep Nix-related configuration under `nix/`
+- Group reusable logic by purpose: `home/` (core home setup), `platforms/` (OS-specific), `presets/` (package bundles), `programs/` (one file per tool), `data/` (pure data shared across tools)
+- Manage `git`, `tmux`, `wget`, and most of `zsh` with native Home Manager options
+- Use `Home Manager` for repo-backed configs as well
+- Manage CLI tools with Nix instead of shell installer scripts
+- Keep local-only settings and secrets outside the repo
 
-旧来の `install.sh` などの shell installer は廃止済みです。
+The old shell-based installer flow has been removed.
 
-## 前提
+## Assumptions
 
-- この repo は `~/dotfiles` に clone する前提です
-- この repo は flake を使うため `nix-command` と `flakes` が必要です
-- Linux 側は現在 `nosuke` と `azureuser` の出力を用意しています
-- それ以外の username で使う場合は `flake.nix` にエントリ追加が必要です
+- This repo is cloned to `~/dotfiles`
+- This repo uses flakes, so `nix-command` and `flakes` must be enabled
+- Linux outputs are currently provided for `nosuke` and `azureuser`
+- If you use another username, add another output in `flake.nix`
 
-## Nix の導入
+## Install Nix
 
-[Determinate Nix](https://docs.determinate.systems/) を前提にしています。インストール時に `--extra-conf` で「信頼するバイナリキャッシュ」も一緒に注入します。これをやっておかないと、`llm-agents.nix` などの flake が宣言する `cache.numtide.com` が untrusted 扱いされて無視され、`codex` などの Rust パッケージが毎回ソースから `cargo build` されてしまいます。
+This repo assumes [Determinate Nix](https://docs.determinate.systems/). At install time we also inject the binary caches we trust via `--extra-conf`. Without this, the `cache.numtide.com` cache declared by flakes such as `llm-agents.nix` is treated as untrusted and ignored, so Rust packages like `codex` are rebuilt from source with `cargo` on every switch.
 
 macOS / Linux:
 
@@ -44,11 +42,11 @@ curl -fsSL https://install.determinate.systems/nix | sh -s -- install \
   --extra-conf "extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
 ```
 
-trust 設定はマシンの Nix インストールに属する関心事なので、dotfiles 側ではなくインストーラに渡します。後から確認・追加したい場合は `/etc/nix/nix.custom.conf` に追記し、`sudo launchctl kickstart -k system/systems.determinate.nix-daemon`（macOS）で反映できます。
+Trust is a property of the machine's Nix install, not of the dotfiles, so we pass it to the installer rather than declaring it in the repo. To inspect or add caches later, append to `/etc/nix/nix.custom.conf` and reload the daemon with `sudo launchctl kickstart -k system/systems.determinate.nix-daemon` (macOS).
 
-インストール後はいったん shell を開き直すか、Nix の profile script を読み直してください。Determinate Nix は `nix-command` / `flakes` をデフォルトで有効化するため、次の手動設定は通常不要です（fresh install 直後に反映が間に合わないときの保険として残しています）。
+After installation, restart your shell or reload the Nix profile script. Determinate Nix enables `nix-command` / `flakes` by default, so the manual step below is usually unnecessary (kept as a fallback when a fresh install hasn't picked it up yet).
 
-flake を使うので、未設定なら `nix-command` と `flakes` を有効にします。
+Since this repo uses flakes, enable `nix-command` and `flakes` if they are not enabled yet.
 
 ```bash
 mkdir -p ~/.config/nix
@@ -56,31 +54,31 @@ grep -qxF 'experimental-features = nix-command flakes' ~/.config/nix/nix.conf 2>
   || printf '%s\n' 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
 ```
 
-確認:
+Check:
 
 ```bash
 nix --version
 nix config show | grep experimental-features
-# trust が効いているか（codex の cargo build 回避）。出なければ install 時の --extra-conf を忘れています
+# Is the trust in effect (avoids codex's cargo build)? If empty, you forgot --extra-conf at install time.
 nix config show | grep cache.numtide.com
 ```
 
-もし `nix run` 実行時に `experimental Nix feature 'nix-command' is disabled` や `flakes is disabled` が出たら、まだ設定が反映されていません。shell を開き直すか、初回だけ `NIX_CONFIG` で明示します。`home-manager` は内部でも `nix` を呼ぶため、`--extra-experimental-features` よりこちらの方が確実です。
+If `nix run` still fails with `experimental Nix feature 'nix-command' is disabled` or `flakes is disabled`, the config has not taken effect yet. Restart your shell, or set `NIX_CONFIG` once. This is more reliable than `--extra-experimental-features` here because `home-manager` invokes `nix` internally as well.
 
 ```bash
 NIX_CONFIG='experimental-features = nix-command flakes' \
   nix run home-manager/master -- switch --flake "path:$PWD#nosuke@linux-aarch64"
 ```
 
-これは Ubuntu 固有ではなく、fresh install 直後で `nix-command` / `flakes` がまだ有効になっていない環境なら macOS / Linux のどちらでも起こりえます。
+This is not Ubuntu-specific. It can happen on any fresh Nix install on macOS or Linux before `nix-command` / `flakes` are enabled and picked up.
 
-この repo を 1 度 `home-manager switch` できれば、以後は `~/.config/nix/nix.conf` も Home Manager で管理されるため、通常は毎回 `NIX_CONFIG=...` を付けなくて大丈夫です。
+After one successful `home-manager switch`, this repo also manages `~/.config/nix/nix.conf`, so you normally do not need to keep prefixing commands with `NIX_CONFIG=...`.
 
-## セットアップ
+## Setup
 
 ### macOS
 
-初回適用:
+First apply:
 
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
@@ -88,7 +86,7 @@ cd ~/dotfiles
 sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake "path:$PWD#nosuke-M5-MBP"
 ```
 
-2回目以降:
+Subsequent applies:
 
 ```bash
 cd ~/dotfiles
@@ -135,15 +133,28 @@ NIX_CONFIG='experimental-features = nix-command flakes' \
 nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@linux-aarch64"
 ```
 
-## ローカル設定
+### Other outputs
 
-Git の個人設定:
+Additional Home Manager outputs exist for specific hosts. Use the matching flake attribute:
+
+- `nosuke@nosuke-windows` (WSL)
+- `azureuser@gem-ai`
+
+List every available configuration with:
 
 ```bash
-cp ~/dotfiles/nix/programs/git/git.local.example ~/.config/git.local
+nix flake show
 ```
 
-`~/.config/git.local` を編集:
+## Local configuration
+
+Git identity:
+
+```bash
+cp ~/dotfiles/.config/git.local.example ~/.config/git.local
+```
+
+Edit `~/.config/git.local`:
 
 ```ini
 [user]
@@ -151,87 +162,75 @@ cp ~/dotfiles/nix/programs/git/git.local.example ~/.config/git.local
     email = your@email.com
 ```
 
-Zsh のローカル上書き設定:
+Optional local Zsh overrides:
 
 ```bash
-cp ~/dotfiles/nix/programs/zsh/zsh.local.example ~/.config/zsh.local
+cp ~/dotfiles/.config/zsh.local.example ~/.config/zsh.local
 ```
 
-secrets:
+Secrets:
 
 ```bash
 export AZURE_OPENAI_API_KEY='your_api_key'
 export OTHER_SECRET='...'
 ```
 
-必要なら `~/.config/secrets` を作って読み込ませます。
+You can also keep them in `~/.config/secrets`.
 
-## Git 管理しないファイル
-
-以下は repo の外に置く想定です。
+## Files intentionally kept out of git
 
 - `~/.config/git.local`
 - `~/.config/zsh.local`
 - `~/.config/secrets`
 - `$XDG_CACHE_HOME/zsh/.zcompdump`
 
-## ディレクトリ構成
+## Repository layout
 
 ```text
 dotfiles/
 ├── nix/
+│   ├── home-manager/
+│   │   ├── default.nix       # entry point for the shared Home Manager config
+│   │   ├── data/             # pure data shared across tools (e.g. mcp-servers.nix)
+│   │   ├── home/             # core home setup (shell, profile, directories, nix, migrations)
+│   │   ├── platforms/        # darwin.nix / linux.nix
+│   │   ├── presets/          # package bundles: base / devtools / webdevtools
+│   │   └── programs/         # one file per tool (git, zsh, nvim, direnv, claude-code, ...)
 │   ├── hosts/
 │   │   ├── darwin/
-│   │   └── linux/
-│   ├── darwin/
-│   │   └── system.nix
-│   ├── home-manager/
-│   │   ├── default.nix
-│   │   ├── darwin.nix
-│   │   ├── linux.nix
-│   │   └── home/
-│   └── programs/
-│       ├── common.nix
-│       ├── darwin.nix
-│       ├── linux.nix
-│       ├── git/
-│       ├── karabiner/
-│       ├── lazygit/
-│       ├── nvim/
-│       ├── sheldon/
-│       ├── starship/
-│       ├── tmux/
-│       ├── wezterm/
-│       ├── wget/
-│       └── zsh/
-├── config/
-│   └── nvim/
+│   │   └── linux/            # azureuser.nix / nosuke.nix
+│   └── nix-darwin/           # system.nix / homebrew.nix
+├── .config/                  # repo-backed configs (ghostty, nvim, sheldon, starship, lazygit, ...)
 ├── flake.nix
 └── flake.lock
 ```
 
-## 現状メモ
+## Current state
 
-- macOS は `nix-darwin` ベースで運用可能です
-- Linux は standalone `Home Manager` 出力を用意しています
-- 共通の Home Manager 構成は `nix/home-manager/` にあります
-- 汎用 package と OS 固有 package は `nix/programs/common.nix` と `nix/programs/darwin.nix` / `linux.nix` にあります
-- 各アプリ設定は `nix/programs/common.nix` と OS 別の `darwin.nix` / `linux.nix` から束ねています
-- tool 固有の package は対応する `nix/programs/<tool>/` で管理します
-- `git`、`tmux`、`wget`、Zsh の主要部分は native option 化済みです
-- Zsh plugin は `sheldon`、prompt は `starship` で管理しています
-- macOS の GUI アプリは `nix-darwin` の Homebrew module 経由で管理しています
-- `lazygit`、`nvim`、`wezterm`、`karabiner` などは tool ごとの `files/` を Home Manager から参照します
+- macOS is usable with `nix-darwin`
+- Linux uses standalone `Home Manager` outputs
+- Shared Home Manager logic lives under `nix/home-manager/`
+- Packages are grouped into presets: `base.nix` (always-on CLI tools), `devtools.nix`, and `webdevtools.nix`
+- Each tool's settings live in a single file under `nix/home-manager/programs/<tool>.nix`
+- `git`, `tmux`, `wget`, and most of `zsh` are managed with native Home Manager options
+- Zsh plugins are managed with `sheldon`, and the prompt is managed with `starship`
+- Shell integrations for `zoxide`, `starship`, and `sheldon` are cached at startup for faster shell init
+- `direnv` (with `nix-direnv`) is managed under `programs/direnv.nix`
+- Agent tooling — Claude Code, Codex, agent skills, and MCP servers — is managed under `programs/` (with the MCP server definitions shared via `data/mcp-servers.nix`)
+- macOS GUI apps are managed through the `nix-darwin` Homebrew module under `nix/nix-darwin/`
 
-## 主な内容
+## Included tools and configs
 
-- XDG Base Directory 対応
+- XDG Base Directory support
 - Zsh
 - Sheldon
 - Starship
 - Neovim
 - tmux
 - WezTerm
+- Ghostty
 - Karabiner-Elements
 - Git / lazygit
-- ripgrep / fd / fzf / yazi / zoxide などの CLI ツール
+- direnv (with nix-direnv)
+- Claude Code / Codex / agent skills / MCP servers
+- CLI tools such as ripgrep, fd, fzf, yazi, and zoxide
