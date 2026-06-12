@@ -26,7 +26,7 @@ in
       outputStyle = "Explanatory";
       model = "claude-opus-4-8";
       effortLevel = "high";
-      fastMode = true;
+      fastMode = false;
       permissions.allow = [
         "Bash(pnpm typecheck)"
         "Bash(pnpm test)"

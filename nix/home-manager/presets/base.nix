@@ -15,6 +15,7 @@
     ../programs/agents-skills.nix
     ../programs/claude-code.nix
     ../programs/codex.nix
+    ../programs/direnv.nix
     ../programs/ghostty.nix
     ../programs/git.nix
     ../programs/lazygit.nix

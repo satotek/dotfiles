@@ -10,6 +10,7 @@
     ignores = [
       ".DS_Store"
       "thumbs.db"
+      ".direnv/"
       "**/.claude/settings.local.json"
     ];
     settings = {
