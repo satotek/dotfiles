@@ -10,11 +10,6 @@
       set -as terminal-overrides ',*:Tc'
       set -g status-bg '#9A88CB'
 
-      new-session -d
-      split-window -h
-      split-window -v
-      select-pane -t 0
-
       bind \\ split-window -h
       bind - split-window -v
 

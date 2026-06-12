@@ -5,7 +5,7 @@ let
     name = "claude-statusline-line3";
     runtimeInputs = [ pkgs.jq ];
     text = ''
-      /usr/bin/jq -r 'def bar(pct):(pct*10/100|floor) as $f|(10-$f) as $e|([range($f)]|map("█")|join(""))+([range($e)]|map("░")|join("")); (.rate_limits.five_hour.resets_at // 0) as $resets | (if ($resets > 0) and (($resets - now) > 0) then ($resets - now | floor) as $d | " (+" + ($d/3600|floor|tostring) + "h" + ($d%3600/60|floor|tostring) + "m)" else "" end) as $rt | "5h " + bar(.rate_limits.five_hour.used_percentage // 0) + " " + (.rate_limits.five_hour.used_percentage // 0 | floor | tostring) + "%" + $rt + " | 7d " + bar(.rate_limits.seven_day.used_percentage // 0) + " " + (.rate_limits.seven_day.used_percentage // 0 | floor | tostring) + "% | $" + (.cost.total_cost_usd // 0 | . * 100 | round | . / 100 | tostring)'
+      jq -r 'def bar(pct):(pct*10/100|floor) as $f|(10-$f) as $e|([range($f)]|map("█")|join(""))+([range($e)]|map("░")|join("")); (.rate_limits.five_hour.resets_at // 0) as $resets | (if ($resets > 0) and (($resets - now) > 0) then ($resets - now | floor) as $d | " (+" + ($d/3600|floor|tostring) + "h" + ($d%3600/60|floor|tostring) + "m)" else "" end) as $rt | "5h " + bar(.rate_limits.five_hour.used_percentage // 0) + " " + (.rate_limits.five_hour.used_percentage // 0 | floor | tostring) + "%" + $rt + " | 7d " + bar(.rate_limits.seven_day.used_percentage // 0) + " " + (.rate_limits.seven_day.used_percentage // 0 | floor | tostring) + "% | $" + (.cost.total_cost_usd // 0 | . * 100 | round | . / 100 | tostring)'
     '';
   };
 in
@@ -54,7 +54,7 @@ in
       };
       statusLine = {
         type = "command";
-        command = "${pkgs.bun}/bin/bunx ccstatusline@latest";
+        command = "${pkgs.llm-agents.ccstatusline}/bin/ccstatusline";
         refreshInterval = 5;
         padding = 0;
       };

@@ -78,19 +78,27 @@ After one successful `home-manager switch`, this repo also manages `~/.config/ni
 
 ### macOS
 
+macOS is split into two layers:
+
+- System layer (`darwinConfigurations`): Homebrew casks, fonts, macOS settings. Needs `sudo`.
+- Home layer (`homeConfigurations`): everything under Home Manager. No `sudo`.
+
 First apply:
 
 ```bash
 git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+# System layer
 sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake "path:$PWD#nosuke-M5-MBP"
+# Home layer (no sudo)
+nix run home-manager/master -- switch --flake "path:$PWD#nosuke@nosuke-M5-MBP"
 ```
 
-Subsequent applies:
+Subsequent applies (both commands are installed by the home layer):
 
 ```bash
-cd ~/dotfiles
-sudo darwin-rebuild switch --flake "path:$PWD#nosuke-M5-MBP"
+nix-switch     # home layer, no sudo — day-to-day changes live here
+darwin-switch  # system layer (sudo) — only when casks/fonts/macOS settings change
 ```
 
 ### Linux x86_64

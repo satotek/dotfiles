@@ -1,9 +1,12 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
+    # bat / eza は zsh.nix の ZENO_GIT_CAT / ZENO_GIT_TREE が前提とする
+    bat
     btop
     curl
     deno
+    eza
     fd
     fzf
     ghq

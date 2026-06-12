@@ -9,6 +9,7 @@
       "$HOME/.local/share" \
       "$HOME/.local/state" \
       "$HOME/.local/state/git" \
+      "$HOME/.local/state/zsh" \
       "$HOME/bin" \
       "$HOME/ghq" \
       "$HOME/workspaces/develop" \

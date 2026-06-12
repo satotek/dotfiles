@@ -5,6 +5,10 @@
   hostname,
   system,
 }:
+# システム層 (Homebrew casks, fonts, macOS 設定) のみを管理する。
+# ホーム層は homeConfigurations."<user>@<hostname>" (standalone Home Manager,
+# sudo 不要の nix-switch) に一本化しているので、ここに home-manager モジュールを
+# 入れて二重管理にしないこと。
 inputs.nix-darwin.lib.darwinSystem {
   inherit system;
 
@@ -19,38 +23,10 @@ inputs.nix-darwin.lib.darwinSystem {
 
   modules = [
     ../../nix-darwin/system.nix
-    inputs.home-manager.darwinModules.home-manager
     {
       users.users.${username} = {
         name = username;
         home = "/Users/${username}";
-      };
-
-      home-manager.backupFileExtension = "pre-home-manager";
-      home-manager.useGlobalPkgs = true;
-      home-manager.useUserPackages = true;
-      home-manager.extraSpecialArgs = {
-        inherit
-          inputs
-          self
-          username
-          hostname
-          ;
-      };
-      home-manager.users.${username} = {
-        imports = [
-          ../../home-manager/default.nix
-          ../../home-manager/platforms/darwin.nix
-          ../../home-manager/presets/base.nix
-          ../../home-manager/presets/devtools.nix
-          ../../home-manager/presets/webdevtools.nix
-        ];
-
-        home.username = username;
-        home.homeDirectory = "/Users/${username}";
-        home.stateVersion = "25.05";
-
-        programs.home-manager.enable = true;
       };
     }
   ];

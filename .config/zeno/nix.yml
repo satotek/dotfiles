@@ -1,8 +1,13 @@
 snippets:
-  # nix switch (OS-aware shell app)
+  # nix switch (home layer, no sudo)
   - name: nix switch
     keyword: nix-switch
     snippet: nix-switch
+
+  # darwin switch (macOS system layer, sudo)
+  - name: darwin switch
+    keyword: darwin-switch
+    snippet: darwin-switch
 
   # nix flake
   - name: nix flake update

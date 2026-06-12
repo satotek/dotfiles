@@ -17,7 +17,6 @@ let
   codexConfig = {
     personality = "friendly";
     network_access = true;
-    trust_level = "trusted";
     web_search = "live";
 
     analytics.enabled = false;

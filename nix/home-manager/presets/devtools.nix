@@ -6,6 +6,7 @@
     gh
     go
     gopls
+    rust-analyzer
     rustc
   ];
 }

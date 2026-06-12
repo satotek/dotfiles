@@ -82,7 +82,7 @@ in
         cache_dir="''${XDG_CACHE_HOME:-$HOME/.local/cache}/zsh"
         sheldon_cache="$cache_dir/sheldon.zsh"
         sheldon_toml="''${XDG_CONFIG_HOME:-$HOME/.config}/sheldon/plugins.toml"
-        sheldon_lock="''${XDG_CONFIG_HOME:-$HOME/.config}/sheldon/plugins.lock"
+        sheldon_lock="''${XDG_DATA_HOME:-$HOME/.local/share}/sheldon/plugins.lock"
         _sheldon_bin="$(command -v sheldon)"
 
         if [[ -n "$_sheldon_bin" && ( ! -r "$sheldon_cache" || "$sheldon_toml" -nt "$sheldon_cache" || ( -r "$sheldon_lock" && "$sheldon_lock" -nt "$sheldon_cache" ) ) ]]; then
