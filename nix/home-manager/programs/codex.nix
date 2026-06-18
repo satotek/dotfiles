@@ -41,6 +41,7 @@ let
     service_tier = "default";
 
     approval_policy = "on-request";
+    approvals_reviewer = "auto_review";
     features.guardian_approval = true;
     sandbox_mode = "workspace-write";
     sandbox_workspace_write.writable_roots = [
@@ -74,6 +75,48 @@ in
     enable = true;
     package = pkgs.llm-agents.codex;
   };
+
+  home.file.".codex/rules/default.rules".force = true;
+
+  home.file.".codex/rules/default.rules".text = ''
+    # Allow low-risk inspection commands outside the sandbox without prompting.
+    prefix_rule(pattern = ["git", "diff"], decision = "allow")
+    prefix_rule(pattern = ["git", "status"], decision = "allow")
+    prefix_rule(pattern = ["git", "log"], decision = "allow")
+    prefix_rule(pattern = ["git", "show"], decision = "allow")
+    prefix_rule(pattern = ["git", "branch"], decision = "allow")
+    prefix_rule(pattern = ["git", "rev-parse"], decision = "allow")
+    prefix_rule(pattern = ["git", "remote", "-v"], decision = "allow")
+    prefix_rule(pattern = ["git", "ls-files"], decision = "allow")
+    prefix_rule(pattern = ["git", "for-each-ref"], decision = "allow")
+    prefix_rule(pattern = ["git", "cherry", "-v"], decision = "allow")
+    prefix_rule(pattern = ["git", "add"], decision = "allow")
+
+    prefix_rule(pattern = ["rg"], decision = "allow")
+    prefix_rule(pattern = ["sed", "-n"], decision = "allow")
+    prefix_rule(pattern = ["ls"], decision = "allow")
+    prefix_rule(pattern = ["pwd"], decision = "allow")
+    prefix_rule(pattern = ["wc"], decision = "allow")
+    prefix_rule(pattern = ["head"], decision = "allow")
+    prefix_rule(pattern = ["tail"], decision = "allow")
+    prefix_rule(pattern = ["sort"], decision = "allow")
+    prefix_rule(pattern = ["readlink", "-f"], decision = "allow")
+    prefix_rule(pattern = ["which"], decision = "allow")
+    prefix_rule(pattern = ["date"], decision = "allow")
+    prefix_rule(pattern = ["nix-instantiate", "--parse"], decision = "allow")
+
+    # Keep operations that publish, rewrite history, or discard work interactive.
+    prefix_rule(pattern = ["git", "commit"], decision = "prompt")
+    prefix_rule(pattern = ["git", "push"], decision = "prompt")
+    prefix_rule(pattern = ["git", "reset"], decision = "prompt")
+    prefix_rule(pattern = ["git", "rebase"], decision = "prompt")
+    prefix_rule(pattern = ["git", "restore"], decision = "prompt")
+    prefix_rule(pattern = ["git", "checkout"], decision = "prompt")
+    prefix_rule(pattern = ["git", "clean"], decision = "prompt")
+    prefix_rule(pattern = ["git", "merge"], decision = "prompt")
+    prefix_rule(pattern = ["rm"], decision = "prompt")
+    prefix_rule(pattern = ["sudo"], decision = "prompt")
+  '';
 
   home.activation.generateCodexConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     codex_dir="${homeDir}/.codex"
