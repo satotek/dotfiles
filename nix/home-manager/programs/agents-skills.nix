@@ -66,6 +66,11 @@ in
         path = "react-best-practices";
       };
 
+      vercel-composition-patterns = {
+        from = "vercel-agent-skills";
+        path = "composition-patterns";
+      };
+
       next-best-practices = {
         from = "vercel-next-skills";
       };
@@ -95,9 +100,5 @@ in
       dest = "${homeDir}/.claude/skills";
       structure = "symlink-tree";
     };
-
-    excludePatterns = [
-      "/vercel-composition-patterns"
-    ];
   };
 }

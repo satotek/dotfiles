@@ -24,19 +24,21 @@ let
 
     tui.status_line = [
       "model-with-reasoning"
+      "approval-mode"
       "project-root"
       "context-remaining"
       "git-branch"
       "five-hour-limit"
       "weekly-limit"
     ];
+    tui.alternate_screen = "never";
 
     # model setting
     model = "gpt-5.5";
     model_reasoning_effort = "medium";
     model_reasoning_summary = "auto";
     model_verbosity = "medium";
-    service_tier = "fast";
+    service_tier = "default";
 
     approval_policy = "on-request";
     features.guardian_approval = true;
