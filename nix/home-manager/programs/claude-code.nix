@@ -51,6 +51,7 @@ in
         "gopls-lsp@claude-plugins-official" = true;
         "pyright-lsp@claude-plugins-official" = true;
         "typescript-lsp@claude-plugins-official" = true;
+        "frontend-design@claude-plugins-official" = true;
       };
       statusLine = {
         type = "command";
