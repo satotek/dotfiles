@@ -33,7 +33,6 @@ in
 
       vercel-next-skills = {
         input = "vercel-next-skills";
-        subdir = "skills";
       };
 
       anthropic-skills = {
@@ -69,10 +68,6 @@ in
       vercel-composition-patterns = {
         from = "vercel-agent-skills";
         path = "composition-patterns";
-      };
-
-      next-best-practices = {
-        from = "vercel-next-skills";
       };
 
       web-design-guidelines = {
