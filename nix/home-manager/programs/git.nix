@@ -38,6 +38,16 @@
         ps = "push";
         fixit = "commit --amend --no-edit";
         fixmsg = "commit --amend";
+        # ベースブランチに戻って最新化し、リモートで消えた(マージ済み)ローカルブランチを一括削除する。
+        # 使い方: `git sweep`(=develop) / `git sweep main` のように引数でベースを指定可能。
+        sweep = ''
+          !f() { \
+            base="''${1:-develop}"; \
+            git switch "$base" && \
+            git fetch --prune && \
+            git pull && \
+            git branch -vv | awk '/: gone]/{print $1}' | grep -vE '^[*+]' | xargs -r git branch -D; \
+          }; f'';
       };
     };
   };
