@@ -137,7 +137,11 @@ in
         _starship_cache="$cache_dir/starship.zsh"
         _starship_config="''${XDG_CONFIG_HOME:-$HOME/.config}/starship.toml"
         _starship_bin="$(command -v starship)"
-        if [[ -n "$_starship_bin" && ( ! -r "$_starship_cache" || ( -r "$_starship_config" && "$_starship_config" -nt "$_starship_cache" ) || "$_starship_bin" -nt "$_starship_cache" ) ]]; then
+        # starship init bakes the generator's absolute path into the cache, so a
+        # profile-path change (e.g. nix-darwin -> standalone home-manager) leaves a
+        # stale, unresolvable path that mtime checks can't catch (nix store mtimes are
+        # all 1970). Also regenerate when the current binary path is absent from the cache.
+        if [[ -n "$_starship_bin" ]] && { [[ ! -r "$_starship_cache" ]] || { [[ -r "$_starship_config" ]] && [[ "$_starship_config" -nt "$_starship_cache" ]]; } || [[ "$_starship_bin" -nt "$_starship_cache" ]] || ! grep -qF -- "$_starship_bin" "$_starship_cache" 2>/dev/null; }; then
           "$_starship_bin" init zsh >| "$_starship_cache"
         fi
         [[ -r "$_starship_cache" ]] && source "$_starship_cache"

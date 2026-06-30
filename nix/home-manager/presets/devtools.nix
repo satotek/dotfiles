@@ -1,6 +1,13 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
+    # Nix 版 azure-cli は実行時 `az extension add` が同梱 Python の read-only 制約で
+    # 失敗しがちなので、拡張は withExtensions でビルド時に宣言的に焼き込む。
+    (azure-cli.withExtensions [
+      azure-cli.extensions.azure-devops
+      azure-cli.extensions.ssh
+      azure-cli.extensions.account
+    ])
     cargo
     ffmpeg
     gh

@@ -1,6 +1,6 @@
 { inputs, pkgs, self, username, ... }:
 {
-  imports = [ ./homebrew.nix ];
+  imports = [ ./homebrew.nix ./macos-defaults.nix ];
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfree = true;
   nixpkgs.overlays = [
