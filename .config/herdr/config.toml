@@ -1,0 +1,35 @@
+# herdr config
+# 全オプションは `herdr --default-config` で確認できる。
+# 反映: `herdr server reload-config`(アプリ再起動不要)。
+# 自前キーを白紙化: `herdr config reset-keys`。
+
+# セットアップ済みなので初回オンボーディング通知を出さない。
+onboarding = false
+
+[theme]
+# 他ツールと揃えて catppuccin(herdr のデフォルトも catppuccin)。
+# 選択肢: catppuccin, terminal, tokyo-night, dracula, nord, gruvbox,
+#         one-dark, solarized, kanagawa, rose-pine, vesper
+name = "catppuccin"
+
+[keys]
+# tmux と同じ ctrl+a を prefix(leader)にする(herdr のデフォルトは ctrl+b)。
+# デフォルトで focus_pane_left/down/up/right = prefix+h/j/k/l(hjkl ペイン移動)、
+# zoom=prefix+z など tmux 風なので、prefix を変えるだけで手癖がほぼそのまま使える。
+prefix = "ctrl+a"
+
+# tmux の bind \ / bind - に寄せて、\ と - の両方を分割に割当。
+# ※ herdr の vertical/horizontal の向きは実機で確認し、逆なら入れ替える。
+split_vertical = "prefix+\\"
+split_horizontal = "prefix+minus"
+
+# lazygit を一時ペインで開く(tmux の popup 相当)。終了で自動的に閉じる。
+[[keys.command]]
+key = "prefix+alt+g"
+type = "pane"
+command = "lazygit"
+
+[experimental]
+# prefix モード中だけ macOS の入力ソースを ASCII に切り替える。
+# 日本語IME が ON のままでも ctrl+a 起点のコマンドが確実に登録される(macOS のみ・ベストエフォート)。
+switch_ascii_input_source_in_prefix = true

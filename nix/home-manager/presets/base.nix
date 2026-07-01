@@ -22,6 +22,7 @@
     ../programs/direnv.nix
     ../programs/ghostty.nix
     ../programs/git.nix
+    ../programs/herdr.nix
     ../programs/lazygit.nix
     ../programs/nvim.nix
     ../programs/sheldon.nix
