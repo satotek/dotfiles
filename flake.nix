@@ -41,6 +41,13 @@
       flake = false;
     };
 
+    # herdr 公式 agent skill (リポジトリ直下の SKILL.md)。
+    # パッケージ本体は mac の Homebrew で入れているため flake = false でソースのみ取得。
+    herdr-skill = {
+      url = "github:ogulcancelik/herdr";
+      flake = false;
+    };
+
     agent-browser = {
       url = "github:vercel-labs/agent-browser";
       flake = false;

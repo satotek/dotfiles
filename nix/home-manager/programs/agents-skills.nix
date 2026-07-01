@@ -6,6 +6,15 @@
 }:
 let
   homeDir = config.home.homeDirectory;
+
+  # herdr の公式 skill は upstream リポジトリのルートに SKILL.md が直置きされており、
+  # さらに root の CLAUDE.md がファイルへの symlink のため、リポジトリを直接
+  # discovery source にすると scanner が symlink を辿って `readDir` で落ちる。
+  # SKILL.md だけをクリーンな herdr/ ツリーへ抽出し、この upstream 固有の構造を回避する。
+  herdrSkillSrc = pkgs.runCommand "herdr-skill-src" { } ''
+    mkdir -p "$out/herdr"
+    cp ${inputs.herdr-skill}/SKILL.md "$out/herdr/SKILL.md"
+  '';
 in
 {
   imports = [
@@ -49,6 +58,11 @@ in
         input = "agent-browser";
         subdir = "skills";
       };
+
+      # herdr 公式 skill。input を直接指定せず、上で抽出したクリーンツリーを path で渡す。
+      herdr = {
+        path = "${herdrSkillSrc}";
+      };
     };
 
     skills.explicit = {
@@ -81,6 +95,10 @@ in
 
       agent-browser = {
         from = "agent-browser";
+      };
+
+      herdr = {
+        from = "herdr";
       };
     };
 
