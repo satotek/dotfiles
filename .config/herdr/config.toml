@@ -29,7 +29,23 @@ key = "prefix+alt+g"
 type = "pane"
 command = "lazygit"
 
+[ui]
+# エージェントサイドバーを「要対応キュー」順に並べる("spaces"=スペース順が既定)。
+# 複数エージェントを回す時に、対応が必要なものが上に来る。
+agent_panel_sort = "priority"
+
+[ui.toast]
+# エージェントが完了/入力待ちになったら通知。
+# "terminal"=外側端末(WezTerm)に通知を依頼、"system"=OSへ直接、
+# "herdr"=アプリ内トースト、"off"=無効。飛ばなければ "system" に変える。
+delivery = "terminal"
+
 [experimental]
 # prefix モード中だけ macOS の入力ソースを ASCII に切り替える。
 # 日本語IME が ON のままでも ctrl+a 起点のコマンドが確実に登録される(macOS のみ・ベストエフォート)。
 switch_ascii_input_source_in_prefix = true
+
+# エージェントペインで日本語IMEの変換候補ウィンドウがカーソルに追従するようにする。
+# allow-list で claude/codex のみに限定 → nvim 等では無効化し、余分カーソルの副作用を避ける。
+reveal_hidden_cursor_for_cjk_ime = true
+cjk_ime_agents = ["claude", "codex"]
