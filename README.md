@@ -208,6 +208,8 @@ dotfiles/
 │   │   ├── darwin/
 │   │   └── linux/            # azureuser.nix / nosuke.nix
 │   └── nix-darwin/           # system.nix / homebrew.nix
+├── .github/
+│   └── workflows/            # CI: automatic flake.lock updates (see Automation)
 ├── .config/                  # repo-backed configs (ghostty, nvim, sheldon, starship, lazygit, ...)
 ├── flake.nix
 └── flake.lock
@@ -226,6 +228,16 @@ dotfiles/
 - `direnv` (with `nix-direnv`) is managed under `programs/direnv.nix`
 - Agent tooling — Claude Code, Codex, agent skills, and MCP servers — is managed under `programs/` (with the MCP server definitions shared via `data/mcp-servers.nix`)
 - macOS GUI apps are managed through the `nix-darwin` Homebrew module under `nix/nix-darwin/`
+- `flake.lock` is updated automatically by GitHub Actions (see Automation)
+
+## Automation
+
+`flake.lock` is kept up to date by GitHub Actions (under `.github/workflows/`). Two workflows open pull requests, and each one builds the Linux Home Manager configuration as a check before merging, so a broken update never lands on `main`:
+
+- `update-flake-ai.yml` — daily. Updates the fast-moving AI / agent inputs (`llm-agents`, `agent-browser`, `agent-skills`, `anthropic-skills`, `herdr-skill`, `mattpocock-skills`, `vercel-*-skills`).
+- `update-flake-stable.yml` — every 3 days. Updates the base inputs (`nixpkgs`, `nix-darwin`, `home-manager`), and only accepts versions that are at least 3 days old (an "age gate") to avoid pulling in a same-day, possibly-broken release.
+
+Both configure the `cache.numtide.com` binary cache in CI so AI tools are downloaded rather than rebuilt from source during the validation build. Validated PRs are auto-merged; you still apply them per machine with `git pull` and a switch (`nix-switch` / `darwin-switch`). The repo is public, so GitHub-hosted runners are free.
 
 ## Included tools and configs
 
@@ -241,4 +253,6 @@ dotfiles/
 - Git / lazygit
 - direnv (with nix-direnv)
 - Claude Code / Codex / agent skills / MCP servers
+- herdr (agent multiplexer — a tmux-like TUI for AI coding agents)
+- rumdl (Markdown linter/formatter, used as the Neovim Markdown LSP)
 - CLI tools such as ripgrep, fd, fzf, yazi, and zoxide
