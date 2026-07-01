@@ -1,0 +1,56 @@
+name: 'Bot: Update AI agent inputs'
+
+# AI エージェント/スキル系の flake input を毎日更新して PR を作る。
+# これらは更新が速い（claude-code は毎日のようにリリース）ので高頻度で追従する。
+# マージは人が確認して行う。
+
+on:
+  schedule:
+    - cron: '0 21 * * *' # 毎日 21:00 UTC（= 翌 06:00 JST）
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Nix build cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Update AI agent flake inputs
+        run: |
+          nix flake update \
+            llm-agents \
+            agent-browser \
+            agent-skills \
+            anthropic-skills \
+            herdr-skill \
+            mattpocock-skills \
+            vercel-agent-skills \
+            vercel-next-skills \
+            vercel-skills
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'chore(nix): update AI agent inputs'
+          title: 'chore(nix): update AI agent inputs'
+          body: |
+            AI エージェント / スキル系 flake input の更新（毎日）。
+            llm-agents (claude-code / codex 等) / agent-browser / *-skills。
+
+            マージ後、各マシンで `git pull` して切替を実行してください。
+
+            _このPRは update-flake-ai ワークフローが自動生成しました。_
+          branch: chore/update-flake-ai
+          delete-branch: true
+          labels: dependencies,automated
