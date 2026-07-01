@@ -2,6 +2,7 @@ name: 'Bot: Update AI agent inputs'
 
 # AI エージェント/スキル系の flake input を毎日更新。
 # 更新が速い（claude-code は毎日のようにリリース）ので高頻度で追従する。
+# numtide バイナリキャッシュを設定してビルド済みを DL（ソースコンパイルを避ける）、
 # Linux home 構成のビルドで検証してから PR を作り、自動マージする。
 
 on:
@@ -17,11 +18,23 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
+      # 検証ビルドのためにディスクを確保（標準ランナーは空き ~14GB で不足しがち）
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          large-packages: false
+
       - name: Checkout
         uses: actions/checkout@v4
 
+      # numtide キャッシュを設定 = llm-agents/codex/claude-code をビルド済みで DL。
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            extra-substituters = https://cache.numtide.com
+            extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
 
       - name: Nix build cache
         uses: DeterminateSystems/magic-nix-cache-action@main

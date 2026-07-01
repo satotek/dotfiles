@@ -20,11 +20,22 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          large-packages: false
+
       - name: Checkout
         uses: actions/checkout@v4
 
+      # numtide キャッシュを設定 = AI/各種ツールをビルド済みで DL（ソースコンパイル回避）。
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            extra-substituters = https://cache.numtide.com
+            extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
 
       - name: Nix build cache
         uses: DeterminateSystems/magic-nix-cache-action@main
