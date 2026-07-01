@@ -18,13 +18,6 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      # 検証ビルドのためにディスクを確保（標準ランナーは空き ~14GB で不足しがち）
-      - name: Free disk space
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: true
-          large-packages: false
-
       - name: Checkout
         uses: actions/checkout@v4
 
