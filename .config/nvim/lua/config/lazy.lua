@@ -16,9 +16,60 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   spec = {
-    -- add LazyVim and import its plugins
+    -- ============================================================
+    -- LazyVim コア（snacks / lspconfig / mason / cmp / treesitter /
+    -- which-key / conform / gitsigns / flash / trouble ... 約50個の土台）
+    -- ============================================================
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
-    -- import/override with your plugins
+
+    -- ============================================================
+    -- extras（旧 lazyvim.json → ここに明示 import 化）
+    -- 各行のコメントは「その extra が連れてくる主なプラグイン」
+    -- 卒業したら該当行を消し、lua/plugins/ に自前ファイルを置く
+    -- ============================================================
+    -- AI
+    { import = "lazyvim.plugins.extras.ai.copilot" }, -- zbirenbaum/copilot.lua
+
+    -- coding
+    { import = "lazyvim.plugins.extras.coding.yanky" }, -- gbprod/yanky.nvim
+
+    -- editor
+    { import = "lazyvim.plugins.extras.editor.dial" }, -- monaqa/dial.nvim
+    { import = "lazyvim.plugins.extras.editor.illuminate" }, -- RRethy/vim-illuminate
+    { import = "lazyvim.plugins.extras.editor.inc-rename" }, -- smjonas/inc-rename.nvim
+    { import = "lazyvim.plugins.extras.editor.snacks_picker" }, -- folke/snacks.nvim (picker有効化)
+
+    -- lang（LSP × formatter × treesitter × dap の結線を各言語で提供）
+    { import = "lazyvim.plugins.extras.lang.docker" },
+    { import = "lazyvim.plugins.extras.lang.git" },
+    { import = "lazyvim.plugins.extras.lang.go" },
+    { import = "lazyvim.plugins.extras.lang.haskell" },
+    { import = "lazyvim.plugins.extras.lang.json" },
+    { import = "lazyvim.plugins.extras.lang.markdown" },
+    { import = "lazyvim.plugins.extras.lang.prisma" },
+    { import = "lazyvim.plugins.extras.lang.python" },
+    { import = "lazyvim.plugins.extras.lang.rust" },
+    { import = "lazyvim.plugins.extras.lang.sql" },
+    { import = "lazyvim.plugins.extras.lang.tailwind" },
+    { import = "lazyvim.plugins.extras.lang.toml" },
+    { import = "lazyvim.plugins.extras.lang.typescript" },
+    { import = "lazyvim.plugins.extras.lang.typescript.biome" },
+    { import = "lazyvim.plugins.extras.lang.yaml" },
+
+    -- test
+    { import = "lazyvim.plugins.extras.test.core" }, -- neotest + nvim-dap
+
+    -- ui
+    { import = "lazyvim.plugins.extras.ui.mini-animate" }, -- nvim-mini/mini.animate
+    { import = "lazyvim.plugins.extras.ui.treesitter-context" }, -- nvim-treesitter/nvim-treesitter-context
+
+    -- util
+    { import = "lazyvim.plugins.extras.util.mini-hipatterns" }, -- nvim-mini/mini.hipatterns
+    { import = "lazyvim.plugins.extras.util.project" }, -- ahmedkhalf/project.nvim
+
+    -- ============================================================
+    -- 自前プラグイン（lua/plugins/*.lua）— 上書きが効くよう最後に
+    -- ============================================================
     { import = "plugins" },
   },
   defaults = {
