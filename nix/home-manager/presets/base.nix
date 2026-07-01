@@ -10,6 +10,7 @@
     fzf
     ghq
     ripgrep
+    rumdl # markdown linter & formatter (nvim の markdown LSP)
     yazi
   ];
 
