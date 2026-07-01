@@ -1,8 +1,8 @@
 name: 'Bot: Update AI agent inputs'
 
-# AI エージェント/スキル系の flake input を毎日更新して PR を作る。
-# これらは更新が速い（claude-code は毎日のようにリリース）ので高頻度で追従する。
-# マージは人が確認して行う。
+# AI エージェント/スキル系の flake input を毎日更新。
+# 更新が速い（claude-code は毎日のようにリリース）ので高頻度で追従する。
+# Linux home 構成のビルドで検証してから PR を作り、自動マージする。
 
 on:
   schedule:
@@ -39,18 +39,32 @@ jobs:
             vercel-next-skills \
             vercel-skills
 
+      # 自動マージの安全弁: 更新後の inputs で Linux home 構成が実際にビルドできるか検証。
+      # 失敗すればここで止まり PR を作らない（壊れた更新が main に入らない）。
+      - name: Validate (build linux home config)
+        run: nix build --no-link '.#homeConfigurations."nosuke@linux-x86_64".activationPackage'
+
       - name: Create Pull Request
+        id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
           commit-message: 'chore(nix): update AI agent inputs'
           title: 'chore(nix): update AI agent inputs'
           body: |
-            AI エージェント / スキル系 flake input の更新（毎日）。
+            AI エージェント / スキル系 flake input の更新（毎日・ビルド検証済み）。
             llm-agents (claude-code / codex 等) / agent-browser / *-skills。
 
-            マージ後、各マシンで `git pull` して切替を実行してください。
-
-            _このPRは update-flake-ai ワークフローが自動生成しました。_
+            _このPRは update-flake-ai ワークフローが自動生成し、自動マージされます。_
           branch: chore/update-flake-ai
           delete-branch: true
           labels: dependencies,automated
+
+      # 検証を通っているので自動マージ。必須チェックが無い場合は即マージにフォールバック。
+      - name: Auto-merge
+        if: steps.cpr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pr="${{ steps.cpr.outputs.pull-request-number }}"
+          gh pr merge --auto --squash --delete-branch "$pr" \
+            || gh pr merge --squash --delete-branch "$pr"
