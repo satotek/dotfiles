@@ -1,8 +1,8 @@
 name: 'Bot: Update stable inputs'
 
 # 基盤系の flake input を3日おきに更新して PR を作る。
-# nixpkgs 等は当日リリースが壊れていることがあるので、頻度を落として安定重視。
-# （AI 系は update-flake-ai.yml が毎日担当。ここでは触らない）
+# ただし「リリースから3日以上経った版」だけを取り込む age gate 付き。
+# nixpkgs 等の当日リリースが壊れているリスクを避けるため（AI系は update-flake-ai.yml が毎日担当）。
 # マージは人が確認して行う。
 
 on:
@@ -13,6 +13,9 @@ on:
 permissions:
   contents: write
   pull-requests: write
+
+env:
+  MIN_AGE_DAYS: '3' # これより新しい版は取り込まない（当日事故回避）
 
 jobs:
   update:
@@ -27,8 +30,29 @@ jobs:
       - name: Nix build cache
         uses: DeterminateSystems/magic-nix-cache-action@main
 
-      - name: Update stable flake inputs
-        run: nix flake update nixpkgs nix-darwin home-manager
+      # input を1つずつ更新し、locked.lastModified が MIN_AGE_DAYS 未満なら差し戻す。
+      # git checkout -- flake.lock はインデックス(=採用済みの良い更新)へ戻すので、
+      # 若すぎる input だけを個別に巻き戻せる。
+      - name: Update stable inputs (only versions older than MIN_AGE_DAYS)
+        run: |
+          set -euo pipefail
+          cutoff=$(( $(date +%s) - MIN_AGE_DAYS * 86400 ))
+          for inp in nixpkgs nix-darwin home-manager; do
+            echo "::group::update $inp"
+            nix flake update "$inp"
+            # root.inputs からノード名を解決（nixpkgs は nixpkgs_2 等に別名化されるため）。
+            node=$(jq -r ".nodes.root.inputs.\"$inp\" | if type==\"array\" then .[-1] else . end" flake.lock)
+            lm=$(jq -r ".nodes.\"$node\".locked.lastModified // 0" flake.lock)
+            if [ "$lm" -gt "$cutoff" ]; then
+              age=$(( ( $(date +%s) - lm ) / 86400 ))
+              echo "$inp: locked版が ${age}日前 (< ${MIN_AGE_DAYS}日) のため差し戻し"
+              git checkout -- flake.lock
+            else
+              echo "$inp: OK (>= ${MIN_AGE_DAYS}日) 採用"
+              git add flake.lock
+            fi
+            echo "::endgroup::"
+          done
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
@@ -36,8 +60,10 @@ jobs:
           commit-message: 'chore(nix): update stable inputs'
           title: 'chore(nix): update stable inputs (nixpkgs/darwin/home-manager)'
           body: |
-            基盤系 flake input の更新（3日おき）: nixpkgs / nix-darwin / home-manager。
+            基盤系 flake input の更新（3日おき・3日以上経った版のみ）:
+            nixpkgs / nix-darwin / home-manager。
 
+            当日リリースの巻き込みを避けるため MIN_AGE_DAYS=3 の age gate を通しています。
             マージ後、各マシンで `git pull` して切替を実行してください。
 
             _このPRは update-flake-stable ワークフローが自動生成しました。_
