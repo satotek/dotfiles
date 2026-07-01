@@ -37,9 +37,6 @@ jobs:
             extra-substituters = https://cache.numtide.com
             extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
 
-      - name: Nix build cache
-        uses: DeterminateSystems/magic-nix-cache-action@main
-
       # input を1つずつ更新し、locked.lastModified が MIN_AGE_DAYS 未満なら差し戻す。
       # git checkout -- flake.lock はインデックス(=採用済みの良い更新)へ戻すので、
       # 若すぎる input だけを個別に巻き戻せる。
