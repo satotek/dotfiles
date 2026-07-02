@@ -31,6 +31,7 @@ require("lazy").setup({
     { import = "lazyvim.plugins.extras.ai.copilot" }, -- zbirenbaum/copilot.lua
 
     -- coding
+    { import = "lazyvim.plugins.extras.coding.mini-surround" }, -- nvim-mini/mini.surround (gs プレフィックス)
     { import = "lazyvim.plugins.extras.coding.yanky" }, -- gbprod/yanky.nvim
 
     -- editor
