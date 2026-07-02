@@ -78,6 +78,10 @@
         system = "x86_64-linux";
         hostname = "nosuke-windows";
       };
+      linuxStko23WSL = import ./nix/hosts/linux/stko23.nix {
+        system = "x86_64-linux";
+        hostname = "stko23-windows";
+      };
       linuxAzureuserX86_64 = import ./nix/hosts/linux/azureuser.nix {
         system = "x86_64-linux";
         hostname = "linux-x86_64";
@@ -152,6 +156,8 @@
       homeConfigurations."nosuke@linux-x86_64" = mkHomeConfiguration linuxNosukeX86_64;
 
       homeConfigurations."nosuke@nosuke-windows" = mkHomeConfiguration linuxNosukeWSL;
+
+      homeConfigurations."stko23@stko23-windows" = mkHomeConfiguration linuxStko23WSL;
 
       homeConfigurations."nosuke@linux-aarch64" = mkHomeConfiguration linuxNosukeAarch64;
 
