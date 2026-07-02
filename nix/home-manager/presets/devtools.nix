@@ -13,6 +13,7 @@
     gh
     go
     gopls
+    lazydocker
     rust-analyzer
     rustc
     tenv # OpenTofu/Terraform 等のバージョンマネージャ。terraform 本体は BSL(unfree)で
