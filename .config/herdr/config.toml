@@ -13,10 +13,14 @@ onboarding = false
 name = "catppuccin"
 
 [keys]
-# tmux と同じ ctrl+a を prefix(leader)にする(herdr のデフォルトは ctrl+b)。
+# prefix(leader)は ctrl+q(herdr のデフォルトは ctrl+b)。
+# ctrl+a は nvim のインクリメント・zsh の行頭移動と干渉するため不採用。
+# ctrl+q は nvim では矩形選択の予備キー(ctrl+v で足りる)、zsh では push-line のみで実質空き。
+# フロー制御(XON)は zsh の NO_FLOW_CONTROL 設定済みなので問題なし。
 # デフォルトで focus_pane_left/down/up/right = prefix+h/j/k/l(hjkl ペイン移動)、
 # zoom=prefix+z など tmux 風なので、prefix を変えるだけで手癖がほぼそのまま使える。
-prefix = "ctrl+a"
+# prefix 2回押しで生の ctrl+q を配下アプリへ素通しできる(tmux の send-prefix 相当・検証済み)。
+prefix = "ctrl+q"
 
 # tmux の bind \ / bind - に寄せて、\ と - の両方を分割に割当。
 # ※ herdr の vertical/horizontal の向きは実機で確認し、逆なら入れ替える。
@@ -26,6 +30,13 @@ split_horizontal = "prefix+minus"
 # lazygit を一時ペインで開く(tmux の popup 相当)。終了で自動的に閉じる。
 [[keys.command]]
 key = "prefix+alt+g"
+type = "pane"
+command = "lazygit"
+
+# alt 併用キーはターミナル依存で不安定なため、alt 無しの代替バインドも用意。
+# (prefix+g は goto、prefix+shift+g は new_worktree で使用済みなので t を使う)
+[[keys.command]]
+key = "prefix+t"
 type = "pane"
 command = "lazygit"
 
