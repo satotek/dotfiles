@@ -102,6 +102,7 @@ style = "bold cyan"
 read_only_style = "bold cyan"
 
 [nodejs]
+disabled = true
 format = "[$symbol]($style) "
 symbol = " "
 style = "green"
