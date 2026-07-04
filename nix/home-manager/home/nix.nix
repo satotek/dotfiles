@@ -14,11 +14,17 @@ let
       if pkgs.stdenv.isDarwin then
         ''
           cd "${dotfilesDir}"
+          # 未管理ファイルと衝突しても、エラーで止めず自動で .hm-bak に退避してから
+          # symlink を張る（standalone HM には declarative オプションが無いので env で指定）。
+          export HOME_MANAGER_BACKUP_EXT="''${HOME_MANAGER_BACKUP_EXT:-hm-bak}"
           exec nix run home-manager/master -- switch --flake ".#$(id -un)@$(scutil --get LocalHostName)" "$@"
         ''
       else
         ''
           cd "${dotfilesDir}"
+          # 未管理ファイルと衝突しても、エラーで止めず自動で .hm-bak に退避してから
+          # symlink を張る（standalone HM には declarative オプションが無いので env で指定）。
+          export HOME_MANAGER_BACKUP_EXT="''${HOME_MANAGER_BACKUP_EXT:-hm-bak}"
           exec nix run home-manager/master -- switch --flake ".#$(id -un)@$(hostname)" "$@"
         '';
   };
