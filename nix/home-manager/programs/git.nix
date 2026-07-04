@@ -98,9 +98,14 @@
         }
       else
         {
-          # azureuser(Linux VM): 1Password が無いので従来どおり store をグローバルに。
-          # Azure DevOps も GitHub もこの store(PAT) で認証する。
-          credential.helper = "store --file ~/.local/state/git/credentials";
+          # azureuser(Linux VM): VM 自身には GitHub の PAT も鍵も置かない(A-strict)。
+          # GitHub は Mac から転送された 1Password の SSH エージェント(ForwardAgent)で
+          # 認証する。そのため 1Password を持つ機(Mac)から SSH した時のみ GitHub 操作可。
+          url."git@github.com:".insteadOf = "https://github.com/";
+
+          # Azure DevOps だけは VM 内で完結させるため従来どおり store(PAT)。
+          # GitHub の平文トークンは VM から無くなる。
+          credential."https://dev.azure.com".helper = "store --file ~/.local/state/git/credentials";
         }
     );
   };
