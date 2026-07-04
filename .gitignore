@@ -11,7 +11,9 @@
 .neoconf.json
 
 # Local secrets
-secrets
+secrets/*
+!secrets/.gitkeep
+!secrets/*.yaml
 
 # Zsh session files
 .zsh_sessions/

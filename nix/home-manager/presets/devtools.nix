@@ -8,6 +8,7 @@
       azure-cli.extensions.ssh
       azure-cli.extensions.account
     ])
+    age
     cargo
     ffmpeg
     gh
@@ -16,6 +17,7 @@
     lazydocker
     rust-analyzer
     rustc
+    sops
     tenv # OpenTofu/Terraform 等のバージョンマネージャ。terraform 本体は BSL(unfree)で
     # nixpkgs だと毎回 go build されるため、tenv 経由で公式ビルド済みバイナリを使う。
   ];
