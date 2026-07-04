@@ -24,6 +24,11 @@
   ];
 
   programs.zsh.enable = true;
+  # Home Manager 側の zshrc が compinit をキャッシュ付きで遅延実行するので、
+  # /etc/zshrc の同期 compinit（毎起動フルスキャン）とプロンプト初期化は無効化する
+  programs.zsh.enableGlobalCompInit = false;
+  programs.zsh.enableBashCompletion = false;
+  programs.zsh.promptInit = "";
 
   system.configurationRevision = self.rev or self.dirtyRev or null;
   system.primaryUser = username;
