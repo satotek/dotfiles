@@ -86,7 +86,7 @@ macOS is split into two layers:
 First apply:
 
 ```bash
-git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
+git clone https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 # System layer
 sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake "path:$PWD#nosuke-M5-MBP"
@@ -106,7 +106,7 @@ darwin-switch  # system layer (sudo) — only when casks/fonts/macOS settings ch
 `nosuke`:
 
 ```bash
-git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
+git clone https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 NIX_CONFIG='experimental-features = nix-command flakes' \
 nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-x86_64"
@@ -115,7 +115,7 @@ nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-
 `azureuser`:
 
 ```bash
-git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
+git clone https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 NIX_CONFIG='experimental-features = nix-command flakes' \
 nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@linux-x86_64"
@@ -126,7 +126,7 @@ nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@lin
 `nosuke`:
 
 ```bash
-git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
+git clone https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 NIX_CONFIG='experimental-features = nix-command flakes' \
 nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-aarch64"
@@ -135,7 +135,7 @@ nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-
 `azureuser`:
 
 ```bash
-git clone --recursive https://github.com/satotek/dotfiles.git ~/dotfiles
+git clone https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 NIX_CONFIG='experimental-features = nix-command flakes' \
 nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@linux-aarch64"
