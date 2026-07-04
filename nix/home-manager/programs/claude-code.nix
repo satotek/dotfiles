@@ -8,12 +8,83 @@ let
       jq -r 'def bar(pct):(pct*10/100|floor) as $f|(10-$f) as $e|([range($f)]|map("█")|join(""))+([range($e)]|map("░")|join("")); (.rate_limits.five_hour.resets_at // 0) as $resets | (if ($resets > 0) and (($resets - now) > 0) then ($resets - now | floor) as $d | " (+" + ($d/3600|floor|tostring) + "h" + ($d%3600/60|floor|tostring) + "m)" else "" end) as $rt | "5h " + bar(.rate_limits.five_hour.used_percentage // 0) + " " + (.rate_limits.five_hour.used_percentage // 0 | floor | tostring) + "%" + $rt + " | 7d " + bar(.rate_limits.seven_day.used_percentage // 0) + " " + (.rate_limits.seven_day.used_percentage // 0 | floor | tostring) + "% | $" + (.cost.total_cost_usd // 0 | . * 100 | round | . / 100 | tostring)'
     '';
   };
+
+  # ccstatusline の行構成。1行目=モデル/コンテキスト/git、3行目=レート上限バー+コスト。
+  # commandPath は nix store の絶対パスにして全ホスト(azureuser 含む)で有効にする。
+  # 空の 2 行目は ccstatusline が畳むため、実表示は 2 行になる。
+  ccstatuslineSettings = {
+    version = 3;
+    lines = [
+      [
+        {
+          id = "1";
+          type = "model";
+          color = "cyan";
+        }
+        {
+          id = "2";
+          type = "separator";
+        }
+        {
+          id = "3";
+          type = "context-length";
+          color = "brightBlack";
+        }
+        {
+          id = "4";
+          type = "separator";
+        }
+        {
+          id = "5";
+          type = "git-branch";
+          color = "magenta";
+        }
+        {
+          id = "6";
+          type = "separator";
+        }
+        {
+          id = "7";
+          type = "git-changes";
+          color = "yellow";
+        }
+      ]
+      [ ]
+      [
+        {
+          id = "8";
+          type = "custom-command";
+          commandPath = "${claudeStatuslineLine3}/bin/claude-statusline-line3";
+          preserveColors = true;
+        }
+      ]
+    ];
+    flexMode = "full-minus-40";
+    compactThreshold = 60;
+    colorLevel = 2;
+    inheritSeparatorColors = false;
+    globalBold = false;
+    gitCacheTtlSeconds = 5;
+    minimalistMode = false;
+    powerline = {
+      enabled = false;
+      separators = [ "" ];
+      separatorInvertBackground = [ false ];
+      startCaps = [ ];
+      endCaps = [ ];
+      autoAlign = false;
+      continueThemeAcrossLines = false;
+    };
+  };
 in
 {
   home.file.".local/bin/claude-statusline-line3" = {
     source = "${claudeStatuslineLine3}/bin/claude-statusline-line3";
     executable = true;
   };
+
+  # ccstatusline 設定を home-manager 管理下に（スクリプトと配線をセットで再現可能にする）。
+  home.file.".config/ccstatusline/settings.json".text = builtins.toJSON ccstatuslineSettings;
 
   # statusLine.command は nix store の絶対パス参照なので PATH には入らない。
   # 設定 TUI（ccstatusline コマンド）を手動起動できるよう PATH にも追加する。
