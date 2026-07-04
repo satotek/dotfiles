@@ -6,6 +6,5 @@
     ./home/migrations.nix
     ./home/shell.nix
     ./home/directories.nix
-    ./programs/sops.nix
   ];
 }
