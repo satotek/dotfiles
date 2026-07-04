@@ -15,6 +15,10 @@ in
     executable = true;
   };
 
+  # statusLine.command は nix store の絶対パス参照なので PATH には入らない。
+  # 設定 TUI（ccstatusline コマンド）を手動起動できるよう PATH にも追加する。
+  home.packages = [ pkgs.llm-agents.ccstatusline ];
+
   programs.claude-code = {
     enable = true;
     package = pkgs.llm-agents.claude-code;
@@ -27,6 +31,12 @@ in
       model = "claude-opus-4-8";
       effortLevel = "high";
       fastMode = false;
+      # AskUserQuestion(選択肢プロンプト)の自動タイムアウト。
+      # settings キーの askUserQuestionTimeout は 60s/5m/10m/never の固定値のみ（最大10分）なので、
+      # 1時間にするには env の CLAUDE_AFK_TIMEOUT_MS（ミリ秒）を使う。要 v2.1.198+。
+      env = {
+        CLAUDE_AFK_TIMEOUT_MS = "3600000";
+      };
       permissions.allow = [
         "Bash(pnpm typecheck)"
         "Bash(pnpm test)"
