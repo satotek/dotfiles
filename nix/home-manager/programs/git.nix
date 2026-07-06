@@ -99,9 +99,14 @@
       else
         {
           # azureuser(Linux VM): VM 自身には GitHub の PAT も鍵も置かない(A-strict)。
-          # GitHub は Mac から転送された 1Password の SSH エージェント(ForwardAgent)で
-          # 認証する。そのため 1Password を持つ機(Mac)から SSH した時のみ GitHub 操作可。
-          url."git@github.com:".insteadOf = "https://github.com/";
+          # 書き込み(push)だけ Mac から転送された 1Password の SSH エージェント(ForwardAgent)
+          # で認証する。そのため push は 1Password を持つ機(Mac)から SSH した時のみ可。
+          #
+          # fetch/clone は insteadOf ではなく pushInsteadOf にして https のまま残す。
+          # こうすると public リポジトリは鍵なしの匿名 https で pull でき、Mac 以外の
+          # 使い捨て環境でも dotfiles の更新や nvim(lazy.nvim)のプラグイン取得が通る。
+          # (insteadOf だと fetch まで SSH 化され、鍵ゼロの VM ではプラグイン更新まで全滅する)
+          url."git@github.com:".pushInsteadOf = "https://github.com/";
 
           # Azure DevOps だけは VM 内で完結させるため従来どおり store(PAT)。
           # GitHub の平文トークンは VM から無くなる。
