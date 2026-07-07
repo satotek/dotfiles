@@ -6,6 +6,10 @@
 }:
 let
   homeDir = config.home.homeDirectory;
+  context7ApiKeyFile = "${homeDir}/.config/context7/api-key";
+  sharedMcpServers = import ../data/mcp-servers.nix {
+    inherit context7ApiKeyFile;
+  };
   trustedProjectRoots = [
     "${homeDir}/ghq"
     "${homeDir}/workspaces"
@@ -24,13 +28,12 @@ let
 
     tui.status_line = [
       "model-with-reasoning"
-      "approval-mode"
-      "project-root"
-      "context-remaining"
-      "git-branch"
+      "context-used"
       "five-hour-limit"
       "weekly-limit"
+      "git-branch"
     ];
+    tui.status_line_use_colors = true;
     tui.alternate_screen = "never";
 
     # model setting
@@ -43,16 +46,16 @@ let
     approval_policy = "on-request";
     approvals_reviewer = "auto_review";
     features.guardian_approval = true;
+    features.memories = true;
     sandbox_mode = "workspace-write";
     sandbox_workspace_write.writable_roots = [
       "/tmp"
-      "/var/cache"
     ];
     sandbox_workspace_write.network_access = true;
 
     # 共有 MCP サーバー定義（Claude Code と共通: ../data/mcp-servers.nix）。
     # TOML では [mcp_servers.<name>] テーブルとして出力される。
-    mcp_servers = import ../data/mcp-servers.nix;
+    mcp_servers = sharedMcpServers;
 
     plugins = {
       "computer-use@openai-bundled".enabled = false;
@@ -121,10 +124,18 @@ in
   home.activation.generateCodexConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     codex_dir="${homeDir}/.codex"
     output="$codex_dir/config.toml"
+    hooks_state_file="$(mktemp)"
 
     mkdir -p "$codex_dir"
     if [ -L "$output" ]; then
       rm -f "$output"
+    fi
+
+    if [ -f "$output" ]; then
+      awk '
+        /^\[hooks\.state\]/ { keep = 1 }
+        keep { print }
+      ' "$output" > "$hooks_state_file"
     fi
 
     cp -f ${lib.escapeShellArg baseConfigFile} "$output"
@@ -157,5 +168,11 @@ in
     for project in ${extraTrustedProjectsScript}; do
       append_trusted_project "$project"
     done
+
+    if [ -s "$hooks_state_file" ]; then
+      printf '\n' >> "$output"
+      cat "$hooks_state_file" >> "$output"
+    fi
+    rm -f "$hooks_state_file"
   '';
 }

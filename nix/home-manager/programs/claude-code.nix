@@ -1,6 +1,15 @@
-{ pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 let
-  sharedMcpServers = import ../data/mcp-servers.nix;
+  homeDir = config.home.homeDirectory;
+  context7ApiKeyFile = "${homeDir}/.config/context7/api-key";
+  sharedMcpServers = import ../data/mcp-servers.nix {
+    inherit context7ApiKeyFile;
+  };
   claudeStatuslineLine3 = pkgs.writeShellApplication {
     name = "claude-statusline-line3";
     runtimeInputs = [ pkgs.jq ];
@@ -143,7 +152,14 @@ in
     };
 
     # 共有定義（../data/mcp-servers.nix）に Claude 固有の type = "stdio" を付与。
-    mcpServers = lib.mapAttrs (_name: server: { type = "stdio"; } // server) sharedMcpServers;
+    # Codex は Claude Code から専門エージェントとして呼ぶため、Claude 専用に追加する。
+    mcpServers = (lib.mapAttrs (_name: server: { type = "stdio"; } // server) sharedMcpServers) // {
+      codex = {
+        type = "stdio";
+        command = "codex";
+        args = [ "mcp-server" ];
+      };
+    };
 
   };
 }
