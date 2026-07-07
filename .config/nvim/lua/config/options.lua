@@ -1,7 +1,13 @@
 -- Options are automatically loaded before lazy.nvim startup
 -- Default options that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
 -- Add any additional options here
-vim.opt.swapfile = false
+-- swap を有効化して crash recovery を確保する（VM の突然停止対策）。
+-- 実ファイルは書き換えないので auto-save のような保存時副作用は出ない。
+-- swap の保存先はデフォルトの stdpath("state")/swap// に集約されるため、
+-- 編集対象の隣に .swp は散らからない。
+vim.opt.swapfile = true
+-- swap をディスクへ書き出す間隔を短縮（既定 4000ms）。突然死時のロスを最小化。
+vim.opt.updatetime = 250
 vim.opt.autoread = true
 vim.opt.mouse = "a"
 
