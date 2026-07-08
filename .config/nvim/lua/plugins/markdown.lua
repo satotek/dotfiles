@@ -1,5 +1,5 @@
 return {
-    {
+  {
     "iamcco/markdown-preview.nvim",
     cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
     ft = { "markdown" },
@@ -26,5 +26,15 @@ return {
       end
       -- ローカル(Mac/GUI)は既定のまま: <leader>cp で手元ブラウザが開く
     end,
-    }
+  },
+  {
+    "MeanderingProgrammer/render-markdown.nvim",
+    opts = {
+      html = {
+        comment = {
+          conceal = false,
+        },
+      },
+    },
+  },
 }
