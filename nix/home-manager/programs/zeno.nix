@@ -4,6 +4,5 @@ let
   dotfilesDir = "${homeDirectory}/dotfiles";
 in
 {
-  xdg.configFile."zeno".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/.config/zeno";
+  xdg.configFile."zeno".source = config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/.config/zeno";
 }

@@ -97,6 +97,11 @@
         system = "x86_64-linux";
         hostname = "gem-ai";
       };
+      formatterSystems = [
+        darwinSystem
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
       mkPkgs =
         system:
         import nixpkgs {
@@ -134,7 +139,7 @@
         };
     in
     {
-      formatter.${darwinSystem} = (mkPkgs darwinSystem).nixfmt-rfc-style;
+      formatter = nixpkgs.lib.genAttrs formatterSystems (system: (mkPkgs system).nixfmt-tree);
 
       darwinConfigurations.${darwinHostname} = import ./nix/hosts/darwin {
         inherit inputs self;

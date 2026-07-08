@@ -1,4 +1,6 @@
-{ context7ApiKeyFile ? null }:
+{
+  context7ApiKeyFile ? null,
+}:
 
 # 共有 MCP サーバー定義（純データ）。
 # Claude Code (settings.json の mcpServers) と Codex (config.toml の [mcp_servers])

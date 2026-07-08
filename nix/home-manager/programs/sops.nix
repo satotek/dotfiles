@@ -23,7 +23,8 @@ in
         key = "cloudflare_infra_env";
         path = "${config.home.homeDirectory}/.config/cloudflare/cloudflare-infra.env";
       };
-    } // lib.optionalAttrs hasContext7SopsFile {
+    }
+    // lib.optionalAttrs hasContext7SopsFile {
       "context7-api-key" = {
         sopsFile = context7SopsFile;
         key = "context7_api_key";

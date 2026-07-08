@@ -132,7 +132,7 @@ in
     fi
 
     if [ -f "$output" ]; then
-      awk '
+      ${pkgs.gawk}/bin/awk '
         /^\[hooks\.state\]/ { keep = 1 }
         keep { print }
       ' "$output" > "$hooks_state_file"

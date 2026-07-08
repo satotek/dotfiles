@@ -1,4 +1,7 @@
-{ system, hostname ? system }:
+{
+  system,
+  hostname ? system,
+}:
 {
   inherit system hostname;
   userName = "stko23";

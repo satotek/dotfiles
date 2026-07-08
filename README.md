@@ -178,18 +178,22 @@ cp ~/dotfiles/.config/zsh.local.example ~/.config/zsh.local
 
 Secrets:
 
-```bash
-export AZURE_OPENAI_API_KEY='your_api_key'
-export OTHER_SECRET='...'
-```
+Secrets that should be managed by this repo live under `secrets/*.yaml` and are encrypted with `sops` / `age`.
+Home Manager reads the age key from `~/.config/sops/age/keys.txt` and materializes the configured secrets at switch time.
 
-You can also keep them in `~/.config/secrets`.
+Currently managed secrets:
+
+- `secrets/cloudflare.yaml` -> `~/.config/cloudflare/cloudflare-infra.env`
+- `secrets/context7.yaml` -> `~/.config/context7/api-key` when the file exists
+
+Local-only shell secrets that should not be repo-managed can still be kept in `~/.config/secrets`.
 
 ## Files intentionally kept out of git
 
 - `~/.config/git.local`
 - `~/.config/zsh.local`
 - `~/.config/secrets`
+- `~/.config/sops/age/keys.txt`
 - `$XDG_CACHE_HOME/zsh/.zcompdump`
 
 ## Repository layout
