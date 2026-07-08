@@ -64,10 +64,10 @@
       # Linux VM(azureuser) にはそれが無いので従来どおり store を使う。
       if pkgs.stdenv.isDarwin then
         {
-          # GitHub: https の remote を push/fetch 時に git@ へ自動書き換え。
-          # SSH は 1Password エージェントが鍵を出すため credential helper を通らず、
-          # GitHub トークンの平文保存が無くなる。
-          url."git@github.com:".insteadOf = "https://github.com/";
+          # GitHub: push だけ SSH 化する。fetch/clone は HTTPS のままにして、
+          # lazy.nvim など public repo を読むツールが SSH port 22 に依存しないようにする。
+          # private repo は最初から git@github.com:owner/repo.git で clone する。
+          url."git@github.com:".pushInsteadOf = "https://github.com/";
 
           # Azure DevOps だけ store(PAT)。先頭の空 helper で system の
           # osxkeychain 継承をこの URL 用にリセットし、store のみを使わせる。
@@ -102,10 +102,10 @@
           # SSH 秘密鍵(~/.ssh/id_ed25519)を置く。公開鍵は GitHub の SSH keys に登録済み。
           # これにより push も private repo の fetch/clone も VM 内で完結する。
           #
-          # push/fetch 両方を SSH 化するため insteadOf を使う(pushInsteadOf ではない)。
-          # 以前は「VM に秘密を残さない(A-strict)」方針で pushInsteadOf にし fetch を匿名
-          # https のまま残していたが、常用機化に伴い鍵をディスクに置く判断へ変更した。
-          url."git@github.com:".insteadOf = "https://github.com/";
+          # GitHub: push だけ SSH 化する。fetch/clone は HTTPS のままにして、
+          # lazy.nvim など public repo を読むツールが SSH port 22 に依存しないようにする。
+          # private repo は最初から git@github.com:owner/repo.git で cloneする。
+          url."git@github.com:".pushInsteadOf = "https://github.com/";
 
           # Azure DevOps だけは VM 内で完結させるため従来どおり store(PAT)。
           # GitHub の平文トークンは VM から無くなる。

@@ -3,10 +3,10 @@ return {
     "iamcco/markdown-preview.nvim",
     cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
     ft = { "markdown" },
-    -- 既定の mkdp#util#install は yarn 前提で、yarn 未導入の環境ではビルドに失敗し
-    -- app/node_modules が作られず "Cannot find module 'tslib'" になる。
-    -- npm(nix経由で導入済み)で app 依存を入れるビルドに変更して環境非依存にする。
-    build = "cd app && npm install",
+    -- upstream は Yarn v1 の yarn.lock を持っているため、npm install だと plugin checkout
+    -- 内の lockfile が書き換わり lazy.nvim の更新が止まる。Node 同梱の corepack で
+    -- Yarn v1 を明示して、Home Manager に yarn 本体は増やさない。
+    build = "cd app && corepack yarn@1.22.22 install --frozen-lockfile",
     init = function()
       -- リモート(SSH/ヘッドレス)判定: SSH接続あり、または Linux で GUI(DISPLAY)無し
       local is_remote = vim.env.SSH_CONNECTION ~= nil
