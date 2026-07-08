@@ -10,6 +10,7 @@
     ../../home-manager/platforms/linux.nix
     ../../home-manager/presets/base.nix
     ../../home-manager/presets/devtools.nix
+    ../../home-manager/presets/rust.nix
     ../../home-manager/presets/webdevtools.nix
   ];
 }
