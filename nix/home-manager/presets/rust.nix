@@ -1,16 +1,17 @@
 { lib, pkgs, ... }:
+let
+  rustSrcPath = "${pkgs.rustPlatform.rustLibSrc}";
+in
 {
   home.sessionVariables = {
-    RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
+    RUST_SRC_PATH = rustSrcPath;
   };
 
-  home.file = lib.mkIf pkgs.stdenv.isDarwin {
-    "Library/Application Support/Code/User/settings.json".text = builtins.toJSON {
-      "rust-analyzer.server.extraEnv" = {
-        RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
-      };
-    };
-  };
+  home.activation.setRustSrcPathForLaunchd = lib.mkIf pkgs.stdenv.isDarwin (
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      /bin/launchctl setenv RUST_SRC_PATH ${lib.escapeShellArg rustSrcPath}
+    ''
+  );
 
   home.packages = with pkgs; [
     cargo
