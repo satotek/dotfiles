@@ -2,9 +2,17 @@
 return {
   "stevearc/oil.nvim",
   version = "*",
-  -- oil replaces netrw, so it must be available the moment nvim opens a
-  -- directory (e.g. `nvim .`). Lazy-loading via `keys` alone would miss that.
-  lazy = false,
+  lazy = true,
+  cmd = { "Oil" },
+  init = function()
+    local path = vim.fn.expand("%:p")
+    local is_dir = vim.fn.isdirectory(path) == 1
+    local is_oil_path = path:find("^oil://") or path:find("^oil%-ssh://") or path:find("^oil%-trash://")
+
+    if is_dir or is_oil_path then
+      require("oil")
+    end
+  end,
   -- no `dependencies`: LazyVim already loads mini.icons, and oil auto-detects it
   keys = {
     { "-", "<cmd>Oil<cr>", desc = "Open parent directory (oil)" },

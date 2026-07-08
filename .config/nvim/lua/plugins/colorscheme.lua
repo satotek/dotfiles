@@ -2,6 +2,7 @@ return {
   -- kanagawa（併用: 棚に残す。:colorscheme kanagawa で切替可）
   {
     "rebelot/kanagawa.nvim",
+    lazy = true,
     opts = {
       transparent = true,
       theme = "wave", -- wave, dragon, lotus
