@@ -1,0 +1,5 @@
+# hunk (modem-dev/hunk) の設定。TOML。
+# 他フレーバー: catppuccin-macchiato / catppuccin-frappe / catppuccin-latte(ライト)。
+# アプリ内テーマ選択(t キー)での変更もこのファイルに直接反映される(可変 symlink のため)。
+theme = "catppuccin-mocha"
+watch = true

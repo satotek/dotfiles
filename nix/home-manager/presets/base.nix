@@ -23,6 +23,7 @@
     ../programs/ghostty.nix
     ../programs/git.nix
     ../programs/herdr.nix
+    ../programs/hunk.nix
     ../programs/lazygit.nix
     ../programs/nvim.nix
     ../programs/sheldon.nix
