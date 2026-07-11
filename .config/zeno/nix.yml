@@ -1,3 +1,8 @@
+history:
+  fzfCommand: fzf
+  fzfOptions:
+    - "--"
+
 snippets:
   # nix switch (home layer, no sudo)
   - name: nix switch

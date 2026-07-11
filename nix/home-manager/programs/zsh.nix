@@ -51,6 +51,7 @@ in
         export ZENO_DISABLE_EXECUTE_CACHE_COMMAND=1
         export ZENO_GIT_CAT="bat --color=always"
         export ZENO_GIT_TREE="eza --tree"
+        export FZF_DEFAULT_OPTS="--extended --cycle --select-1 --height 40% --reverse --border"
 
         ensure_zcompiled() {
           local src="$1"
@@ -78,10 +79,46 @@ in
         zstyle ':completion:*' group-name ""
         zstyle ':completion:*:default' menu select=2
 
-        cghq() {
-          local dir
-          dir="$(ghq list -p 2>/dev/null | fzf --height 40% --reverse)" || return
-          [[ -n "$dir" ]] && cd "$dir"
+        _ghq_roots_widget() {
+          local selected
+          selected="$(ghq list --full-path | roots | fzf \
+            --height 40% \
+            --reverse \
+            --border \
+            --cycle \
+            --select-1 \
+            --preview 'eza --tree --level=2 --git-ignore --color=always --icons {} 2>/dev/null || ls -A -- {}')"
+          [[ -n "$selected" ]] && cd -- "$selected"
+          zle reset-prompt
+        }
+
+        _fkill_widget() {
+          local pid
+          pid="$(ps ax -o pid,time,command | fzf --prompt 'Kill> ' --query "$LBUFFER" | awk '{print $1}')" || {
+            zle reset-prompt
+            return
+          }
+          [[ -n "$pid" && "$pid" != "PID" ]] && kill "$pid"
+          zle reset-prompt
+        }
+
+        _git_switch_branch_widget() {
+          if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+            zle -M "Not in a Git repository"
+            return
+          fi
+
+          local branch
+          branch="$(git branch -a --format='%(refname:short) %(symref)' | \
+            awk 'NF == 1 { print $1 }' | \
+            sed 's|^origin/||' | \
+            sort -u | \
+            fzf --prompt 'Switch to branch: ')" || {
+            zle reset-prompt
+            return
+          }
+          [[ -n "$branch" ]] && git switch "$branch"
+          zle reset-prompt
         }
 
         # vm への動的ポートフォワード (VS Code 風)。~/.ssh/config の ControlMaster 接続へ
@@ -150,6 +187,13 @@ in
           bindkey '^x^s' zeno-insert-snippet
           bindkey '^x^f' zeno-snippet-next-placeholder
         fi
+
+        zle -N ghq-roots-widget _ghq_roots_widget
+        bindkey '^g' ghq-roots-widget
+        zle -N fkill-widget _fkill_widget
+        bindkey '^x^k' fkill-widget
+        zle -N git-switch-branch-widget _git_switch_branch_widget
+        bindkey '^b' git-switch-branch-widget
 
         _deferred_compinit() {
           autoload -Uz compinit
