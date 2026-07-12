@@ -1,8 +1,9 @@
 ---@type LazySpec
 return {
-  "satotek/vim-bad-apple",
-  dependencies = {
-    "vim-denops/denops.vim",
+  "satotek/bad-apple.nvim",
+  cmd = {
+    "BadApple",
+    "BadApplePlay",
   },
-  event = "VeryLazy",
+  config = true,
 }

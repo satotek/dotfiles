@@ -91,12 +91,22 @@
 
 | キー / コマンド | 用途 |
 |---|---|
-| `-` | Oil で親ディレクトリを開く |
-| `<leader>o` | Oil を開く |
-| `:Oil` | Oil を開く |
-| `nvim .` | Oil でカレントディレクトリを開く |
+| `<leader>e` | Snacks Explorer を開く |
+| `nvim .` | Snacks Explorer でカレントディレクトリを開く |
+| Explorer で `a` | ファイルまたはディレクトリを作成 |
+| Explorer で `r` | rename |
+| Explorer で `d` | 削除 |
+| Explorer で `c` / `m` | copy / move |
 
-Oil はファイル一覧を普通のバッファのように編集し、`:w` で rename / move / delete / create を反映する。
+## Terminal
+
+汎用 terminal は ToggleTerm を使う。Snacks Terminal の標準キーは無効化している。
+
+| キー | 用途 |
+|---|---|
+| `<C-/>` | floating terminal を開閉 |
+| Terminal で `Ctrl-\` → `Ctrl-N` | Terminal mode から Normal mode へ移動 |
+| Normal mode で `i` | Terminal mode へ戻る |
 
 ## Snacks / Picker 系
 
@@ -113,7 +123,8 @@ LazyVim の picker は Snacks を使う。
 | Explorer で `H` | hidden files toggle |
 | Explorer で `I` | ignored files toggle |
 
-Explorer は初期状態で hidden files を表示し、ignored files は非表示にしている。`H` / `I` は開いている Explorer インスタンスの一時 toggle。
+Explorer は初期状態で hidden files を表示し、ignored files は非表示にしている。
+`H` / `I` は開いている Explorer インスタンスの一時 toggle。
 
 ## LSP
 
