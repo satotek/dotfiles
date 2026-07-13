@@ -1,34 +1,63 @@
 {
   config,
-  inputs,
   lib,
+  pkgs,
   ...
 }:
 let
   secretsDir = ../../../secrets;
+  cloudflareSopsFile = "${secretsDir}/cloudflare.yaml";
   context7SopsFile = "${secretsDir}/context7.yaml";
   hasContext7SopsFile = builtins.pathExists context7SopsFile;
+
+  secrets = [
+    {
+      key = "cloudflare_infra_env";
+      sopsFile = cloudflareSopsFile;
+      target = "${config.home.homeDirectory}/.config/cloudflare/cloudflare-infra.env";
+    }
+  ]
+  ++ lib.optional hasContext7SopsFile {
+    key = "context7_api_key";
+    sopsFile = context7SopsFile;
+    target = "${config.home.homeDirectory}/.config/context7/api-key";
+  };
+
+  installSecret = secret: ''
+    decrypt_secret \
+      ${lib.escapeShellArg (toString secret.sopsFile)} \
+      ${lib.escapeShellArg secret.key} \
+      ${lib.escapeShellArg secret.target}
+  '';
 in
 {
-  imports = [
-    inputs.sops-nix.homeManagerModules.sops
-  ];
+  # sops-nix requires an Age, GPG, or SSH key source even when the encrypted
+  # files use only GCP KMS. Decrypt directly during activation so ADC is the
+  # sole credential source.
+  home.activation.decryptSopsSecrets = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    decrypt_secret() {
+      sops_file="$1"
+      key="$2"
+      target="$3"
+      target_dir="$(${pkgs.coreutils}/bin/dirname "$target")"
 
-  sops = {
-    defaultSopsFile = ../../../secrets/cloudflare.yaml;
+      ${pkgs.coreutils}/bin/install -d -m 0700 "$target_dir"
+      tmp="$(${pkgs.coreutils}/bin/mktemp "$target_dir/.sops.XXXXXX")"
 
-    secrets = {
-      cloudflare-infra-env = {
-        key = "cloudflare_infra_env";
-        path = "${config.home.homeDirectory}/.config/cloudflare/cloudflare-infra.env";
-      };
+      if ! ${pkgs.sops}/bin/sops \
+        --decrypt \
+        --extract "[\"$key\"]" \
+        --output "$tmp" \
+        "$sops_file"; then
+        ${pkgs.coreutils}/bin/rm -f "$tmp"
+        return 1
+      fi
+
+      ${pkgs.coreutils}/bin/chmod 0600 "$tmp"
+      ${pkgs.coreutils}/bin/mv -f "$tmp" "$target"
     }
-    // lib.optionalAttrs hasContext7SopsFile {
-      "context7-api-key" = {
-        sopsFile = context7SopsFile;
-        key = "context7_api_key";
-        path = "${config.home.homeDirectory}/.config/context7/api-key";
-      };
-    };
-  };
+
+    umask 077
+    ${lib.concatMapStringsSep "\n" installSecret secrets}
+  '';
 }

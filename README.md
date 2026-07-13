@@ -204,11 +204,10 @@ Currently managed secrets:
 - `secrets/context7.yaml` -> `~/.config/context7/api-key` when the file exists
 
 Existing encrypted files do not gain a new KMS recipient merely by changing
-`.sops.yaml`; rewrap them on a machine that can already decrypt the file. The
-Cloudflare secret still needs this one-time operation on macOS:
+`.sops.yaml`; rewrap them on a machine that can already decrypt the file:
 
 ```bash
-sops updatekeys secrets/cloudflare.yaml
+sops updatekeys secrets/*.yaml
 ```
 
 At present, `nix/home-manager/programs/sops.nix` is imported only on macOS
