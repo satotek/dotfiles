@@ -99,13 +99,16 @@
         "x86_64-linux"
         "aarch64-linux"
       ];
+      llmAgentsOverlay = final: _prev: {
+        llm-agents = inputs.llm-agents.packages.${final.stdenv.hostPlatform.system};
+      };
       mkPkgs =
         system:
         import nixpkgs {
           inherit system;
           config.allowUnfree = true;
           overlays = [
-            inputs.llm-agents.overlays.default
+            llmAgentsOverlay
           ];
         };
       mkHomeConfiguration =
@@ -136,6 +139,8 @@
         };
     in
     {
+      overlays.default = llmAgentsOverlay;
+
       formatter = nixpkgs.lib.genAttrs formatterSystems (system: (mkPkgs system).nixfmt-tree);
 
       darwinConfigurations.${darwinHostname} = import ./nix/hosts/darwin {
