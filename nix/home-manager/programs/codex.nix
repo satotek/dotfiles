@@ -37,8 +37,8 @@ let
     tui.alternate_screen = "never";
 
     # model setting
-    model = "gpt-5.5";
-    model_reasoning_effort = "medium";
+    model = "gpt-5.6-sol";
+    model_reasoning_effort = "low";
     model_reasoning_summary = "auto";
     model_verbosity = "medium";
     service_tier = "default";
