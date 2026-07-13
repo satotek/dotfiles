@@ -22,6 +22,14 @@ name = "catppuccin"
 # prefix 2回押しで生の ctrl+q を配下アプリへ素通しできる(tmux の send-prefix 相当・検証済み)。
 prefix = "ctrl+q"
 
+# エージェント間を prefix+shift+p/n で前後移動する。
+# 競合する既定の rename_pane(prefix+shift+p) と
+# new_workspace(prefix+shift+n) は無効化する。
+previous_agent = "prefix+shift+p"
+next_agent = "prefix+shift+n"
+rename_pane = ""
+new_workspace = ""
+
 # tmux の bind \ / bind - に寄せて、\ と - の両方を分割に割当。
 # ※ herdr の vertical/horizontal の向きは実機で確認し、逆なら入れ替える。
 split_vertical = "prefix+\\"
