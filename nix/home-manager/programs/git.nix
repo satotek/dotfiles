@@ -1,4 +1,29 @@
 { pkgs, lib, ... }:
+let
+  gitSsh = pkgs.writeShellScript "git-ssh" ''
+    for arg in "$@"; do
+      case "$arg" in
+        git@ssh.dev.azure.com|ssh.dev.azure.com)
+          identity="$HOME/.ssh/azure-devops"
+          if [ ! -f "$identity" ]; then
+            identity="$identity.pub"
+          fi
+          if [ ! -f "$identity" ]; then
+            echo "Azure DevOps SSH identity not found: ~/.ssh/azure-devops[.pub]" >&2
+            exit 1
+          fi
+
+          exec ${pkgs.openssh}/bin/ssh \
+            -o IdentitiesOnly=yes \
+            -o IdentityFile="$identity" \
+            "$@"
+          ;;
+      esac
+    done
+
+    exec ${pkgs.openssh}/bin/ssh "$@"
+  '';
+in
 {
   home.packages = [ pkgs.delta ];
 
@@ -29,6 +54,7 @@
         pager = "delta --side-by-side";
         editor = "vim";
         autocrlf = "input";
+        sshCommand = toString gitSsh;
       };
       interactive.diffFilter = "delta --color-only";
       delta = {
@@ -59,26 +85,15 @@
       };
     }
     // (
-      # GitHub と Azure DevOps で認証経路を分ける。
-      # Mac には 1Password の SSH エージェントがあるので GitHub は SSH 化し、
-      # Linux VM(azureuser) にはそれが無いので従来どおり store を使う。
+      # Azure DevOpsは各端末で作った専用RSA鍵をgitSshで選ぶ。
+      # Macの1Password SSH Agentは公開鍵(~/.ssh/azure-devops.pub)、
+      # Linux等は秘密鍵(~/.ssh/azure-devops)をIdentityFileとして使う。
       if pkgs.stdenv.isDarwin then
         {
           # GitHub: push だけ SSH 化する。fetch/clone は HTTPS のままにして、
           # lazy.nvim など public repo を読むツールが SSH port 22 に依存しないようにする。
           # private repo は最初から git@github.com:owner/repo.git で clone する。
           url."git@github.com:".pushInsteadOf = "https://github.com/";
-
-          # Azure DevOps だけ store(PAT)。先頭の空 helper で system の
-          # osxkeychain 継承をこの URL 用にリセットし、store のみを使わせる。
-          # useHttpPath = 組織/リポジトリ単位で別トークンを保存する。
-          credential."https://dev.azure.com" = {
-            helper = [
-              ""
-              "store --file ~/.local/state/git/credentials"
-            ];
-            useHttpPath = true;
-          };
 
           # コミット署名を 1Password の SSH 鍵で行う。秘密鍵はディスクに出ず、
           # 署名のたびに op-ssh-sign が 1Password（Touch ID）に依頼する。
@@ -106,10 +121,6 @@
           # lazy.nvim など public repo を読むツールが SSH port 22 に依存しないようにする。
           # private repo は最初から git@github.com:owner/repo.git で cloneする。
           url."git@github.com:".pushInsteadOf = "https://github.com/";
-
-          # Azure DevOps だけは VM 内で完結させるため従来どおり store(PAT)。
-          # GitHub の平文トークンは VM から無くなる。
-          credential."https://dev.azure.com".helper = "store --file ~/.local/state/git/credentials";
         }
     );
   };

@@ -170,6 +170,27 @@ Edit `~/.config/git.local`:
     email = your@email.com
 ```
 
+Azure DevOps SSH authentication uses a separate RSA key on each machine. Add
+each public key to the Azure DevOps profile, rather than sharing private keys
+through this repository or `sops`.
+
+On a machine that stores the private key locally:
+
+```bash
+ssh-keygen -t rsa -b 3072 -f ~/.ssh/azure-devops -C "Azure DevOps $(hostname)"
+```
+
+On macOS with the 1Password SSH Agent, keep the private key in 1Password and
+save only its public key as `~/.ssh/azure-devops.pub`. Git automatically selects
+`~/.ssh/azure-devops` when a local private key exists, or the `.pub` file when
+the matching private key is supplied by an SSH agent.
+
+Azure Repos remotes use this format:
+
+```text
+git@ssh.dev.azure.com:v3/<organization>/<project>/<repository>
+```
+
 Optional local Zsh overrides:
 
 ```bash
@@ -225,6 +246,8 @@ Local-only shell secrets that should not be repo-managed can still be kept in `~
 ## Files intentionally kept out of git
 
 - `~/.config/git.local`
+- `~/.ssh/azure-devops`
+- `~/.ssh/azure-devops.pub`
 - `~/.config/zsh.local`
 - `~/.config/secrets`
 - `$XDG_CACHE_HOME/zsh/.zcompdump`
