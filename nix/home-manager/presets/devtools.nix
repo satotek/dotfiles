@@ -8,7 +8,6 @@
       azure-cli.extensions.ssh
       azure-cli.extensions.account
     ])
-    age
     ffmpeg
     gh
     go

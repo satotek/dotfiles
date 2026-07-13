@@ -179,19 +179,16 @@ cp ~/dotfiles/.config/zsh.local.example ~/.config/zsh.local
 Secrets:
 
 Secrets that should be managed by this repo live under `secrets/*.yaml` and are
-encrypted with `sops`. The creation rule in `.sops.yaml` wraps new data keys for
-both the existing age recipient and this GCP Cloud KMS key:
+encrypted with `sops`. The creation rule in `.sops.yaml` uses this GCP Cloud
+KMS key:
 
 ```text
 projects/nosuke-net/locations/global/keyRings/sops/cryptoKeys/dotfiles
 ```
 
-Authentication depends on the environment:
-
-- macOS can decrypt with the age key at `~/.config/sops/age/keys.txt`.
-- Other environments can decrypt with GCP Application Default Credentials
-  (ADC). Run `gcloud auth application-default login` once on each machine
-  before using GCP KMS.
+Each environment decrypts with GCP Application Default Credentials (ADC). Run
+`gcloud auth application-default login` once on each machine before using GCP
+KMS.
 
 `google-cloud-sdk` is included in the shared `devtools` preset. The GCP project
 is `nosuke-net`; ADC should use the same quota project:
@@ -206,9 +203,8 @@ Currently managed secrets:
 - `secrets/cloudflare.yaml` -> `~/.config/cloudflare/cloudflare-infra.env`
 - `secrets/context7.yaml` -> `~/.config/context7/api-key` when the file exists
 
-`secrets/context7.yaml` is already wrapped for both age and GCP KMS. Existing
-encrypted files do not gain a new recipient merely by changing `.sops.yaml`;
-rewrap them on a machine that can already decrypt the file. For example, the
+Existing encrypted files do not gain a new KMS recipient merely by changing
+`.sops.yaml`; rewrap them on a machine that can already decrypt the file. The
 Cloudflare secret still needs this one-time operation on macOS:
 
 ```bash
@@ -232,7 +228,6 @@ Local-only shell secrets that should not be repo-managed can still be kept in `~
 - `~/.config/git.local`
 - `~/.config/zsh.local`
 - `~/.config/secrets`
-- `~/.config/sops/age/keys.txt`
 - `$XDG_CACHE_HOME/zsh/.zcompdump`
 
 ## Repository layout

@@ -1,4 +1,3 @@
 creation_rules:
   - path_regex: secrets/.*\.ya?ml$
-    age: age1sq8z2flra4n3lrjt79cwhhyhjhludpqmesxls2yg54fpw9zydqzqm3fkyt
     gcp_kms: projects/nosuke-net/locations/global/keyRings/sops/cryptoKeys/dotfiles
