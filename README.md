@@ -178,13 +178,52 @@ cp ~/dotfiles/.config/zsh.local.example ~/.config/zsh.local
 
 Secrets:
 
-Secrets that should be managed by this repo live under `secrets/*.yaml` and are encrypted with `sops` / `age`.
-Home Manager reads the age key from `~/.config/sops/age/keys.txt` and materializes the configured secrets at switch time.
+Secrets that should be managed by this repo live under `secrets/*.yaml` and are
+encrypted with `sops`. The creation rule in `.sops.yaml` wraps new data keys for
+both the existing age recipient and this GCP Cloud KMS key:
+
+```text
+projects/nosuke-net/locations/global/keyRings/sops/cryptoKeys/dotfiles
+```
+
+Authentication depends on the environment:
+
+- macOS can decrypt with the age key at `~/.config/sops/age/keys.txt`.
+- Other environments can decrypt with GCP Application Default Credentials
+  (ADC). Run `gcloud auth application-default login` once on each machine
+  before using GCP KMS.
+
+`google-cloud-sdk` is included in the shared `devtools` preset. The GCP project
+is `nosuke-net`; ADC should use the same quota project:
+
+```bash
+gcloud config set project nosuke-net
+gcloud auth application-default set-quota-project nosuke-net
+```
 
 Currently managed secrets:
 
 - `secrets/cloudflare.yaml` -> `~/.config/cloudflare/cloudflare-infra.env`
 - `secrets/context7.yaml` -> `~/.config/context7/api-key` when the file exists
+
+`secrets/context7.yaml` is already wrapped for both age and GCP KMS. Existing
+encrypted files do not gain a new recipient merely by changing `.sops.yaml`;
+rewrap them on a machine that can already decrypt the file. For example, the
+Cloudflare secret still needs this one-time operation on macOS:
+
+```bash
+sops updatekeys secrets/cloudflare.yaml
+```
+
+At present, `nix/home-manager/programs/sops.nix` is imported only on macOS
+because the Cloudflare secret is Mac-only. Linux can decrypt the Context7 file
+directly with GCP KMS, but `nix-switch` does not materialize it until the Home
+Manager secret definitions are split into shared Context7 and Mac-only
+Cloudflare parts.
+
+The GCP billing account has a monthly JPY 100 budget for `nosuke-net`, with
+current-spend alerts at 50%, 80%, and 100%. A budget sends notifications; it
+does not cap or stop spending.
 
 Local-only shell secrets that should not be repo-managed can still be kept in `~/.config/secrets`.
 

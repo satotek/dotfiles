@@ -12,6 +12,7 @@
     ffmpeg
     gh
     go
+    google-cloud-sdk
     gopls
     lazydocker
     sops
