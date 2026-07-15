@@ -31,6 +31,7 @@ in
     shellAliases = {
       vi = "nvim";
       vim = "nvim";
+      code = "code-insiders";
       sudo = "sudo ";
       python = "python3";
       ll = "ls -l";
