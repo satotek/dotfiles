@@ -143,6 +143,35 @@
 
       formatter = nixpkgs.lib.genAttrs formatterSystems (system: (mkPkgs system).nixfmt-tree);
 
+      checks = nixpkgs.lib.genAttrs formatterSystems (
+        system:
+        let
+          pkgs = mkPkgs system;
+          formatCheck = pkgs.runCommand "check-nix-format" { nativeBuildInputs = [ pkgs.nixfmt ]; } ''
+            find ${self} -name '*.nix' -type f -print0 \
+              | xargs -0 nixfmt --check
+            touch "$out"
+          '';
+        in
+        {
+          nix-format = formatCheck;
+        }
+        // nixpkgs.lib.optionalAttrs (system == "x86_64-linux") {
+          home-nosuke-linux-x86_64 = self.homeConfigurations."nosuke@linux-x86_64".activationPackage;
+          home-azureuser-linux-x86_64 = self.homeConfigurations."azureuser@linux-x86_64".activationPackage;
+          home-azureuser-gem-ai = self.homeConfigurations."azureuser@gem-ai".activationPackage;
+        }
+        // nixpkgs.lib.optionalAttrs (system == "aarch64-linux") {
+          home-nosuke-linux-aarch64 = self.homeConfigurations."nosuke@linux-aarch64".activationPackage;
+          home-azureuser-linux-aarch64 = self.homeConfigurations."azureuser@linux-aarch64".activationPackage;
+        }
+        // nixpkgs.lib.optionalAttrs (system == darwinSystem) {
+          home-nosuke-darwin =
+            self.homeConfigurations."${darwinUsername}@${darwinHostname}".activationPackage;
+          darwin-nosuke = self.darwinConfigurations.${darwinHostname}.system;
+        }
+      );
+
       darwinConfigurations.${darwinHostname} = import ./nix/hosts/darwin {
         inherit inputs self;
         username = darwinUsername;
