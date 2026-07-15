@@ -30,6 +30,7 @@
 
   fonts.packages = with pkgs; [
     hackgen-nf-font
+    maple-mono.NF-CN-unhinted
   ];
 
   programs.zsh.enable = true;
