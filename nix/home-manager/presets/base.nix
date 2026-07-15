@@ -1,5 +1,13 @@
 { pkgs, ... }:
 let
+  dotbench = pkgs.buildGoModule {
+    pname = "dotbench";
+    version = "0.1.0";
+
+    src = ../../../tools/dotbench;
+    vendorHash = null;
+  };
+
   roots = pkgs.buildGoModule rec {
     pname = "roots";
     version = "0.4.1";
@@ -24,6 +32,7 @@ in
   home.packages = with pkgs; [
     # bat / eza は zsh.nix の ZENO_GIT_CAT / ZENO_GIT_TREE が前提とする
     bat
+    dotbench
     curl
     deno
     eza

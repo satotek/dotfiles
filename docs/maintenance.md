@@ -8,7 +8,7 @@
 |---|---|
 | `nix flake show` | flake outputs を確認する |
 | `nix fmt` | Nix ファイルを formatter で整形する |
-| `nix flake check` | flake の基本チェックを走らせる |
+| `nix flake check` | 現在のsystem向けNixフォーマット・Home Manager・nix-darwinチェックを走らせる |
 | `nix build --no-link '.#homeConfigurations."nosuke@linux-x86_64".activationPackage'` | Linux Home Manager 構成をビルド検証する |
 | `nix build --no-link '.#homeConfigurations."azureuser@linux-x86_64".activationPackage'` | Azure user 向け Linux 構成をビルド検証する |
 | `nix build --no-link '.#homeConfigurations."azureuser@gem-ai".activationPackage'` | `gem-ai` 向け Linux 構成をビルド検証する |
@@ -36,6 +36,8 @@
 |---|---|
 | `zsh -i -c exit` | interactive zsh の起動確認 |
 | `time zsh -i -c exit` | zsh 起動時間をざっくり測る |
+| `dotbench` | ZshとNeovimの起動時間を10回測り、min/median/mean/maxを表示する |
+| `dotbench 20` | 実行回数を指定して起動時間を測る |
 | `sheldon lock --update` | Sheldon plugin lock を更新する |
 
 ## Git

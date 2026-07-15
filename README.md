@@ -315,7 +315,37 @@ Both configure the `cache.numtide.com` binary cache in CI so AI tools are downlo
 - Claude Code / Codex / agent skills / MCP servers
 - herdr (agent multiplexer — a tmux-like TUI for AI coding agents)
 - rumdl (Markdown linter/formatter, used as the Neovim Markdown LSP)
+- dotbench (Zsh / Neovim startup benchmark)
 - CLI tools such as ripgrep, fd, fzf, yazi, and zoxide
+
+## Startup benchmark
+
+`dotbench` measures interactive Zsh and headless Neovim startup times. It runs
+each command once to warm filesystem caches, then reports statistics from 10
+measured runs:
+
+```bash
+dotbench
+```
+
+Pass a positive integer to change the number of measured runs:
+
+```bash
+dotbench 20
+```
+
+Example output:
+
+```text
+Startup benchmark (10 runs, one warm-up; lower is better)
+zsh interactive  min 41.2 ms  median 42.2 ms  mean 42.2 ms  max 43.4 ms
+nvim headless    min 26.1 ms  median 26.8 ms  mean 26.8 ms  max 27.9 ms
+```
+
+Use the median when comparing changes; it is less affected by occasional
+background activity than the mean or maximum. `dotbench` is installed by the
+shared Home Manager `base` preset, so it is available after `nix-switch` or the
+equivalent Home Manager switch for the current host.
 
 ## Insight
 
