@@ -1,7 +1,6 @@
 name: 'Bot: Update stable inputs'
 
-# 基盤系の flake input を3日おきに更新（3日以上経った版のみ = age gate）。
-# nixpkgs 等の当日リリース事故を避ける。AI系は update-flake-ai.yml が毎日担当。
+# 基盤系の flake input を3日おきに更新。AI系は update-flake-ai.yml が毎日担当。
 # Linux home 構成のビルドで検証してから PR を作り、自動マージする。
 
 on:
@@ -12,9 +11,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-
-env:
-  MIN_AGE_DAYS: '3' # これより新しい版は取り込まない（当日事故回避）
 
 jobs:
   update:
@@ -31,29 +27,8 @@ jobs:
             extra-substituters = https://cache.numtide.com
             extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
 
-      # input を1つずつ更新し、locked.lastModified が MIN_AGE_DAYS 未満なら差し戻す。
-      # git checkout -- flake.lock はインデックス(=採用済みの良い更新)へ戻すので、
-      # 若すぎる input だけを個別に巻き戻せる。
-      - name: Update stable inputs (only versions older than MIN_AGE_DAYS)
-        run: |
-          set -euo pipefail
-          cutoff=$(( $(date +%s) - MIN_AGE_DAYS * 86400 ))
-          for inp in nixpkgs nix-darwin home-manager; do
-            echo "::group::update $inp"
-            nix flake update "$inp"
-            # root.inputs からノード名を解決（nixpkgs は nixpkgs_2 等に別名化されるため）。
-            node=$(jq -r ".nodes.root.inputs.\"$inp\" | if type==\"array\" then .[-1] else . end" flake.lock)
-            lm=$(jq -r ".nodes.\"$node\".locked.lastModified // 0" flake.lock)
-            if [ "$lm" -gt "$cutoff" ]; then
-              age=$(( ( $(date +%s) - lm ) / 86400 ))
-              echo "$inp: locked版が ${age}日前 (< ${MIN_AGE_DAYS}日) のため差し戻し"
-              git checkout -- flake.lock
-            else
-              echo "$inp: OK (>= ${MIN_AGE_DAYS}日) 採用"
-              git add flake.lock
-            fi
-            echo "::endgroup::"
-          done
+      - name: Update stable inputs
+        run: nix flake update nixpkgs nix-darwin home-manager
 
       # 自動マージの安全弁: 更新後の inputs で Linux home 構成が実際にビルドできるか検証。
       - name: Validate (build linux home config)
@@ -66,7 +41,7 @@ jobs:
           commit-message: 'chore(nix): update stable inputs'
           title: 'chore(nix): update stable inputs (nixpkgs/darwin/home-manager)'
           body: |
-            基盤系 flake input の更新（3日おき・3日以上経った版のみ・ビルド検証済み）:
+            基盤系 flake input の更新（3日おき・ビルド検証済み）:
             nixpkgs / nix-darwin / home-manager。
 
             _このPRは update-flake-stable ワークフローが自動生成し、自動マージされます。_

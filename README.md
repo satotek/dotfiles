@@ -295,7 +295,7 @@ dotfiles/
 `flake.lock` is kept up to date by GitHub Actions (under `.github/workflows/`). Two workflows open pull requests, and each one builds the Linux Home Manager configuration as a check before merging, so a broken update never lands on `main`:
 
 - `update-flake-ai.yml` — daily. Updates the fast-moving AI / agent inputs (`llm-agents`, `agent-browser`, `agent-skills`, `anthropic-skills`, `herdr-skill`, `mattpocock-skills`, `vercel-*-skills`).
-- `update-flake-stable.yml` — every 3 days. Updates the base inputs (`nixpkgs`, `nix-darwin`, `home-manager`), and only accepts versions that are at least 3 days old (an "age gate") to avoid pulling in a same-day, possibly-broken release.
+- `update-flake-stable.yml` — every 3 days. Updates the base inputs (`nixpkgs`, `nix-darwin`, `home-manager`).
 
 Both configure the `cache.numtide.com` binary cache in CI so AI tools are downloaded rather than rebuilt from source during the validation build. Validated PRs are auto-merged; you still apply them per machine with `git pull` and a switch (`nix-switch` / `darwin-switch`). The repo is public, so GitHub-hosted runners are free.
 
