@@ -34,6 +34,7 @@ return {
   },
   {
     "MeanderingProgrammer/render-markdown.nvim",
+    ft = { "markdown", "markdown.mdx" },
     opts = {
       html = {
         comment = {

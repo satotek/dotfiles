@@ -26,14 +26,15 @@ local servers = {
   "yamlls",
 }
 
--- Neovim 0.12純正のLSP色情報をインラインの色見本として表示する。
-vim.lsp.document_color.enable(true, nil, { style = "virtual" })
-
 return {
   {
     "neovim/nvim-lspconfig",
+    event = { "BufReadPre", "BufNewFile" },
     dependencies = { "b0o/SchemaStore.nvim" },
     config = function()
+      -- Neovim 0.12純正のLSP色情報をインラインの色見本として表示する。
+      vim.lsp.document_color.enable(true, nil, { style = "virtual" })
+
       local capabilities = require("blink.cmp").get_lsp_capabilities()
       for _, server in ipairs(servers) do
         vim.lsp.config(server, { capabilities = capabilities })

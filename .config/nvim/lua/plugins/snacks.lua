@@ -15,6 +15,7 @@ return {
     priority = 1000,
     lazy = false,
     opts = {
+      dashboard = { enabled = true },
       input = { enabled = true },
       picker = {
         enabled = true,
@@ -45,6 +46,20 @@ return {
         desc = "Command History",
       },
       { "<leader><space>", with_root("files"), desc = "Find Files (Root Dir)" },
+      {
+        "<leader>e",
+        function()
+          Snacks.explorer({ cwd = root() })
+        end,
+        desc = "File Explorer (Root Dir)",
+      },
+      {
+        "<leader>E",
+        function()
+          Snacks.explorer()
+        end,
+        desc = "File Explorer (cwd)",
+      },
       {
         "<leader>n",
         function()

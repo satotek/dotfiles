@@ -17,7 +17,7 @@ local formatter_clients = {
 return {
   {
     "lukas-reineke/lsp-format.nvim",
-    lazy = false,
+    event = { "BufReadPre", "BufNewFile" },
     opts = { sync = true },
     config = function(_, opts)
       require("lsp-format").setup(opts)
