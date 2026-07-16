@@ -40,30 +40,11 @@ require("lazy").setup({
     { import = "lazyvim.plugins.extras.editor.inc-rename" }, -- smjonas/inc-rename.nvim
     { import = "lazyvim.plugins.extras.editor.snacks_picker" }, -- folke/snacks.nvim (picker有効化)
 
-    -- lang（LSP × formatter × treesitter × dap の結線を各言語で提供）
-    { import = "lazyvim.plugins.extras.lang.docker" },
-    { import = "lazyvim.plugins.extras.lang.git" },
-    { import = "lazyvim.plugins.extras.lang.go" },
-    { import = "lazyvim.plugins.extras.lang.haskell" },
-    { import = "lazyvim.plugins.extras.lang.json" },
-    { import = "lazyvim.plugins.extras.lang.markdown" },
-    { import = "lazyvim.plugins.extras.lang.prisma" },
-    { import = "lazyvim.plugins.extras.lang.python" },
-    { import = "lazyvim.plugins.extras.lang.rust" },
-    { import = "lazyvim.plugins.extras.lang.sql" },
-    { import = "lazyvim.plugins.extras.lang.tailwind" },
-    { import = "lazyvim.plugins.extras.lang.terraform" }, -- terraform-ls + hcl treesitter + fmt
-    { import = "lazyvim.plugins.extras.lang.toml" },
-    { import = "lazyvim.plugins.extras.lang.typescript" },
-    { import = "lazyvim.plugins.extras.lang.typescript.biome" },
-    { import = "lazyvim.plugins.extras.lang.yaml" },
-
     -- test
     { import = "lazyvim.plugins.extras.test.core" }, -- neotest + nvim-dap
 
     -- ui
     { import = "lazyvim.plugins.extras.ui.mini-animate" }, -- nvim-mini/mini.animate
-    { import = "lazyvim.plugins.extras.ui.treesitter-context" }, -- nvim-treesitter/nvim-treesitter-context
 
     -- util
     { import = "lazyvim.plugins.extras.util.mini-hipatterns" }, -- nvim-mini/mini.hipatterns

@@ -1,8 +1,17 @@
 return {
   {
+    "LazyVim/LazyVim",
+    init = function()
+      vim.filetype.add({ extension = { mdx = "markdown.mdx" } })
+    end,
+  },
+  {
     "iamcco/markdown-preview.nvim",
     cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
     ft = { "markdown" },
+    keys = {
+      { "<leader>cp", "<cmd>MarkdownPreviewToggle<cr>", ft = "markdown", desc = "Markdown Preview" },
+    },
     -- upstream は Yarn v1 の yarn.lock を持っているため、npm install だと plugin checkout
     -- 内の lockfile が書き換わり lazy.nvim の更新が止まる。Node 同梱の corepack で
     -- Yarn v1 を明示して、Home Manager に yarn 本体は増やさない。
