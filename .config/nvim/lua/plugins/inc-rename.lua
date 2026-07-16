@@ -6,27 +6,6 @@ return {
     opts = {},
   },
   {
-    "neovim/nvim-lspconfig",
-    opts = {
-      servers = {
-        ["*"] = {
-          keys = {
-            {
-              "<leader>cr",
-              function()
-                local inc_rename = require("inc_rename")
-                return ":" .. inc_rename.config.cmd_name .. " " .. vim.fn.expand("<cword>")
-              end,
-              expr = true,
-              desc = "Rename",
-              has = "rename",
-            },
-          },
-        },
-      },
-    },
-  },
-  {
     "folke/noice.nvim",
     event = "VeryLazy",
     dependencies = {
