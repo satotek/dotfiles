@@ -4,4 +4,5 @@ return {
   { "mason-org/mason-lspconfig.nvim", enabled = false },
   { "stevearc/conform.nvim", enabled = false },
   { "mfussenegger/nvim-lint", enabled = false },
+  { "folke/trouble.nvim", enabled = false },
 }
