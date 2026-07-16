@@ -23,14 +23,6 @@ require("lazy").setup({
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
 
     -- ============================================================
-    -- extras（旧 lazyvim.json → ここに明示 import 化）
-    -- 各行のコメントは「その extra が連れてくる主なプラグイン」
-    -- 卒業したら該当行を消し、lua/plugins/ に自前ファイルを置く
-    -- ============================================================
-    -- editor
-    { import = "lazyvim.plugins.extras.editor.snacks_picker" }, -- folke/snacks.nvim (picker有効化)
-
-    -- ============================================================
     -- 自前プラグイン（lua/plugins/*.lua）— 上書きが効くよう最後に
     -- ============================================================
     { import = "plugins" },

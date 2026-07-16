@@ -59,13 +59,9 @@ return {
         }
       end,
     },
-  },
-
-  -- アクティブな colorscheme を catppuccin に
-  {
-    "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "catppuccin",
-    },
+    config = function(_, opts)
+      require("catppuccin").setup(opts)
+      vim.cmd.colorscheme("catppuccin")
+    end,
   },
 }

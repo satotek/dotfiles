@@ -8,7 +8,7 @@ vim.keymap.del("n", "<leader>fT")
 -- Oxker (Docker TUI)
 vim.keymap.set("n", "<leader>D", function()
   Snacks.terminal("oxker", {
-    cwd = LazyVim.root(),
+    cwd = Snacks.git.get_root() or vim.uv.cwd(),
     win = { style = "lazygit" },
   })
 end, { desc = "Oxker (Docker)" })

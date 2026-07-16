@@ -15,7 +15,10 @@ return {
   {
     "nvim-lualine/lualine.nvim",
     opts = function(_, opts)
-      local icons = LazyVim.config.icons
+      local icons = {
+        diagnostics = { Error = " ", Warn = " ", Info = " ", Hint = " " },
+        git = { added = " ", modified = " ", removed = " " },
+      }
 
       opts.options = vim.tbl_deep_extend("force", opts.options or {}, {
         theme = "auto",
