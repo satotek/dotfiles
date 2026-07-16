@@ -3,6 +3,7 @@
 local servers = {
   "bashls",
   "biome",
+  "cssls",
   "denols",
   "efm",
   "eslint",
@@ -28,6 +29,9 @@ local enabled = {}
 for _, server in ipairs(servers) do
   enabled[server] = {}
 end
+
+-- Neovim 0.12純正のLSP色情報をインラインの色見本として表示する。
+vim.lsp.document_color.enable(true, nil, { style = "virtual" })
 
 return {
   {

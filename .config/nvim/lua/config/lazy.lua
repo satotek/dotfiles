@@ -27,28 +27,8 @@ require("lazy").setup({
     -- 各行のコメントは「その extra が連れてくる主なプラグイン」
     -- 卒業したら該当行を消し、lua/plugins/ に自前ファイルを置く
     -- ============================================================
-    -- AI
-    { import = "lazyvim.plugins.extras.ai.copilot" }, -- zbirenbaum/copilot.lua
-
-    -- coding
-    { import = "lazyvim.plugins.extras.coding.mini-surround" }, -- nvim-mini/mini.surround (gs プレフィックス)
-    { import = "lazyvim.plugins.extras.coding.yanky" }, -- gbprod/yanky.nvim
-
     -- editor
-    { import = "lazyvim.plugins.extras.editor.dial" }, -- monaqa/dial.nvim
-    { import = "lazyvim.plugins.extras.editor.illuminate" }, -- RRethy/vim-illuminate
-    { import = "lazyvim.plugins.extras.editor.inc-rename" }, -- smjonas/inc-rename.nvim
     { import = "lazyvim.plugins.extras.editor.snacks_picker" }, -- folke/snacks.nvim (picker有効化)
-
-    -- test
-    { import = "lazyvim.plugins.extras.test.core" }, -- neotest + nvim-dap
-
-    -- ui
-    { import = "lazyvim.plugins.extras.ui.mini-animate" }, -- nvim-mini/mini.animate
-
-    -- util
-    { import = "lazyvim.plugins.extras.util.mini-hipatterns" }, -- nvim-mini/mini.hipatterns
-    { import = "lazyvim.plugins.extras.util.project" }, -- ahmedkhalf/project.nvim
 
     -- ============================================================
     -- 自前プラグイン（lua/plugins/*.lua）— 上書きが効くよう最後に
