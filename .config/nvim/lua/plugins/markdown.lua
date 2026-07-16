@@ -1,10 +1,6 @@
+vim.filetype.add({ extension = { mdx = "markdown.mdx" } })
+
 return {
-  {
-    "LazyVim/LazyVim",
-    init = function()
-      vim.filetype.add({ extension = { mdx = "markdown.mdx" } })
-    end,
-  },
   {
     "iamcco/markdown-preview.nvim",
     cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
