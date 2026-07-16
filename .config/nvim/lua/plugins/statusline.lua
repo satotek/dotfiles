@@ -14,6 +14,7 @@ end
 return {
   {
     "nvim-lualine/lualine.nvim",
+    event = "VeryLazy",
     opts = function(_, opts)
       local icons = {
         diagnostics = { Error = " ", Warn = " ", Info = " ", Hint = " " },
