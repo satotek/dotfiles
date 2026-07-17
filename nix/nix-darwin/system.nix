@@ -30,7 +30,7 @@
 
   fonts.packages = with pkgs; [
     hackgen-nf-font
-    maple-mono.NF-CN-unhinted
+    moralerspace
   ];
 
   programs.zsh.enable = true;

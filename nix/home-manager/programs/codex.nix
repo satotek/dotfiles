@@ -26,6 +26,52 @@ let
     analytics.enabled = false;
     feedback.enabled = false;
 
+    desktop = {
+      followUpQueueMode = "queue";
+      defaultTerminalLocation = "right";
+      "show-context-window-usage" = true;
+      appearanceDarkCodeThemeId = "catppuccin";
+      appearanceLightCodeThemeId = "catppuccin";
+      appearanceTheme = "system";
+      "git-branch-prefix" = "codex/";
+
+      open-in-target-preferences.global = "vscodeInsiders";
+
+      appearanceDarkChromeTheme = {
+        accent = "#cba6f7";
+        contrast = 85;
+        ink = "#cdd6f4";
+        opaqueWindows = false;
+        surface = "#1e1e2e";
+        fonts = {
+          code = "Moralerspace Neon";
+          ui = "Moralerspace Neon";
+        };
+        semanticColors = {
+          diffAdded = "#a6e3a1";
+          diffRemoved = "#f38ba8";
+          skill = "#cba6f7";
+        };
+      };
+
+      appearanceLightChromeTheme = {
+        accent = "#8839ef";
+        contrast = 45;
+        ink = "#4c4f69";
+        opaqueWindows = false;
+        surface = "#eff1f5";
+        fonts = {
+          code = "Moralerspace Neon";
+          ui = "Moralerspace Neon";
+        };
+        semanticColors = {
+          diffAdded = "#40a02b";
+          diffRemoved = "#d20f39";
+          skill = "#8839ef";
+        };
+      };
+    };
+
     tui.status_line = [
       "model-with-reasoning"
       "context-used"
@@ -47,6 +93,7 @@ let
     approvals_reviewer = "auto_review";
     features.guardian_approval = true;
     features.memories = true;
+    features.js_repl = false;
     sandbox_mode = "workspace-write";
     sandbox_workspace_write.writable_roots = [
       "/tmp"
@@ -58,7 +105,11 @@ let
     mcp_servers = sharedMcpServers;
 
     plugins = {
-      "computer-use@openai-bundled".enabled = false;
+      "computer-use@openai-bundled".enabled = true;
+      "sites@openai-bundled".enabled = true;
+      "visualize@openai-bundled".enabled = true;
+      "browser@openai-bundled".enabled = true;
+      "chrome@openai-bundled".enabled = true;
       "github@openai-curated".enabled = true;
       "gmail@openai-curated".enabled = true;
       "google-calendar@openai-curated".enabled = true;

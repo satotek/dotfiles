@@ -197,7 +197,6 @@ vt-kam-allowed = false
 # 
 # Changing this value at runtime and reloading the configuration will only
 # affect new windows, tabs, and splits.
-custom-shader = shaders/bloom.glsl
 
 # If `true` (default), the focused terminal surface will run an animation
 # loop when custom shaders are used. This uses slightly more CPU (generally
@@ -216,7 +215,6 @@ custom-shader = shaders/bloom.glsl
 # 
 # This value can be changed at runtime and will affect all currently
 # open terminals.
-custom-shader-animation = true
 
 # Control the in-app notifications that Ghostty shows.
 # 
