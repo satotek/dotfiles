@@ -33,6 +33,12 @@
     moralerspace
   ];
 
+  security.pam.services.sudo_local = {
+    touchIdAuth = true;
+    # tmux などの中からでも Touch ID の認証ダイアログを利用できるようにする。
+    reattach = true;
+  };
+
   programs.zsh.enable = true;
   # Home Manager 側の zshrc が compinit をキャッシュ付きで遅延実行するので、
   # /etc/zshrc の同期 compinit（毎起動フルスキャン）とプロンプト初期化は無効化する

@@ -117,6 +117,20 @@ in
       env = {
         CLAUDE_AFK_TIMEOUT_MS = "3600000";
       };
+      # HerdrへClaude Codeのネイティブsession IDを通知し、Herdr server再起動後の
+      # `claude --resume <id>` による会話復元を可能にする。
+      hooks.SessionStart = [
+        {
+          matcher = "*";
+          hooks = [
+            {
+              type = "command";
+              command = "bash '${homeDir}/.claude/hooks/herdr-agent-state.sh' session";
+              timeout = 10;
+            }
+          ];
+        }
+      ];
       permissions.allow = [
         "Bash(pnpm typecheck)"
         "Bash(pnpm test)"
@@ -162,4 +176,5 @@ in
     };
 
   };
+
 }

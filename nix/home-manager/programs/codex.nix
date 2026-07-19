@@ -92,6 +92,8 @@ let
     approval_policy = "on-request";
     approvals_reviewer = "auto_review";
     features.guardian_approval = true;
+    # Herdr integration hookをCodexで有効化する。
+    features.hooks = true;
     features.memories = true;
     features.js_repl = false;
     sandbox_mode = "workspace-write";
@@ -171,6 +173,22 @@ in
     prefix_rule(pattern = ["rm"], decision = "prompt")
     prefix_rule(pattern = ["sudo"], decision = "prompt")
   '';
+
+  # HerdrへCodexのネイティブsession IDを通知し、Herdr server再起動後の
+  # `codex resume <id>` による会話復元を可能にする。
+  home.file.".codex/hooks.json".text = builtins.toJSON {
+    hooks.SessionStart = [
+      {
+        hooks = [
+          {
+            type = "command";
+            command = "bash '${homeDir}/.codex/herdr-agent-state.sh' session";
+            timeout = 10;
+          }
+        ];
+      }
+    ];
+  };
 
   home.activation.generateCodexConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     codex_dir="${homeDir}/.codex"
