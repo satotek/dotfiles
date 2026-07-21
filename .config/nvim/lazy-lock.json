@@ -24,7 +24,7 @@
   "lazydev.nvim": { "branch": "main", "commit": "ff2cbcba459b637ec3fd165a2be59b7bbaeedf0d" },
   "lsp-format.nvim": { "branch": "master", "commit": "e2b4ae87545c1aadebcf1dfc1b5dffe28dcf2ffb" },
   "lualine.nvim": { "branch": "master", "commit": "221ce6b2d999187044529f49da6554a92f740a96" },
-  "markdown-preview.nvim": { "branch": "master", "commit": "a923f5fc5ba36a3b17e289dc35dc17f66d0548ee" },
+  "md-render.nvim": { "branch": "main", "commit": "56057d92d636a45cdeac5d1857e776e10d279d69" },
   "mini.ai": { "branch": "main", "commit": "25248c6aa002391936a6200f12d1466015987133" },
   "mini.icons": { "branch": "main", "commit": "98faae31e9be1cc054ae63485e58ceb185efcad0" },
   "mini.pairs": { "branch": "main", "commit": "b1fd9df3bb4a41c8f45778a3859ee80ef6b367e3" },

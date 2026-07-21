@@ -18,6 +18,7 @@
     lazydocker
     lua-language-server
     marksman
+    mermaid-cli
     sops
     shellcheck
     shfmt

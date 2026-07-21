@@ -144,7 +144,9 @@ Explorer は初期状態で hidden files を表示し、ignored files は非表�
 
 | キー / コマンド | 用途 |
 |---|---|
-| `<leader>cp` | Markdown preview toggle |
+| `<leader>cp` | md-render floating preview toggle |
+| `:MdRender split` | ソースとレンダリングを分割表示 |
+| `:MdRender tab` | レンダリングをタブ表示 |
 | `<leader>um` | render-markdown toggle |
 
 `<!-- ... -->` は `render-markdown.nvim` で conceal しない設定にしている。
