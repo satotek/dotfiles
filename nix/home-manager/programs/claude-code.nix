@@ -111,6 +111,8 @@ in
       model = "claude-opus-4-8";
       effortLevel = "high";
       fastMode = false;
+      # ローカルのセッション履歴を ccusage などで長期間集計できるよう保持する。
+      cleanupPeriodDays = 3650;
       # AskUserQuestion(選択肢プロンプト)の自動タイムアウト。
       # settings キーの askUserQuestionTimeout は 60s/5m/10m/never の固定値のみ（最大10分）なので、
       # 1時間にするには env の CLAUDE_AFK_TIMEOUT_MS（ミリ秒）を使う。要 v2.1.198+。
