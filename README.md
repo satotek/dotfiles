@@ -269,7 +269,7 @@ dotfiles/
 │   └── nix-darwin/           # system.nix / homebrew.nix
 ├── .github/
 │   └── workflows/            # CI: automatic flake.lock updates (see Automation)
-├── .config/                  # repo-backed configs (ghostty, nvim, sheldon, starship, lazygit, ...)
+├── .config/                  # repo-backed configs (nvim, lazygit, ...)
 ├── flake.nix
 └── flake.lock
 ```
@@ -285,6 +285,7 @@ dotfiles/
 - Zsh plugins are managed with `sheldon`, and the prompt is managed with `starship`
 - Shell integrations for `zoxide`, `starship`, and `sheldon` are cached at startup for faster shell init
 - `direnv` (with `nix-direnv`) is managed under `programs/direnv.nix`
+- Ghostty and its settings are managed with native Home Manager options
 - Agent tooling — Claude Code, Codex, Antigravity CLI, Grok, agent skills, and MCP servers — is managed under `programs/` (with the MCP server definitions shared via `data/mcp-servers.nix`)
 - macOS GUI apps are managed through the `nix-darwin` Homebrew module under `nix/nix-darwin/`
 - `flake.lock` is updated automatically by GitHub Actions (see Automation)
