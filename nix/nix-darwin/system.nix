@@ -9,6 +9,7 @@
   imports = [
     ./homebrew.nix
     ./macos-defaults.nix
+    ./nix-cleanup.nix
   ];
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfree = true;
