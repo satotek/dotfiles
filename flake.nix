@@ -42,7 +42,7 @@
     };
 
     # herdr 公式 agent skill (リポジトリ直下の SKILL.md)。
-    # パッケージ本体は mac の Homebrew で入れているため flake = false でソースのみ取得。
+    # パッケージ本体は llm-agents.nix から入れ、ここでは skill のソースだけを取得する。
     herdr-skill = {
       url = "github:ogulcancelik/herdr";
       flake = false;
