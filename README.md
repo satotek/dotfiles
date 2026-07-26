@@ -1,38 +1,88 @@
 # dotfiles
 
-Personal dotfiles managed with Nix Flakes.
-This repo uses `nix-darwin + Home Manager` on macOS and standalone `Home Manager` on Linux.
+macOSとLinuxの開発環境を、Nix Flakes・nix-darwin・Home Managerで管理する個人用dotfilesです。
 
-## Supported platforms
+- macOSは「nix-darwinのsystem layer」と「standalone Home Managerのhome layer」を分離
+- LinuxとWSLはstandalone Home Managerで管理
+- CLI、shell、editor、AI agent環境をNixで再現
+- NeovimやWezTermなど頻繁に編集する設定は、リポジトリへのout-of-store symlinkで管理
+- machine固有設定と平文secretはリポジトリ外に保持
 
-- macOS
-- Linux
-  - primarily Ubuntu / Debian-like environments
-  - intended to work on Azure VMs and Linux desktop environments
+## Architecture
 
-## Approach
+```text
+                            flake.nix
+                                │
+                 ┌──────────────┴──────────────┐
+                 │                             │
+        darwinConfigurations             homeConfigurations
+           (macOS only)                   (macOS / Linux)
+                 │                             │
+        nix/nix-darwin/                 nix/home-manager/
+                 │                             │
+     Homebrew casks / fonts /         shell / editor / CLI /
+     macOS defaults / Touch ID        agents / repo-backed config
+                 │                             │
+          darwin-switch                    nix-switch
+           sudo required                  no sudo
+```
 
-- Keep Nix-related configuration under `nix/`
-- Group reusable logic by purpose: `home/` (core home setup), `platforms/` (OS-specific), `presets/` (package bundles), `programs/` (one file per tool), `data/` (pure data shared across tools)
-- Manage `git`, `tmux`, `wget`, and most of `zsh` with native Home Manager options
-- Use `Home Manager` for repo-backed configs as well
-- Manage CLI tools with Nix instead of shell installer scripts
-- Keep local-only settings and secrets outside the repo
+Determinate NixがNix daemonとstore GCを担当します。nix-darwinでは
+`nix.enable = false`とし、同じNix installationを二重管理しません。
 
-The old shell-based installer flow has been removed.
+### macOS system layer
 
-## Assumptions
+nix-darwinが次を管理します。
 
-- This repo is cloned to `~/dotfiles`
-- This repo uses flakes, so `nix-command` and `flakes` must be enabled
-- Linux outputs are currently provided for `nosuke` and `azureuser`
-- If you use another username, add another output in `flake.nix`
+- Homebrew casks: 1Password、1Password CLI、Karabiner-Elements、WezTerm Nightly
+- fonts: HackGen NF、Moralerspace
+- Dock、Finder、keyboard、trackpad、screenshotなどのmacOS defaults
+- sudoのTouch ID認証
+- login shellとしてのZsh
+- 古いnix-darwin system generationsの定期整理
+
+### Home Manager layer
+
+macOSとLinuxで共有するhome layerです。
+
+- XDG Base Directory
+- Zsh、Sheldon、Starship、Zeno、zoxide、direnv
+- Git、delta、lazygit、tmux
+- Neovim、Ghostty、WezTerm、Karabiner設定
+- development toolchainsとlanguage servers
+- Claude Code、Codex、Antigravity CLI、Grok、Herdr、Hunk
+- agent skills、MCP server設定、Herdr agent integrations
+- sops + GCP Cloud KMSによるsecret復号
+
+## Supported configurations
+
+| Flake output | Platform | User / host |
+|---|---|---|
+| `darwinConfigurations.nosuke-M5-MBP` | `aarch64-darwin` | macOS system layer |
+| `homeConfigurations."nosuke@nosuke-M5-MBP"` | `aarch64-darwin` | macOS home layer |
+| `homeConfigurations."nosuke@linux-x86_64"` | `x86_64-linux` | generic Linux |
+| `homeConfigurations."nosuke@linux-aarch64"` | `aarch64-linux` | generic Linux |
+| `homeConfigurations."nosuke@nosuke-windows"` | `x86_64-linux` | WSL |
+| `homeConfigurations."stko23@stko23-windows"` | `x86_64-linux` | WSL |
+| `homeConfigurations."azureuser@linux-x86_64"` | `x86_64-linux` | Azure / generic Linux |
+| `homeConfigurations."azureuser@linux-aarch64"` | `aarch64-linux` | Azure / generic Linux |
+| `homeConfigurations."azureuser@gem-ai"` | `x86_64-linux` | `gem-ai` |
+
+すべてのoutputは次で確認できます。
+
+```bash
+nix flake show
+```
+
+この構成はリポジトリを`~/dotfiles`へcloneする前提です。別のuser、host、
+clone先を使う場合は、`flake.nix`、host definition、またはHome Manager
+module内の`dotfilesDir`を調整してください。
 
 ## Install Nix
 
-This repo assumes [Determinate Nix](https://docs.determinate.systems/). At install time we also inject the binary caches we trust via `--extra-conf`. Without this, the `cache.numtide.com` cache declared by flakes such as `llm-agents.nix` is treated as untrusted and ignored, so Rust packages like `codex` are rebuilt from source with `cargo` on every switch.
-
-macOS / Linux:
+[Determinate Nix](https://docs.determinate.systems/)を使用します。
+`llm-agents.nix`のbinary cacheをtrusted substituterとして登録し、Codexなどの
+大きなRust packageを毎回source buildしないようにします。
 
 ```bash
 curl -fsSL https://install.determinate.systems/nix | sh -s -- install \
@@ -42,119 +92,136 @@ curl -fsSL https://install.determinate.systems/nix | sh -s -- install \
   --extra-conf "extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
 ```
 
-Trust is a property of the machine's Nix install, not of the dotfiles, so we pass it to the installer rather than declaring it in the repo. To inspect or add caches later, append to `/etc/nix/nix.custom.conf` and reload the daemon with `sudo launchctl kickstart -k system/systems.determinate.nix-daemon` (macOS).
-
-After installation, restart your shell or reload the Nix profile script. Determinate Nix enables `nix-command` / `flakes` by default, so the manual step below is usually unnecessary (kept as a fallback when a fresh install hasn't picked it up yet).
-
-Since this repo uses flakes, enable `nix-command` and `flakes` if they are not enabled yet.
-
-```bash
-mkdir -p ~/.config/nix
-grep -qxF 'experimental-features = nix-command flakes' ~/.config/nix/nix.conf 2>/dev/null \
-  || printf '%s\n' 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
-```
-
-Check:
+インストール後にshellを開き直し、確認します。
 
 ```bash
 nix --version
 nix config show | grep experimental-features
-# Is the trust in effect (avoids codex's cargo build)? If empty, you forgot --extra-conf at install time.
 nix config show | grep cache.numtide.com
 ```
 
-If `nix run` still fails with `experimental Nix feature 'nix-command' is disabled` or `flakes is disabled`, the config has not taken effect yet. Restart your shell, or set `NIX_CONFIG` once. This is more reliable than `--extra-experimental-features` here because `home-manager` invokes `nix` internally as well.
+Determinate Nixは通常`nix-command`と`flakes`を有効化します。fresh install直後に無効と表示される場合だけ、fallbackとして次を設定します。
 
 ```bash
-NIX_CONFIG='experimental-features = nix-command flakes' \
-  nix run home-manager/master -- switch --flake "path:$PWD#nosuke@linux-aarch64"
+mkdir -p ~/.config/nix
+grep -qxF 'experimental-features = nix-command flakes' \
+  ~/.config/nix/nix.conf 2>/dev/null \
+  || printf '%s\n' 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
 ```
 
-This is not Ubuntu-specific. It can happen on any fresh Nix install on macOS or Linux before `nix-command` / `flakes` are enabled and picked up.
+初回のHome Manager適用後は、リポジトリ内の`.config/nix/nix.conf`が管理対象になります。
 
-After one successful `home-manager switch`, this repo also manages `~/.config/nix/nix.conf`, so you normally do not need to keep prefixing commands with `NIX_CONFIG=...`.
-
-## Setup
+## First setup
 
 ### macOS
 
-macOS is split into two layers:
-
-- System layer (`darwinConfigurations`): Homebrew casks, fonts, macOS settings. Needs `sudo`.
-- Home layer (`homeConfigurations`): everything under Home Manager. No `sudo`.
-
-First apply:
-
 ```bash
 git clone https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+
 # System layer
-sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake "path:$PWD#nosuke-M5-MBP"
-# Home layer (no sudo)
-nix run home-manager/master -- switch --flake "path:$PWD#nosuke@nosuke-M5-MBP"
+sudo nix run nix-darwin/master#darwin-rebuild -- \
+  switch --flake "path:$PWD#nosuke-M5-MBP"
+
+# Home layer
+nix run home-manager/master -- \
+  switch --flake "path:$PWD#nosuke@nosuke-M5-MBP"
 ```
 
-Subsequent applies (both commands are installed by the home layer):
+system layerにはsudoが必要ですが、home layerには不要です。
 
-```bash
-nix-switch     # home layer, no sudo — day-to-day changes live here
-darwin-switch  # system layer (sudo) — only when casks/fonts/macOS settings change
-```
-
-### Linux x86_64
-
-`nosuke`:
+### Linux / WSL
 
 ```bash
 git clone https://github.com/satotek/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-NIX_CONFIG='experimental-features = nix-command flakes' \
-nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-x86_64"
+
+nix run home-manager/master -- \
+  switch -b backup --flake "path:$PWD#<home-configuration>"
 ```
 
-`azureuser`:
+例:
 
 ```bash
-git clone https://github.com/satotek/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-NIX_CONFIG='experimental-features = nix-command flakes' \
-nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@linux-x86_64"
+nix run home-manager/master -- \
+  switch -b backup --flake "path:$PWD#azureuser@gem-ai"
 ```
 
-### Linux aarch64
+`-b backup`は、初回適用時に既存ファイルとHome Manager linkが衝突した場合の退避用です。
 
-`nosuke`:
+## Daily workflow
+
+初回適用後は次のwrapperがインストールされます。
 
 ```bash
-git clone https://github.com/satotek/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-NIX_CONFIG='experimental-features = nix-command flakes' \
-nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@linux-aarch64"
+nix-switch
 ```
 
-`azureuser`:
+現在のuserとhostに対応するstandalone Home Manager configurationを適用します。macOSでもLinuxでもsudoは不要です。
+
+macOSのsystem layerを変更した場合だけ次を実行します。
 
 ```bash
-git clone https://github.com/satotek/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-NIX_CONFIG='experimental-features = nix-command flakes' \
-nix run home-manager/master -- switch -b backup --flake "path:$PWD#azureuser@linux-aarch64"
+darwin-switch
 ```
 
-### Other outputs
+使い分け:
 
-Additional Home Manager outputs exist for specific hosts. Use the matching flake attribute:
+| 変更 | Command |
+|---|---|
+| shell、CLI、Neovim、Ghostty、agents、Lazygit | `nix-switch` |
+| Homebrew cask、font、macOS defaults、system Zsh | `darwin-switch` |
+| 両方 | `darwin-switch`の後に`nix-switch` |
 
-- `nosuke@nosuke-windows` (WSL)
-- `azureuser@gem-ai`
+flakeはGit管理対象だけをsourceとして扱います。新しいNix moduleや`.zsh`
+snippetを追加した場合は、switchまたは通常のflake評価より先に`git add`
+してください。未追跡ファイルを含めて一時的に評価するときは
+`path:$PWD#...`を使用できます。
 
-List every available configuration with:
+## Configuration ownership
 
-```bash
-nix flake show
-```
+### Home Manager native settings
 
-## Local configuration
+可能なものはHome Manager optionから生成します。
+
+- Git
+- Zsh historyとaliases
+- Sheldon plugins
+- Starship
+- direnv / nix-direnv
+- zoxide
+- tmux
+- Ghostty
+- Lazygit
+
+Lazygitの`config.yml`は`programs.lazygit.settings`から生成され、activation時に
+upstream schemaで検証されます。pagerのdeltaはNix storeの絶対パスで参照します。
+
+### Repo-backed settings
+
+頻繁に直接編集したい設定は、Home Managerがリポジトリへout-of-store symlinkを作ります。
+
+- `.config/nvim`
+- `.config/nvchad`
+- `.config/wezterm`
+- `.config/zeno`
+- `.config/hunk/config.toml`
+- `.config/karabiner/karabiner.json`
+- `.config/nix/nix.conf`
+- `nix/home-manager/home/profile.sh`
+
+これらは編集直後にアプリケーションから読めるものと、再起動・reload・`nix-switch`が必要なものがあります。各moduleの管理方法を確認してください。
+
+### Local-only files
+
+次はGit管理しません。
+
+- `~/.config/git.local`
+- `~/.config/zsh.local`
+- `~/.config/secrets`
+- `~/.ssh/azure-devops`
+- `~/.ssh/azure-devops.pub`
+- `$XDG_CACHE_HOME/zsh/`
 
 Git identity:
 
@@ -162,192 +229,211 @@ Git identity:
 cp ~/dotfiles/.config/git.local.example ~/.config/git.local
 ```
 
-Edit `~/.config/git.local`:
-
-```ini
-[user]
-    name = Your Name
-    email = your@email.com
-```
-
-Azure DevOps SSH authentication uses a separate RSA key on each machine. Add
-each public key to the Azure DevOps profile, rather than sharing private keys
-through this repository or `sops`.
-
-On a machine that stores the private key locally:
-
-```bash
-ssh-keygen -t rsa -b 3072 -f ~/.ssh/azure-devops -C "Azure DevOps $(hostname)"
-```
-
-On macOS with the 1Password SSH Agent, keep the private key in 1Password and
-save only its public key as `~/.ssh/azure-devops.pub`. Git automatically selects
-`~/.ssh/azure-devops` when a local private key exists, or the `.pub` file when
-the matching private key is supplied by an SSH agent.
-
-Azure Repos remotes use this format:
-
-```text
-git@ssh.dev.azure.com:v3/<organization>/<project>/<repository>
-```
-
-Optional local Zsh overrides:
+任意のZsh override:
 
 ```bash
 cp ~/dotfiles/.config/zsh.local.example ~/.config/zsh.local
 ```
 
-Secrets:
+## Secrets
 
-Secrets that should be managed by this repo live under `secrets/*.yaml` and are
-encrypted with `sops`. The creation rule in `.sops.yaml` uses this GCP Cloud
-KMS key:
+repositoryで管理するsecretは`secrets/*.yaml`をsopsで暗号化し、GCP Cloud KMSで復号します。
 
 ```text
 projects/nosuke-net/locations/global/keyRings/sops/cryptoKeys/dotfiles
 ```
 
-Each environment decrypts with GCP Application Default Credentials (ADC). Run
-`gcloud auth application-default login` once on each machine before using GCP
-KMS.
-
-`google-cloud-sdk` is included in the shared `devtools` preset. The GCP project
-is `nosuke-net`; ADC should use the same quota project:
+各hostで一度、Application Default Credentialsを設定します。
 
 ```bash
 gcloud config set project nosuke-net
+gcloud auth application-default login
 gcloud auth application-default set-quota-project nosuke-net
 ```
 
-Currently managed secrets:
+現在の出力先:
 
-- `secrets/cloudflare.yaml` -> `~/.config/cloudflare/cloudflare-infra.env`
-- `secrets/context7.yaml` -> `~/.config/context7/api-key` when the file exists
+| Encrypted source | Decrypted target | Scope |
+|---|---|---|
+| `secrets/cloudflare.yaml` | `~/.config/cloudflare/cloudflare-infra.env` | macOS only |
+| `secrets/context7.yaml` | `~/.config/context7/api-key` | agents presetを使うhost |
 
-Existing encrypted files do not gain a new KMS recipient merely by changing
-`.sops.yaml`; rewrap them on a machine that can already decrypt the file:
+既存ファイルへKMS recipientを追加した場合は、復号可能なmachineでrewrapします。
 
 ```bash
 sops updatekeys secrets/*.yaml
 ```
 
-`nix/home-manager/programs/sops.nix` is imported by the shared agents preset.
-Context7 is therefore materialized on every host that uses that preset, while
-the Cloudflare secret remains restricted to macOS. Each participating host
-needs GCP ADC credentials before `nix-switch` can decrypt its secrets.
+repo管理外のshell secretは`~/.config/secrets`へ置けます。
 
-The GCP billing account has a monthly JPY 100 budget for `nosuke-net`, with
-current-spend alerts at 50%, 80%, and 100%. A budget sends notifications; it
-does not cap or stop spending.
+## Shell
 
-Local-only shell secrets that should not be repo-managed can still be kept in `~/.config/secrets`.
+Zsh pluginはSheldon、promptはStarship、snippetとhistory UIはZenoが担当します。
 
-## Files intentionally kept out of git
+Zshコードは役割ごとに分割し、Nix評価時に最終`.zshrc`へ埋め込みます。runtimeで分割ファイルを追加sourceしないため、ファイル分割による起動時I/Oは増えません。
 
-- `~/.config/git.local`
-- `~/.ssh/azure-devops`
-- `~/.ssh/azure-devops.pub`
-- `~/.config/zsh.local`
-- `~/.config/secrets`
-- `$XDG_CACHE_HOME/zsh/.zcompdump`
+```text
+nix/home-manager/programs/
+├── zsh.nix
+└── zsh/
+    ├── early.zsh
+    ├── widgets.zsh
+    ├── vm.zsh
+    └── init.zsh
+```
+
+Sheldon、Starship、zoxideの生成結果は`$XDG_CACHE_HOME/zsh`へatomicに保存し、
+Zsh bytecodeへcompileします。Nix storeのmtimeに依存せず、package実体や
+設定変更からcacheを更新します。
+
+主なkeybinding:
+
+| Key | Action |
+|---|---|
+| `Ctrl-B` | Git branchをfzfで選択 |
+| `Ctrl-G` | ghq / rootsのprojectへ移動 |
+| `Ctrl-R` | Zeno history検索 |
+| `Ctrl-X` → `Ctrl-K` | processをfzfで選択して終了 |
+| `Tab` | Zeno completion |
+
+詳細は[Zsh keybindings](docs/zsh-keybindings.md)を参照してください。
+
+## Agents and Herdr
+
+agent packageは主に`llm-agents.nix` overlayから導入します。設定はHome Managerで
+生成し、共通MCP definitionsは`nix/home-manager/data/mcp-servers.nix`に置きます。
+
+- Claude Code
+- Codex
+- Antigravity CLI
+- Grok
+- Herdr
+- Hunk
+- agent-browser
+- curated agent skills
+
+Herdr本体はNix packageとして管理しています。Home Manager activationは
+Claude CodeとCodexのHerdr integrationを生成し、session restoreに必要なhookを
+設定します。
+
+Herdrのremote workflowとSSH forwardingは[VM remote workflow](docs/vm-remote-workflow.md)を参照してください。
+
+## Tool presets
+
+Home Manager packageは用途別presetに分けています。
+
+| Preset | Purpose |
+|---|---|
+| `base` | shell、editor、Git、常用CLI |
+| `agents` | AI agents、skills、MCP、Herdr、sops |
+| `cloud` | Azure CLI、Google Cloud SDK、SOPS、Terraform/OpenTofu tooling |
+| `devtools` | Go、shell/Lua/Markdown tooling、Mermaid、ffmpeg |
+| `rust` | rustc、cargo、clippy、rustfmt、rust-analyzer |
+| `webdevtools` | Node.js、Bun、pnpm、Python、NixとWeb系language servers |
+
+hostごとのpreset組み合わせは`flake.nix`と`nix/hosts/`で定義します。
+
+## Validation and maintenance
+
+よく使う検証:
+
+```bash
+# Nix format
+nix fmt
+
+# Current platformのchecks
+nix flake check
+
+# 特定Home Manager outputをbuild
+nix build --no-link \
+  '.#homeConfigurations."nosuke@linux-x86_64".activationPackage'
+
+# Zsh snippetの構文
+for file in nix/home-manager/programs/zsh/*.zsh; do
+  zsh -n "$file"
+done
+```
+
+詳細なmaintenance commandは[Maintenance Commands](docs/maintenance.md)を参照してください。
+
+### Startup benchmark
+
+`dotbench`はinteractive Zshとheadless Neovimを1回warm-upした後、デフォルト10回測定し、min・median・mean・maxを表示します。
+
+```bash
+dotbench
+dotbench 30
+```
+
+環境間または変更前後の比較には、background activityの影響を受けにくいmedianを使います。macOSでは一部Zsh初期化を`zsh-defer`へ渡しているため、`dotbench`のZsh値はprompt表示までの同期処理を中心に測ります。
+
+### Generation cleanup
+
+macOSでは毎週日曜に次を整理します。
+
+- 12:00: Home Manager generationsを最低5世代、直近30日分残して整理
+- 12:15: nix-darwin system generationsを最低5世代、直近30日分残して整理
+
+store GCはDeterminate Nixdへ任せ、`nh clean profile`には`--no-gc --no-gcroots`を指定しています。
+
+## Automation
+
+GitHub Actionsがflake inputsを更新し、Linux Home Manager configurationのbuildに成功した場合だけPRを作成してauto-mergeします。
+
+| Workflow | Schedule | Inputs |
+|---|---|---|
+| `update-flake-ai.yml` | daily | `llm-agents`、agent browser、agent skills |
+| `update-flake-stable.yml` | every 3 days | `nixpkgs`、`nix-darwin`、`home-manager` |
+
+両workflowとも`cache.numtide.com`を利用し、
+`homeConfigurations."nosuke@linux-x86_64".activationPackage`を検証します。
+更新はrepositoryへmergeされるだけなので、各machineでは`git pull`後に必要な
+switchを実行します。
 
 ## Repository layout
 
 ```text
 dotfiles/
+├── flake.nix
+├── flake.lock
 ├── nix/
-│   ├── home-manager/
-│   │   ├── default.nix       # entry point for the shared Home Manager config
-│   │   ├── data/             # pure data shared across tools (e.g. mcp-servers.nix)
-│   │   ├── home/             # core home setup (shell, profile, directories, nix, migrations)
-│   │   ├── platforms/        # darwin.nix / linux.nix
-│   │   ├── presets/          # package bundles: base / agents / cloud / language toolchains
-│   │   └── programs/         # one file per tool (git, zsh, nvim, direnv, claude-code, ...)
 │   ├── hosts/
 │   │   ├── darwin/
-│   │   └── linux/            # azureuser.nix / nosuke.nix
-│   └── nix-darwin/           # system.nix / homebrew.nix
-├── .github/
-│   └── workflows/            # CI: automatic flake.lock updates (see Automation)
-├── .config/                  # repo-backed configs (nvim, wezterm, ...)
-├── flake.nix
-└── flake.lock
+│   │   └── linux/
+│   ├── nix-darwin/
+│   │   ├── system.nix
+│   │   ├── homebrew.nix
+│   │   ├── macos-defaults.nix
+│   │   └── nix-cleanup.nix
+│   └── home-manager/
+│       ├── home/
+│       ├── platforms/
+│       ├── presets/
+│       ├── programs/
+│       └── data/
+├── .config/
+│   ├── nvim/
+│   ├── nvchad/
+│   ├── wezterm/
+│   └── zeno/
+├── docs/
+├── secrets/
+├── tools/
+│   └── dotbench/
+└── .github/
+    └── workflows/
 ```
 
-## Current state
+## Related documentation
 
-- macOS is usable with `nix-darwin`
-- Linux uses standalone `Home Manager` outputs
-- Shared Home Manager logic lives under `nix/home-manager/`
-- Packages are grouped into presets: `base.nix` (always-on CLI tools), `devtools.nix`, and `webdevtools.nix`
-- Each tool's settings live in a single file under `nix/home-manager/programs/<tool>.nix`
-- `git`, `tmux`, `wget`, and most of `zsh` are managed with native Home Manager options
-- Zsh plugins are managed with `sheldon`, and the prompt is managed with `starship`
-- Shell integrations for `zoxide`, `starship`, and `sheldon` are cached at startup for faster shell init
-- `direnv` (with `nix-direnv`) is managed under `programs/direnv.nix`
-- Ghostty and its settings are managed with native Home Manager options
-- Agent tooling — Claude Code, Codex, Antigravity CLI, Grok, agent skills, and MCP servers — is managed under `programs/` (with the MCP server definitions shared via `data/mcp-servers.nix`)
-- macOS GUI apps are managed through the `nix-darwin` Homebrew module under `nix/nix-darwin/`
-- `flake.lock` is updated automatically by GitHub Actions (see Automation)
-
-## Automation
-
-`flake.lock` is kept up to date by GitHub Actions (under `.github/workflows/`). Two workflows open pull requests, and each one builds the Linux Home Manager configuration as a check before merging, so a broken update never lands on `main`:
-
-- `update-flake-ai.yml` — daily. Updates the fast-moving AI / agent inputs (`llm-agents`, `agent-browser`, `agent-skills`, `anthropic-skills`, `herdr-skill`, `mattpocock-skills`, `vercel-*-skills`).
-- `update-flake-stable.yml` — every 3 days. Updates the base inputs (`nixpkgs`, `nix-darwin`, `home-manager`).
-
-Both configure the `cache.numtide.com` binary cache in CI so AI tools are downloaded rather than rebuilt from source during the validation build. Validated PRs are auto-merged; you still apply them per machine with `git pull` and a switch (`nix-switch` / `darwin-switch`). The repo is public, so GitHub-hosted runners are free.
-
-## Included tools and configs
-
-- XDG Base Directory support
-- Zsh
-- Sheldon
-- Starship
-- Neovim
-- tmux
-- WezTerm
-- Ghostty
-- Karabiner-Elements
-- Git / lazygit
-- direnv (with nix-direnv)
-- Claude Code / Codex / Antigravity CLI / Grok / agent skills / MCP servers
-- herdr (agent multiplexer — a tmux-like TUI for AI coding agents)
-- rumdl (Markdown linter/formatter, used as the Neovim Markdown LSP)
-- dotbench (Zsh / Neovim startup benchmark)
-- CLI tools such as ripgrep, fd, fzf, yazi, and zoxide
-
-## Startup benchmark
-
-`dotbench` measures interactive Zsh and headless Neovim startup times. It runs
-each command once to warm filesystem caches, then reports statistics from 10
-measured runs:
-
-```bash
-dotbench
-```
-
-Pass a positive integer to change the number of measured runs:
-
-```bash
-dotbench 20
-```
-
-Example output:
-
-```text
-Startup benchmark (10 runs, one warm-up; lower is better)
-zsh interactive  min 41.2 ms  median 42.2 ms  mean 42.2 ms  max 43.4 ms
-nvim headless    min 26.1 ms  median 26.8 ms  mean 26.8 ms  max 27.9 ms
-```
-
-Use the median when comparing changes; it is less affected by occasional
-background activity than the mean or maximum. `dotbench` is installed by the
-shared Home Manager `base` preset, so it is available after `nix-switch` or the
-equivalent Home Manager switch for the current host.
+- [Maintenance Commands](docs/maintenance.md)
+- [Zsh keybindings](docs/zsh-keybindings.md)
+- [Neovim cheatsheet](docs/nvim-cheatsheet.md)
+- [VM remote workflow](docs/vm-remote-workflow.md)
 
 ## Insight
+
+<!-- rumdl-disable MD013 MD033 -->
 
 ### Activity
 
@@ -368,3 +454,5 @@ equivalent Home Manager switch for the current host.
 </a>
 
 <!-- Made with [OSS Insight](https://ossinsight.io/) -->
+
+<!-- rumdl-enable MD013 MD033 -->
