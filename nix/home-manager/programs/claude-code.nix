@@ -108,8 +108,8 @@ in
       autoUpdates = false;
       includeCoAuthoredBy = false;
       outputStyle = "Explanatory";
-      model = "claude-opus-4-8";
-      effortLevel = "high";
+      model = "opus";
+      effortLevel = "medium";
       fastMode = false;
       # ローカルのセッション履歴を ccusage などで長期間集計できるよう保持する。
       cleanupPeriodDays = 3650;
