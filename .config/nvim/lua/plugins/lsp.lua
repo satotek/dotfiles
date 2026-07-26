@@ -76,9 +76,13 @@ return {
             Snacks.picker.lsp_workspace_symbols()
           end, "LSP Workspace Symbols")
           map("<leader>ca", vim.lsp.buf.code_action, "Code Action", { "n", "x" })
-          map("<leader>cr", function()
-            vim.cmd("IncRename " .. vim.fn.expand("<cword>"))
-          end, "Rename", "n")
+          vim.keymap.set("n", "<leader>cr", function()
+            return ":IncRename " .. vim.fn.expand("<cword>")
+          end, {
+            buffer = event.buf,
+            expr = true,
+            desc = "Rename",
+          })
           map("gD", "<cmd>Glance definitions<cr>", "Glance Definitions")
           map("gR", "<cmd>Glance references<cr>", "Glance References")
           map("gY", "<cmd>Glance type_definitions<cr>", "Glance Type Definitions")
