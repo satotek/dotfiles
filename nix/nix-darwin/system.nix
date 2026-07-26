@@ -23,7 +23,6 @@
   nix.enable = false;
 
   environment.systemPackages = with pkgs; [
-    curl
     git
     vim
   ];

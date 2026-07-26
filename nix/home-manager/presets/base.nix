@@ -33,7 +33,6 @@ in
     # bat / eza は zsh.nix の ZENO_GIT_CAT / ZENO_GIT_TREE が前提とする
     bat
     dotbench
-    curl
     deno
     eza
     fd
@@ -46,15 +45,10 @@ in
   ];
 
   imports = [
-    ../programs/agents-skills.nix
     ../programs/btop.nix
-    ../programs/claude-code.nix
-    ../programs/codex.nix
     ../programs/direnv.nix
     ../programs/ghostty.nix
     ../programs/git.nix
-    ../programs/herdr.nix
-    ../programs/hunk.nix
     ../programs/lazygit.nix
     ../programs/nvim.nix
     ../programs/sheldon.nix

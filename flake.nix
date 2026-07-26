@@ -187,6 +187,8 @@
         extraModules = [
           ./nix/home-manager/platforms/darwin.nix
           ./nix/home-manager/presets/base.nix
+          ./nix/home-manager/presets/agents.nix
+          ./nix/home-manager/presets/cloud.nix
           ./nix/home-manager/presets/devtools.nix
           ./nix/home-manager/presets/rust.nix
           ./nix/home-manager/presets/webdevtools.nix

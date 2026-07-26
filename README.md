@@ -231,11 +231,10 @@ Existing encrypted files do not gain a new KMS recipient merely by changing
 sops updatekeys secrets/*.yaml
 ```
 
-At present, `nix/home-manager/programs/sops.nix` is imported only on macOS
-because the Cloudflare secret is Mac-only. Linux can decrypt the Context7 file
-directly with GCP KMS, but `nix-switch` does not materialize it until the Home
-Manager secret definitions are split into shared Context7 and Mac-only
-Cloudflare parts.
+`nix/home-manager/programs/sops.nix` is imported by the shared agents preset.
+Context7 is therefore materialized on every host that uses that preset, while
+the Cloudflare secret remains restricted to macOS. Each participating host
+needs GCP ADC credentials before `nix-switch` can decrypt its secrets.
 
 The GCP billing account has a monthly JPY 100 budget for `nosuke-net`, with
 current-spend alerts at 50%, 80%, and 100%. A budget sends notifications; it
@@ -262,7 +261,7 @@ dotfiles/
 │   │   ├── data/             # pure data shared across tools (e.g. mcp-servers.nix)
 │   │   ├── home/             # core home setup (shell, profile, directories, nix, migrations)
 │   │   ├── platforms/        # darwin.nix / linux.nix
-│   │   ├── presets/          # package bundles: base / devtools / webdevtools
+│   │   ├── presets/          # package bundles: base / agents / cloud / language toolchains
 │   │   └── programs/         # one file per tool (git, zsh, nvim, direnv, claude-code, ...)
 │   ├── hosts/
 │   │   ├── darwin/
@@ -286,7 +285,7 @@ dotfiles/
 - Zsh plugins are managed with `sheldon`, and the prompt is managed with `starship`
 - Shell integrations for `zoxide`, `starship`, and `sheldon` are cached at startup for faster shell init
 - `direnv` (with `nix-direnv`) is managed under `programs/direnv.nix`
-- Agent tooling — Claude Code, Codex, agent skills, and MCP servers — is managed under `programs/` (with the MCP server definitions shared via `data/mcp-servers.nix`)
+- Agent tooling — Claude Code, Codex, Antigravity CLI, Grok, agent skills, and MCP servers — is managed under `programs/` (with the MCP server definitions shared via `data/mcp-servers.nix`)
 - macOS GUI apps are managed through the `nix-darwin` Homebrew module under `nix/nix-darwin/`
 - `flake.lock` is updated automatically by GitHub Actions (see Automation)
 
@@ -312,7 +311,7 @@ Both configure the `cache.numtide.com` binary cache in CI so AI tools are downlo
 - Karabiner-Elements
 - Git / lazygit
 - direnv (with nix-direnv)
-- Claude Code / Codex / agent skills / MCP servers
+- Claude Code / Codex / Antigravity CLI / Grok / agent skills / MCP servers
 - herdr (agent multiplexer — a tmux-like TUI for AI coding agents)
 - rumdl (Markdown linter/formatter, used as the Neovim Markdown LSP)
 - dotbench (Zsh / Neovim startup benchmark)
