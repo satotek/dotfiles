@@ -269,7 +269,7 @@ dotfiles/
 │   └── nix-darwin/           # system.nix / homebrew.nix
 ├── .github/
 │   └── workflows/            # CI: automatic flake.lock updates (see Automation)
-├── .config/                  # repo-backed configs (nvim, lazygit, ...)
+├── .config/                  # repo-backed configs (nvim, wezterm, ...)
 ├── flake.nix
 └── flake.lock
 ```

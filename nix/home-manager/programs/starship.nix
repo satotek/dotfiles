@@ -1,4 +1,4 @@
-{ ... }:
+{ config, pkgs, ... }:
 {
   programs.starship = {
     enable = true;
@@ -149,4 +149,12 @@
       character.disabled = false;
     };
   };
+
+  # Nix storeのmtimeでは設定変更を確実に検出できないため、Home Managerの
+  # 内容比較でstarship.tomlが変わった場合は、次回起動時にinitを再生成する。
+  home.file."${config.xdg.configHome}/starship.toml".onChange = ''
+    ${pkgs.coreutils}/bin/rm -f \
+      "${config.home.homeDirectory}/.local/cache/zsh/starship.zsh" \
+      "${config.home.homeDirectory}/.local/cache/zsh/starship.path"
+  '';
 }

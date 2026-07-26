@@ -49,7 +49,7 @@ in
     ../programs/direnv.nix
     ../programs/ghostty.nix
     ../programs/git.nix
-    ../programs/lazygit.nix
+    ../programs/lazygit
     ../programs/nvim.nix
     ../programs/sheldon.nix
     ../programs/starship.nix

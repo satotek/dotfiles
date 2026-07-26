@@ -4,6 +4,8 @@ let
   dotfilesDir = "${homeDirectory}/dotfiles";
 in
 {
+  xdg.enable = true;
+
   xdg.configFile."profile".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/nix/home-manager/home/profile.sh";
 }
