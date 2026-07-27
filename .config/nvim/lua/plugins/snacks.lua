@@ -125,11 +125,11 @@ return {
         desc = "Projects",
       },
       {
-        "<leader>gd",
+        "<leader>gg",
         function()
-          Snacks.picker.git_diff()
+          Snacks.lazygit({ cwd = root() })
         end,
-        desc = "Git Diff",
+        desc = "Lazygit (Root Dir)",
       },
       {
         "<leader>gs",
