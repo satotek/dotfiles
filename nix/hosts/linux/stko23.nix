@@ -7,6 +7,9 @@
   userName = "stko23";
   homeDirectory = "/home/stko23";
   extraModules = [
+    {
+      dotfiles.sops.enable = false;
+    }
     ../../home-manager/platforms/linux.nix
     ../../home-manager/presets/base.nix
     ../../home-manager/presets/agents.nix
