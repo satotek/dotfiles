@@ -112,11 +112,11 @@
     "herdr-skill": {
       "flake": false,
       "locked": {
-        "lastModified": 1785242053,
-        "narHash": "sha256-5W2iCZ2GfxrBk7wMIdScyceq5Ohm3/XqDcM9PT3xTEM=",
+        "lastModified": 1785282893,
+        "narHash": "sha256-SeBkJePTxcFhXzFgGiSXMlAY359bgf5aTgmywZJhuoM=",
         "owner": "ogulcancelik",
         "repo": "herdr",
-        "rev": "e16d7d8c07a20f5ee0b4111808680bbcfd7df9ac",
+        "rev": "73d92004f50d3f5fafe64e0f9b7fddbcf4d99965",
         "type": "github"
       },
       "original": {
@@ -132,11 +132,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785269816,
-        "narHash": "sha256-6JkNDlJ18NY1iAuoSYCPDO7O+yYN/vPwpFmHOHNpVvY=",
+        "lastModified": 1785306346,
+        "narHash": "sha256-DScBkW0fOgpGPK2trNoX3ryLTlaC14+gglFo/BhGJ4g=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "3d25fa94cf355cf7da64c77bb9c3c15806486329",
+        "rev": "e705714e918c3b11affcdd15db2cbe3a070420a0",
         "type": "github"
       },
       "original": {
@@ -154,11 +154,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1785269306,
-        "narHash": "sha256-pPI3X8Q4y3vdRDth85/CV0FF3tOz5YG+zISI5iqH3As=",
+        "lastModified": 1785307878,
+        "narHash": "sha256-e+JNMcQ076Grfw2gMXOGdHABOjrJx078Op2k8VWIru8=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "687b415a756be7b1c3589969b31781e0f04fb684",
+        "rev": "0494202c9aa39d9ee16658ca91f3c0559d00cb15",
         "type": "github"
       },
       "original": {
