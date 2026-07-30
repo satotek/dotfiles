@@ -112,11 +112,11 @@
     "herdr-skill": {
       "flake": false,
       "locked": {
-        "lastModified": 1785282893,
-        "narHash": "sha256-SeBkJePTxcFhXzFgGiSXMlAY359bgf5aTgmywZJhuoM=",
+        "lastModified": 1785368705,
+        "narHash": "sha256-PjN9SpnGRcqciiVgmDgt3RYhRufObMwODZHTZ6W/F4Q=",
         "owner": "ogulcancelik",
         "repo": "herdr",
-        "rev": "73d92004f50d3f5fafe64e0f9b7fddbcf4d99965",
+        "rev": "b44b5b10132b4332f6ac8e8ffc64553d1e176237",
         "type": "github"
       },
       "original": {
