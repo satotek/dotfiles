@@ -6,6 +6,38 @@
 }:
 let
   homeDir = config.home.homeDirectory;
+
+  # React Aria 公式 skill は Git リポジトリではなく well-known endpoint で配布される。
+  # index と skill 全体の再帰 hash を固定し、上流の無検証な変更を取り込まない。
+  reactAriaSkillIndex = pkgs.fetchurl {
+    url = "https://react-aria.adobe.com/.well-known/skills/index.json";
+    hash = "sha256-IINLNbKLDfGNMLqj1jrJXp6SHEKPJjbIbqwzZCZyizw=";
+  };
+  reactAriaSkill =
+    pkgs.runCommand "react-aria-skill"
+      {
+        nativeBuildInputs = [
+          pkgs.curl
+          pkgs.jq
+        ];
+        outputHashMode = "recursive";
+        outputHashAlgo = "sha256";
+        outputHash = "sha256-L1Urh1nXZ5Kw3MObHPehDixRRjZYlEiOwBT0UFiKNeA=";
+      }
+      ''
+        skill_base="https://react-aria.adobe.com/.well-known/skills/react-aria"
+        mkdir -p "$out"
+
+        jq -r '.skills[] | select(.name == "react-aria") | .files[]' \
+          ${reactAriaSkillIndex} | while IFS= read -r file; do
+          target="$out/$file"
+          mkdir -p "$(dirname "$target")"
+          curl --fail --location --silent --show-error \
+            --cacert ${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt \
+            "$skill_base/$file" \
+            --output "$target"
+        done
+      '';
 in
 {
   imports = [
@@ -55,6 +87,10 @@ in
         subdir = "skills";
       };
 
+      react-aria = {
+        path = "${reactAriaSkill}";
+      };
+
       # hunk 公式 skill (hunk-review)。パッケージに同梱されているため flake input 不要。
       # ${hunk}/skills/hunk-review/SKILL.md の単一ファイルツリーをそのまま source にする
       # (herdr のような symlink 混入が無いので runCommand 抽出も不要)。
@@ -85,6 +121,11 @@ in
 
       web-design-guidelines = {
         from = "vercel-agent-skills";
+      };
+
+      react-aria = {
+        from = "react-aria";
+        path = ".";
       };
 
       grill-me = {
