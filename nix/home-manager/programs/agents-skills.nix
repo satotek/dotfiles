@@ -11,7 +11,7 @@ let
   # index と skill 全体の再帰 hash を固定し、上流の無検証な変更を取り込まない。
   reactAriaSkillIndex = pkgs.fetchurl {
     url = "https://react-aria.adobe.com/.well-known/skills/index.json";
-    hash = "sha256-IINLNbKLDfGNMLqj1jrJXp6SHEKPJjbIbqwzZCZyizw=";
+    hash = "sha256-KyoDNoEysqdILf+7Wi74cEtO4Fd1Kx8JOmyw+dR9GbU=";
   };
   reactAriaSkill =
     pkgs.runCommand "react-aria-skill"
@@ -22,7 +22,7 @@ let
         ];
         outputHashMode = "recursive";
         outputHashAlgo = "sha256";
-        outputHash = "sha256-L1Urh1nXZ5Kw3MObHPehDixRRjZYlEiOwBT0UFiKNeA=";
+        outputHash = "sha256-aJeRYH7EPoakb8opsnzMjdXveyFbhvR/g+sc0RwCF6s=";
       }
       ''
         skill_base="https://react-aria.adobe.com/.well-known/skills/react-aria"

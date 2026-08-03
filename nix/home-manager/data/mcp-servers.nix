@@ -21,7 +21,7 @@
           fi
         fi
 
-        exec npx -y @upstash/context7-mcp
+        exec bunx -y @upstash/context7-mcp
       ''
       "context7-mcp"
       (if context7ApiKeyFile == null then "" else context7ApiKeyFile)
@@ -29,7 +29,7 @@
   };
 
   playwright = {
-    command = "npx";
+    command = "bunx";
     args = [
       "-y"
       "@playwright/mcp@latest"
@@ -37,7 +37,7 @@
   };
 
   chrome-devtools = {
-    command = "npx";
+    command = "bunx";
     args = [
       "-y"
       "chrome-devtools-mcp@latest"
