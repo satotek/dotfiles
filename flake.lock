@@ -56,6 +56,22 @@
         "type": "github"
       }
     },
+    "ast-grep-skill": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1783087819,
+        "narHash": "sha256-awochSE2OupbsmaGx0xc7wHf0ovVMSdtHv4gZAGWOus=",
+        "owner": "ast-grep",
+        "repo": "claude-skill",
+        "rev": "c2a9bc154f4ffe08b25d28d5e852dfac8c0d0d8a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ast-grep",
+        "repo": "claude-skill",
+        "type": "github"
+      }
+    },
     "blueprint": {
       "inputs": {
         "nixpkgs": [
@@ -264,6 +280,7 @@
         "agent-browser": "agent-browser",
         "agent-skills": "agent-skills",
         "anthropic-skills": "anthropic-skills",
+        "ast-grep-skill": "ast-grep-skill",
         "herdr-skill": "herdr-skill",
         "home-manager": "home-manager",
         "llm-agents": "llm-agents",

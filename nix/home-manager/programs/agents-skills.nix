@@ -83,6 +83,11 @@ in
         subdir = "skills";
       };
 
+      ast-grep = {
+        input = "ast-grep-skill";
+        subdir = "ast-grep/skills";
+      };
+
       herdr = {
         input = "herdr-skill";
         subdir = "skills";
@@ -144,6 +149,12 @@ in
 
       agent-browser = {
         from = "agent-browser";
+      };
+
+      ast-grep = {
+        from = "ast-grep";
+        path = "ast-grep";
+        packages = [ pkgs.ast-grep ];
       };
 
       herdr = {

@@ -52,6 +52,12 @@
       url = "github:vercel-labs/agent-browser";
       flake = false;
     };
+
+    # ast-grep の公式 Agent Skill。CLI 本体は nixpkgs の ast-grep を使う。
+    ast-grep-skill = {
+      url = "github:ast-grep/claude-skill";
+      flake = false;
+    };
   };
 
   outputs =

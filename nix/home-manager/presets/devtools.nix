@@ -2,6 +2,7 @@
 {
   home.packages = with pkgs; [
     bash-language-server
+    ast-grep
     ffmpeg
     gh
     go
