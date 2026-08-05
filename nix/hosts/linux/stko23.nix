@@ -13,6 +13,13 @@
     ../../home-manager/platforms/linux.nix
     ../../home-manager/presets/base.nix
     ../../home-manager/presets/agents.nix
+    (
+      { lib, ... }:
+      {
+        # WSL では React Aria の外部取得に依存しない。
+        programs.agent-skills.enable = lib.mkForce false;
+      }
+    )
     ../../home-manager/presets/cloud.nix
     ../../home-manager/presets/devtools.nix
     ../../home-manager/presets/rust.nix
