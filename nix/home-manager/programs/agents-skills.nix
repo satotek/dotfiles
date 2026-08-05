@@ -65,6 +65,7 @@ in
 
       vercel-next-skills = {
         input = "vercel-next-skills";
+        subdir = "skills";
       };
 
       anthropic-skills = {
@@ -109,6 +110,10 @@ in
         from = "anthropic-skills";
       };
 
+      webapp-testing = {
+        from = "anthropic-skills";
+      };
+
       vercel-react-best-practices = {
         from = "vercel-agent-skills";
         path = "react-best-practices";
@@ -121,6 +126,10 @@ in
 
       web-design-guidelines = {
         from = "vercel-agent-skills";
+      };
+
+      next-dev-loop = {
+        from = "vercel-next-skills";
       };
 
       react-aria = {

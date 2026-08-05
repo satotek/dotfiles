@@ -345,16 +345,17 @@
     "vercel-next-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1782174821,
-        "narHash": "sha256-ntz4DzUm1xWHPPwGBvjH3Jb4udgnyT4+/b1HD2BLvXI=",
-        "owner": "vercel-labs",
-        "repo": "next-skills",
-        "rev": "b76d687cf3e026eac3b1032f610f06b47a56377c",
+        "lastModified": 1785787604,
+        "narHash": "sha256-Vm5CXoVjBKmWykEnoPcGlVDgt9j1kNdhjbA4+GwBPEA=",
+        "owner": "vercel",
+        "repo": "next.js",
+        "rev": "d73f5622e226358dcef8cf7a8a373333ff265ae7",
         "type": "github"
       },
       "original": {
-        "owner": "vercel-labs",
-        "repo": "next-skills",
+        "owner": "vercel",
+        "ref": "v16.3.0",
+        "repo": "next.js",
         "type": "github"
       }
     },
