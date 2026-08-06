@@ -7,7 +7,7 @@ cache_dir="${XDG_CACHE_HOME:-$HOME/.local/cache}/zsh"
 sheldon_cache="$cache_dir/sheldon.zsh"
 sheldon_toml="${XDG_CONFIG_HOME:-$HOME/.config}/sheldon/plugins.toml"
 sheldon_lock="${XDG_DATA_HOME:-$HOME/.local/share}/sheldon/plugins.lock"
-_sheldon_bin="$(command -v sheldon)"
+_sheldon_bin="${commands[sheldon]:-}"
 
 if [[ -n "$_sheldon_bin" && ( ! -r "$sheldon_cache" || "$sheldon_toml" -nt "$sheldon_cache" || ( -r "$sheldon_lock" && "$sheldon_lock" -nt "$sheldon_cache" ) ) ]]; then
   _sheldon_tmp="$sheldon_cache.tmp.$$"
@@ -23,6 +23,26 @@ if [[ -r "$sheldon_cache" ]]; then
   builtin source "$sheldon_cache"
 fi
 unset _sheldon_tmp _sheldon_bin sheldon_toml sheldon_lock
+
+_direnv_cache="$cache_dir/direnv.zsh"
+_direnv_stamp="$cache_dir/direnv.path"
+_direnv_bin="${commands[direnv]:-}"
+_direnv_real="${_direnv_bin:A}"
+if [[ -n "$_direnv_bin" ]] && { [[ ! -r "$_direnv_cache" ]] || [[ ! -r "$_direnv_stamp" ]] || [[ "$(<"$_direnv_stamp")" != "$_direnv_real" ]]; }; then
+  _direnv_tmp="$cache_dir/direnv.zsh.tmp.$$"
+  _direnv_stamp_tmp="$cache_dir/direnv.path.tmp.$$"
+  if "$_direnv_bin" hook zsh >| "$_direnv_tmp"; then
+    mv -f "$_direnv_tmp" "$_direnv_cache"
+    print -r -- "$_direnv_real" >| "$_direnv_stamp_tmp"
+    mv -f "$_direnv_stamp_tmp" "$_direnv_stamp"
+  else
+    rm -f "$_direnv_tmp" "$_direnv_stamp_tmp"
+  fi
+fi
+if [[ -r "$_direnv_cache" ]]; then
+  ensure_zcompiled "$_direnv_cache"
+  builtin source "$_direnv_cache"
+fi
 
 zle -N ghq-roots-widget _ghq_roots_widget
 bindkey '^g' ghq-roots-widget
@@ -56,7 +76,7 @@ fi
 _starship_cache="$cache_dir/starship.zsh"
 _starship_stamp="$cache_dir/starship.path"
 _starship_config="${XDG_CONFIG_HOME:-$HOME/.config}/starship.toml"
-_starship_bin="$(command -v starship)"
+_starship_bin="${commands[starship]:-}"
 _starship_real="${_starship_bin:A}"
 _starship_cache_version="parallel-prompt-v1"
 _starship_signature="${_starship_real}|${_starship_cache_version}"
@@ -93,7 +113,7 @@ fi
 
 _fzf_cache="$cache_dir/fzf.zsh"
 _fzf_stamp="$cache_dir/fzf.path"
-_fzf_bin="$(command -v fzf)"
+_fzf_bin="${commands[fzf]:-}"
 _fzf_real="${_fzf_bin:A}"
 if [[ -n "$_fzf_bin" ]] && { [[ ! -r "$_fzf_cache" ]] || [[ ! -r "$_fzf_stamp" ]] || [[ "$(<"$_fzf_stamp")" != "$_fzf_real" ]]; }; then
   _fzf_tmp="$cache_dir/fzf.zsh.tmp.$$"
@@ -106,14 +126,63 @@ if [[ -n "$_fzf_bin" ]] && { [[ ! -r "$_fzf_cache" ]] || [[ ! -r "$_fzf_stamp" ]
     rm -f "$_fzf_tmp" "$_fzf_stamp_tmp"
   fi
 fi
-if [[ -r "$_fzf_cache" && $options[zle] = on ]]; then
+if [[ -r "$_fzf_cache" ]]; then
   ensure_zcompiled "$_fzf_cache"
-  builtin source "$_fzf_cache"
+fi
+
+typeset -gr _FZF_INIT_CACHE="$_fzf_cache"
+
+_fzf_lazy_load() {
+  (( $+functions[fzf-file-widget] )) && return
+  [[ -r "$_FZF_INIT_CACHE" ]] || return 1
+  builtin source "$_FZF_INIT_CACHE"
+}
+
+_fzf_lazy_file_widget() {
+  _fzf_lazy_load || return
+  zle fzf-file-widget
+}
+
+_fzf_lazy_cd_widget() {
+  _fzf_lazy_load || return
+  zle fzf-cd-widget
+}
+
+_fzf_lazy_history_widget() {
+  _fzf_lazy_load || return
+  zle fzf-history-widget
+}
+
+_fzf_lazy_completion_widget() {
+  _fzf_lazy_load || return
+  zle fzf-completion
+}
+
+if [[ -r "$_FZF_INIT_CACHE" && $options[zle] = on ]]; then
+  typeset -g fzf_default_completion=expand-or-complete
+  _fzf_binding="$(bindkey '^I')"
+  if [[ "$_fzf_binding" != *undefined-key* ]]; then
+    typeset -g fzf_default_completion="${${(z)_fzf_binding}[2]}"
+  fi
+  unset _fzf_binding
+
+  zle -N _fzf_lazy_file_widget
+  zle -N _fzf_lazy_cd_widget
+  zle -N _fzf_lazy_history_widget
+  zle -N _fzf_lazy_completion_widget
+
+  for _fzf_keymap in emacs vicmd viins; do
+    bindkey -M "$_fzf_keymap" '^T' _fzf_lazy_file_widget
+    bindkey -M "$_fzf_keymap" '\ec' _fzf_lazy_cd_widget
+    bindkey -M "$_fzf_keymap" '^R' _fzf_lazy_history_widget
+  done
+  bindkey '^I' _fzf_lazy_completion_widget
+  unset _fzf_keymap
 fi
 
 _zoxide_cache="$cache_dir/zoxide.zsh"
 _zoxide_stamp="$cache_dir/zoxide.path"
-_zoxide_bin="$(command -v zoxide)"
+_zoxide_bin="${commands[zoxide]:-}"
 _zoxide_real="${_zoxide_bin:A}"
 if [[ -n "$_zoxide_bin" ]] && { [[ ! -r "$_zoxide_cache" ]] || [[ ! -r "$_zoxide_stamp" ]] || [[ "$(<"$_zoxide_stamp")" != "$_zoxide_real" ]]; }; then
   _zoxide_tmp="$cache_dir/zoxide.zsh.tmp.$$"
@@ -138,6 +207,8 @@ else
 fi
 
 unset DEFER_COMPINIT cache_dir sheldon_cache
+unset _direnv_bin _direnv_real _direnv_cache _direnv_stamp
+unset _direnv_tmp _direnv_stamp_tmp
 unset _starship_bin _starship_real _starship_cache _starship_stamp _starship_config
 unset _starship_cache_version _starship_signature _starship_line
 unset _starship_tmp _starship_raw_tmp _starship_stamp_tmp
