@@ -4,7 +4,10 @@ let
   dotfilesDir = "${homeDirectory}/dotfiles";
 in
 {
-  xdg.enable = true;
+  xdg = {
+    enable = true;
+    cacheHome = "${homeDirectory}/.local/cache";
+  };
 
   xdg.configFile."profile".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/nix/home-manager/home/profile.sh";

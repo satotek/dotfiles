@@ -67,6 +67,7 @@ in
 
   programs.fzf = {
     enable = true;
-    enableZshIntegration = true;
+    # init.zshで生成結果をキャッシュ・zcompileして読み込む。
+    enableZshIntegration = false;
   };
 }

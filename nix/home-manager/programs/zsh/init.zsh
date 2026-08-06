@@ -1,3 +1,6 @@
+unfunction dirname 2>/dev/null
+zmodload -u zsh/files 2>/dev/null
+
 cache_dir="${XDG_CACHE_HOME:-$HOME/.local/cache}/zsh"
 [[ -d "$cache_dir" ]] || mkdir -p "$cache_dir"
 
@@ -88,6 +91,26 @@ if [[ -r "$_starship_cache" ]]; then
   builtin source "$_starship_cache"
 fi
 
+_fzf_cache="$cache_dir/fzf.zsh"
+_fzf_stamp="$cache_dir/fzf.path"
+_fzf_bin="$(command -v fzf)"
+_fzf_real="${_fzf_bin:A}"
+if [[ -n "$_fzf_bin" ]] && { [[ ! -r "$_fzf_cache" ]] || [[ ! -r "$_fzf_stamp" ]] || [[ "$(<"$_fzf_stamp")" != "$_fzf_real" ]]; }; then
+  _fzf_tmp="$cache_dir/fzf.zsh.tmp.$$"
+  _fzf_stamp_tmp="$cache_dir/fzf.path.tmp.$$"
+  if "$_fzf_bin" --zsh >| "$_fzf_tmp"; then
+    mv -f "$_fzf_tmp" "$_fzf_cache"
+    print -r -- "$_fzf_real" >| "$_fzf_stamp_tmp"
+    mv -f "$_fzf_stamp_tmp" "$_fzf_stamp"
+  else
+    rm -f "$_fzf_tmp" "$_fzf_stamp_tmp"
+  fi
+fi
+if [[ -r "$_fzf_cache" && $options[zle] = on ]]; then
+  ensure_zcompiled "$_fzf_cache"
+  builtin source "$_fzf_cache"
+fi
+
 _zoxide_cache="$cache_dir/zoxide.zsh"
 _zoxide_stamp="$cache_dir/zoxide.path"
 _zoxide_bin="$(command -v zoxide)"
@@ -118,5 +141,6 @@ unset DEFER_COMPINIT cache_dir sheldon_cache
 unset _starship_bin _starship_real _starship_cache _starship_stamp _starship_config
 unset _starship_cache_version _starship_signature _starship_line
 unset _starship_tmp _starship_raw_tmp _starship_stamp_tmp
+unset _fzf_bin _fzf_real _fzf_cache _fzf_stamp _fzf_tmp _fzf_stamp_tmp
 unset _zoxide_bin _zoxide_real _zoxide_cache _zoxide_stamp
 unset _zoxide_tmp _zoxide_stamp_tmp
