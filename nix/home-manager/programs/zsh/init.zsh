@@ -55,19 +55,32 @@ _starship_stamp="$cache_dir/starship.path"
 _starship_config="${XDG_CONFIG_HOME:-$HOME/.config}/starship.toml"
 _starship_bin="$(command -v starship)"
 _starship_real="${_starship_bin:A}"
+_starship_cache_version="parallel-prompt-v1"
+_starship_signature="${_starship_real}|${_starship_cache_version}"
 # starship init bakes the generator's absolute path into the cache, so a
 # profile-path change (e.g. nix-darwin -> standalone home-manager) leaves a
 # stale, unresolvable path. Track the resolved Nix store path explicitly
 # because store mtimes are fixed and the profile symlink path is stable.
-if [[ -n "$_starship_bin" ]] && { [[ ! -r "$_starship_cache" ]] || [[ ! -r "$_starship_stamp" ]] || [[ "$(<"$_starship_stamp")" != "$_starship_real" ]] || { [[ -r "$_starship_config" ]] && [[ "$_starship_config" -nt "$_starship_cache" ]]; }; }; then
+if [[ -n "$_starship_bin" ]] && { [[ ! -r "$_starship_cache" ]] || [[ ! -r "$_starship_stamp" ]] || [[ "$(<"$_starship_stamp")" != "$_starship_signature" ]] || { [[ -r "$_starship_config" ]] && [[ "$_starship_config" -nt "$_starship_cache" ]]; }; }; then
   _starship_tmp="$cache_dir/starship.zsh.tmp.$$"
+  _starship_raw_tmp="$cache_dir/starship.zsh.raw.tmp.$$"
   _starship_stamp_tmp="$cache_dir/starship.path.tmp.$$"
-  if "$_starship_bin" init zsh >| "$_starship_tmp"; then
+  if "$_starship_bin" init zsh >| "$_starship_raw_tmp"; then
+    # The generated integration executes `starship prompt --continuation`
+    # while it is sourced. Replace that fixed output before caching it.
+    while IFS= read -r _starship_line; do
+      if [[ "$_starship_line" == 'PROMPT2='* ]]; then
+        print -r -- 'PROMPT2=$'\''%{\e[90m%}∙%{\e[0m%} '\'''
+      else
+        print -r -- "$_starship_line"
+      fi
+    done < "$_starship_raw_tmp" >| "$_starship_tmp"
     mv -f "$_starship_tmp" "$_starship_cache"
-    print -r -- "$_starship_real" >| "$_starship_stamp_tmp"
+    print -r -- "$_starship_signature" >| "$_starship_stamp_tmp"
     mv -f "$_starship_stamp_tmp" "$_starship_stamp"
+    rm -f "$_starship_raw_tmp"
   else
-    rm -f "$_starship_tmp" "$_starship_stamp_tmp"
+    rm -f "$_starship_tmp" "$_starship_raw_tmp" "$_starship_stamp_tmp"
   fi
 fi
 if [[ -r "$_starship_cache" ]]; then
@@ -103,6 +116,7 @@ fi
 
 unset DEFER_COMPINIT cache_dir sheldon_cache
 unset _starship_bin _starship_real _starship_cache _starship_stamp _starship_config
-unset _starship_tmp _starship_stamp_tmp
+unset _starship_cache_version _starship_signature _starship_line
+unset _starship_tmp _starship_raw_tmp _starship_stamp_tmp
 unset _zoxide_bin _zoxide_real _zoxide_cache _zoxide_stamp
 unset _zoxide_tmp _zoxide_stamp_tmp

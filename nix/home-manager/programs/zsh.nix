@@ -60,6 +60,7 @@ in
 
         typeset -g DEFER_COMPINIT=${lib.boolToString deferCompinit}
         ${readZsh "init"}
+        ${readZsh "prompt"}
       ''
     ];
   };
