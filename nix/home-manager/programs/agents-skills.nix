@@ -33,6 +33,9 @@ let
           target="$out/$file"
           mkdir -p "$(dirname "$target")"
           curl --fail --location --silent --show-error \
+            --retry 5 \
+            --retry-all-errors \
+            --retry-delay 1 \
             --cacert ${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt \
             "$skill_base/$file" \
             --output "$target"
