@@ -42,6 +42,9 @@ in
       "..." = "../../";
       "...." = "../../../";
       "....." = "../../../../";
+      nfu = "nix flake update --flake ~/dotfiles";
+      nfs = "nix flake show ~/dotfiles";
+      ngc = "nix-collect-garbage -d";
     };
 
     envExtra = ''
@@ -59,5 +62,10 @@ in
         ${readZsh "init"}
       ''
     ];
+  };
+
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
   };
 }

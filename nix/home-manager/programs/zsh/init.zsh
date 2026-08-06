@@ -21,18 +21,6 @@ if [[ -r "$sheldon_cache" ]]; then
 fi
 unset _sheldon_tmp _sheldon_bin sheldon_toml sheldon_lock
 
-if [[ -n $ZENO_LOADED ]]; then
-  bindkey ' ' zeno-auto-snippet
-  bindkey '^m' zeno-auto-snippet-and-accept-line
-  bindkey '^i' zeno-completion
-  bindkey '^x ' zeno-insert-space
-  bindkey '^x^m' accept-line
-  bindkey '^x^z' zeno-toggle-auto-snippet
-  bindkey '^r' zeno-smart-history-selection
-  bindkey '^x^s' zeno-insert-snippet
-  bindkey '^x^f' zeno-snippet-next-placeholder
-fi
-
 zle -N ghq-roots-widget _ghq_roots_widget
 bindkey '^g' ghq-roots-widget
 zle -N fkill-widget _fkill_widget

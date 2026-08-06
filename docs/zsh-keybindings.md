@@ -9,9 +9,9 @@
 |---|---|
 | `Ctrl-B` | Git ブランチを fzf で選んで `git switch` |
 | `Ctrl-G` | ghq 管理下のプロジェクトを fzf で選んで移動 |
-| `Ctrl-R` | Zeno のコマンド履歴を fzf で検索 |
+| `Ctrl-R` | コマンド履歴を fzf で検索 |
 | `Ctrl-X` → `Ctrl-K` | プロセスを fzf で選んで終了 (`SIGTERM`) |
-| `Tab` | Zeno の補完 |
+| `Tab` | fzf 補完（通常は Zsh の標準補完へフォールバック） |
 
 `Ctrl-X` 系は同時押しではない。`Ctrl-X` を押して離してから、次のキーを押す。
 
@@ -41,14 +41,16 @@ Git リポジトリ外では `Not in a Git repository` と表示する。
 
 ### コマンド履歴 (`Ctrl-R`)
 
-Zeno の SQLite 履歴を検索する。入力中のコマンドが初期クエリになる。
+Zsh の履歴を fzf で検索する。選択したコマンドはプロンプトへ挿入され、必要に応じて編集してから実行できる。
+
+### ファイル・ディレクトリ選択
 
 | キー | 用途 |
 |---|---|
-| `Enter` | 選択したコマンドをプロンプトへ挿入 |
-| `Ctrl-R` | global / repository / directory / session のスコープを切り替える |
-| `Ctrl-D` | 選択中の履歴を削除 |
-| `?` | 右側の詳細プレビューを表示・非表示 |
+| `Ctrl-T` | ファイルまたはディレクトリを fzf で選んでプロンプトへ挿入 |
+| `Alt-C` | ディレクトリを fzf で選んで移動 |
+
+ファイル・ディレクトリ・コマンドの補完を fzf で絞り込みたい場合は、`**` を入力してから `Tab` を押す。通常の `Tab` は Zsh の標準補完へフォールバックする。
 
 ### プロセス終了 (`Ctrl-X` → `Ctrl-K`)
 
@@ -56,20 +58,15 @@ Zeno の SQLite 履歴を検索する。入力中のコマンドが初期クエ�
 強制終了 (`SIGKILL`) ではない。
 コマンドラインに文字が入力されている場合は、それを初期クエリとして使う。
 
-## Zeno
+## 短縮コマンド
 
-| キー | 用途 |
+以下は Zsh の alias として定義される。入力した名前のまま Enter で実行される。
+
+| alias | 実行するコマンド |
 |---|---|
-| `Space` | 一致する auto snippet を展開。なければ通常の空白を入力 |
-| `Enter` | auto snippet を展開してコマンドを実行 |
-| `Tab` | Zeno 補完 |
-| `Ctrl-X` → `Space` | snippet 展開をせずに空白を入力 |
-| `Ctrl-X` → `Enter` | snippet 展開をせずにコマンドを実行 |
-| `Ctrl-X` → `Z` | auto snippet の有効・無効を切り替える |
-| `Ctrl-X` → `S` | snippet を選んで挿入 |
-| `Ctrl-X` → `F` | 次の snippet placeholder へ移動 |
-
-Zeno の snippet 定義は `.config/zeno/` に置く。
+| `nfu` | `nix flake update --flake ~/dotfiles` |
+| `nfs` | `nix flake show ~/dotfiles` |
+| `ngc` | `nix-collect-garbage -d` |
 
 ## 反映と調査
 

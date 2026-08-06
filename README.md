@@ -209,7 +209,6 @@ Nixストアの絶対パスで参照します。
 - `.config/nvim`
 - `.config/nvchad`
 - `.config/wezterm`
-- `.config/zeno`
 - `.config/hunk/config.toml`
 - `.config/karabiner/karabiner.json`
 - `.config/nix/nix.conf`
@@ -430,8 +429,7 @@ dotfiles/
 ├── .config/
 │   ├── nvim/
 │   ├── nvchad/
-│   ├── wezterm/
-│   └── zeno/
+│   └── wezterm/
 ├── docs/
 ├── secrets/
 ├── tools/

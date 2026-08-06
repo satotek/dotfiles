@@ -24,11 +24,6 @@
           hooks.pre = "ZSH_AUTOSUGGEST_USE_ASYNC=1";
         };
 
-        zeno = {
-          github = "yuki-yano/zeno.zsh";
-          branch = "feature/sqlite-history-subsystem";
-        };
-
         fast-syntax-highlighting = {
           github = "zdharma-continuum/fast-syntax-highlighting";
           use = [ "fast-syntax-highlighting.plugin.zsh" ];

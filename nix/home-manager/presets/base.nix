@@ -30,13 +30,10 @@ let
 in
 {
   home.packages = with pkgs; [
-    # bat / eza は zsh.nix の ZENO_GIT_CAT / ZENO_GIT_TREE が前提とする
     bat
     dotbench
-    deno
     eza
     fd
-    fzf
     ghq
     ripgrep
     roots
@@ -56,7 +53,6 @@ in
     ../programs/tmux.nix
     ../programs/wezterm.nix
     ../programs/wget.nix
-    ../programs/zeno.nix
     ../programs/zoxide.nix
     ../programs/zsh.nix
   ];
