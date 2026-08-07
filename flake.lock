@@ -151,11 +151,11 @@
     "herdr-skill": {
       "flake": false,
       "locked": {
-        "lastModified": 1785966958,
-        "narHash": "sha256-QTX7qzxUxCbVRZNvdkGhyNOqeKkj58C9Q1NY8nckp24=",
+        "lastModified": 1786049184,
+        "narHash": "sha256-PHiuVukTt0WuenHcEqMSiDb83a8RM73JNz4eOMmLToo=",
         "owner": "ogulcancelik",
         "repo": "herdr",
-        "rev": "2d011c39b4f4cc5edd482ed8493c663463d18701",
+        "rev": "69a07fdf061a35276295189d52d591893c429806",
         "type": "github"
       },
       "original": {
@@ -193,11 +193,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1785966013,
-        "narHash": "sha256-31Dmfn+9LxgI06QLLBurRMxy7VCgSfpl/BM709xWizI=",
+        "lastModified": 1786014936,
+        "narHash": "sha256-ToQkMfyiH/Af/AMpkJi5zR0fVb1QO1lg9jiyzhLVyjc=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "c2c6bb1e32fa0032d47aa54879d63df462dbbd5a",
+        "rev": "5028d4667177f2593ceac30f9c8395afaf6a54d9",
         "type": "github"
       },
       "original": {
@@ -209,11 +209,11 @@
     "mattpocock-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1785953398,
-        "narHash": "sha256-RwFJdrPnyieN65QrwSfABRuBzMdyUIf/qoJ1M8zLLps=",
+        "lastModified": 1786045791,
+        "narHash": "sha256-pseSJJb5nBBGPzpxA1GzjGLB9OrT+u0At1saJ4NqZ1E=",
         "owner": "mattpocock",
         "repo": "skills",
-        "rev": "8b36d4fb2635b3c21998dcd8144439c9e5ba7302",
+        "rev": "84fdeffd12f2ee307994d1eb6feb48173b6e0502",
         "type": "github"
       },
       "original": {
