@@ -11,11 +11,15 @@
         "--keep"
         "5"
         "--keep-since"
-        "30d"
+        "7d"
         "--no-gc"
         "--no-gcroots"
         "/nix/var/nix/profiles/system"
       ];
+      # nh は内部で `nix --version` を実行する。launchd はログインシェルの PATH も
+      # /etc/paths.d も引き継がないため、nix を明示しないと
+      # "No output from nix --version command" で失敗する。
+      EnvironmentVariables.PATH = "/nix/var/nix/profiles/default/bin:/usr/bin:/bin:/usr/sbin:/sbin";
       RunAtLoad = false;
       StartCalendarInterval = [
         {
