@@ -10,7 +10,11 @@ let
 
   gitLogFormat = "git log --graph --color=always --date=format:'%Y-%m-%d %H:%M' --pretty=format:'%C(#a0a0a0 reverse)%h%Creset %C(cyan)%ad%Creset %C(#dd4814)%ae%Creset %C(yellow reverse)%d%Creset %n%C(white bold)%s%Creset%n'";
 
-  schemaUrl = "https://raw.githubusercontent.com/jesseduffield/lazygit/master/schema/config.json";
+  # masterではなく実際に使うlazygitのタグを参照する。masterだと動かしているバイナリ
+  # と検証対象がずれるうえ、check-jsonschemaはURL単位でスキーマをキャッシュするため、
+  # master固定では古いスキーマを掴んだまま破壊的変更を見逃す。バージョンを含めれば
+  # アップグレード時に必ずキャッシュが切り替わる。
+  schemaUrl = "https://raw.githubusercontent.com/jesseduffield/lazygit/v${config.programs.lazygit.package.version}/schema/config.json";
   lazygitConfigFile = "${config.xdg.configHome}/lazygit/config.yml";
 
   mkOption = name: description: {
@@ -34,10 +38,14 @@ in
         branchLogCmd = "${gitLogFormat} {{branchName}} --";
         allBranchesLogCmds = [ "${gitLogFormat} --" ];
         log.showWholeGraph = true;
-        pagers = [
+        # lazygit 0.64 で git.pagers -> git.diffRenderers、pager -> command に改称された。
+        # config.yml は Nix store のシンボリックリンクで書き込めず、lazygit の自動移行が
+        # 毎回失敗するため、宣言側を新スキーマに合わせる。type は delta 向けの
+        # 既定値 "stdinFilter" のままでよい。
+        diffRenderers = [
           {
             colorArg = "always";
-            pager = "${delta} --dark --paging=never --side-by-side --line-numbers --hyperlinks --hyperlinks-file-link-format=\"lazygit-edit://{path}:{line}\"";
+            command = "${delta} --dark --paging=never --side-by-side --line-numbers --hyperlinks --hyperlinks-file-link-format=\"lazygit-edit://{path}:{line}\"";
           }
         ];
       };
