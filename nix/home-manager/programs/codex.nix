@@ -239,8 +239,28 @@ in
     done
 
     if [ -s "$hooks_state_file" ]; then
-      printf '\n' >> "$output"
-      cat "$hooks_state_file" >> "$output"
+      # Codexは実行時に [projects."..."] などを config.toml の末尾（= [hooks.state] より
+      # 後ろ）へ書き足すため、保存した尻尾をそのまま復元すると上で生成済みのテーブルと
+      # 衝突し、TOMLのduplicate keyでconfig全体が読めなくなる。既に出力済みの見出しと、
+      # 尻尾の中で重複する見出しを落としてから復元する（宣言側の定義を優先）。
+      filtered_state_file="$(mktemp)"
+      ${pkgs.gawk}/bin/awk '
+        NR == FNR {
+          if ($0 ~ /^\[/) seen[$0] = 1
+          next
+        }
+        /^\[/ {
+          skip = ($0 in seen)
+          seen[$0] = 1
+        }
+        !skip
+      ' "$output" "$hooks_state_file" > "$filtered_state_file"
+
+      if [ -s "$filtered_state_file" ]; then
+        printf '\n' >> "$output"
+        cat "$filtered_state_file" >> "$output"
+      fi
+      rm -f "$filtered_state_file"
     fi
     rm -f "$hooks_state_file"
   '';
