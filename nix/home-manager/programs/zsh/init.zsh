@@ -4,36 +4,20 @@ zmodload -u zsh/files 2>/dev/null
 cache_dir="${XDG_CACHE_HOME:-$HOME/.local/cache}/zsh"
 [[ -d "$cache_dir" ]] || mkdir -p "$cache_dir"
 
+# Sheldonのキャッシュはhome-managerのactivation(sheldon.nix)が生成・zcompile済み。
+# ここでplugins.toml/lockのmtimeを見て再生成する必要はなく、sheldonの実体を探す
+# ための `${commands[sheldon]}` がPATH全走査を誘発していた。読むだけにする。
 sheldon_cache="$cache_dir/sheldon.zsh"
-sheldon_toml="${XDG_CONFIG_HOME:-$HOME/.config}/sheldon/plugins.toml"
-sheldon_lock="${XDG_DATA_HOME:-$HOME/.local/share}/sheldon/plugins.lock"
-_sheldon_bin="${commands[sheldon]:-}"
-
-if [[ -n "$_sheldon_bin" && ( ! -r "$sheldon_cache" || "$sheldon_toml" -nt "$sheldon_cache" || ( -r "$sheldon_lock" && "$sheldon_lock" -nt "$sheldon_cache" ) ) ]]; then
-  _sheldon_tmp="$sheldon_cache.tmp.$$"
-  if "$_sheldon_bin" --quiet source >| "$_sheldon_tmp"; then
-    mv -f "$_sheldon_tmp" "$sheldon_cache"
-  else
-    rm -f "$_sheldon_tmp"
-  fi
-fi
-
-if [[ -r "$sheldon_cache" ]]; then
-  ensure_zcompiled "$sheldon_cache"
-  builtin source "$sheldon_cache"
-fi
-unset _sheldon_tmp _sheldon_bin sheldon_toml sheldon_lock
+[[ -r "$sheldon_cache" ]] && builtin source "$sheldon_cache"
 
 _direnv_cache="$cache_dir/direnv.zsh"
 _direnv_stamp="$cache_dir/direnv.path"
-_direnv_bin="${commands[direnv]:-}"
-_direnv_real="${_direnv_bin:A}"
-if [[ -n "$_direnv_bin" ]] && { [[ ! -r "$_direnv_cache" ]] || [[ ! -r "$_direnv_stamp" ]] || [[ "$(<"$_direnv_stamp")" != "$_direnv_real" ]]; }; then
+if [[ -n "$_ZBIN_DIRENV" ]] && { [[ ! -r "$_direnv_cache" ]] || [[ ! -r "$_direnv_stamp" ]] || [[ "$(<"$_direnv_stamp")" != "$_ZBIN_DIRENV" ]]; }; then
   _direnv_tmp="$cache_dir/direnv.zsh.tmp.$$"
   _direnv_stamp_tmp="$cache_dir/direnv.path.tmp.$$"
-  if "$_direnv_bin" hook zsh >| "$_direnv_tmp"; then
+  if "$_ZBIN_DIRENV" hook zsh >| "$_direnv_tmp"; then
     mv -f "$_direnv_tmp" "$_direnv_cache"
-    print -r -- "$_direnv_real" >| "$_direnv_stamp_tmp"
+    print -r -- "$_ZBIN_DIRENV" >| "$_direnv_stamp_tmp"
     mv -f "$_direnv_stamp_tmp" "$_direnv_stamp"
   else
     rm -f "$_direnv_tmp" "$_direnv_stamp_tmp"
@@ -76,19 +60,17 @@ fi
 _starship_cache="$cache_dir/starship.zsh"
 _starship_stamp="$cache_dir/starship.path"
 _starship_config="${XDG_CONFIG_HOME:-$HOME/.config}/starship.toml"
-_starship_bin="${commands[starship]:-}"
-_starship_real="${_starship_bin:A}"
 _starship_cache_version="parallel-prompt-v1"
-_starship_signature="${_starship_real}|${_starship_cache_version}"
+_starship_signature="${_ZBIN_STARSHIP}|${_starship_cache_version}"
 # starship init bakes the generator's absolute path into the cache, so a
 # profile-path change (e.g. nix-darwin -> standalone home-manager) leaves a
-# stale, unresolvable path. Track the resolved Nix store path explicitly
-# because store mtimes are fixed and the profile symlink path is stable.
-if [[ -n "$_starship_bin" ]] && { [[ ! -r "$_starship_cache" ]] || [[ ! -r "$_starship_stamp" ]] || [[ "$(<"$_starship_stamp")" != "$_starship_signature" ]] || { [[ -r "$_starship_config" ]] && [[ "$_starship_config" -nt "$_starship_cache" ]]; }; }; then
+# stale, unresolvable path. The signature is the Nix store path itself, so any
+# starship upgrade or profile move invalidates the cache exactly once.
+if [[ -n "$_ZBIN_STARSHIP" ]] && { [[ ! -r "$_starship_cache" ]] || [[ ! -r "$_starship_stamp" ]] || [[ "$(<"$_starship_stamp")" != "$_starship_signature" ]] || { [[ -r "$_starship_config" ]] && [[ "$_starship_config" -nt "$_starship_cache" ]]; }; }; then
   _starship_tmp="$cache_dir/starship.zsh.tmp.$$"
   _starship_raw_tmp="$cache_dir/starship.zsh.raw.tmp.$$"
   _starship_stamp_tmp="$cache_dir/starship.path.tmp.$$"
-  if "$_starship_bin" init zsh >| "$_starship_raw_tmp"; then
+  if "$_ZBIN_STARSHIP" init zsh >| "$_starship_raw_tmp"; then
     # The generated integration executes `starship prompt --continuation`
     # while it is sourced. Replace that fixed output before caching it.
     while IFS= read -r _starship_line; do
@@ -113,14 +95,12 @@ fi
 
 _fzf_cache="$cache_dir/fzf.zsh"
 _fzf_stamp="$cache_dir/fzf.path"
-_fzf_bin="${commands[fzf]:-}"
-_fzf_real="${_fzf_bin:A}"
-if [[ -n "$_fzf_bin" ]] && { [[ ! -r "$_fzf_cache" ]] || [[ ! -r "$_fzf_stamp" ]] || [[ "$(<"$_fzf_stamp")" != "$_fzf_real" ]]; }; then
+if [[ -n "$_ZBIN_FZF" ]] && { [[ ! -r "$_fzf_cache" ]] || [[ ! -r "$_fzf_stamp" ]] || [[ "$(<"$_fzf_stamp")" != "$_ZBIN_FZF" ]]; }; then
   _fzf_tmp="$cache_dir/fzf.zsh.tmp.$$"
   _fzf_stamp_tmp="$cache_dir/fzf.path.tmp.$$"
-  if "$_fzf_bin" --zsh >| "$_fzf_tmp"; then
+  if "$_ZBIN_FZF" --zsh >| "$_fzf_tmp"; then
     mv -f "$_fzf_tmp" "$_fzf_cache"
-    print -r -- "$_fzf_real" >| "$_fzf_stamp_tmp"
+    print -r -- "$_ZBIN_FZF" >| "$_fzf_stamp_tmp"
     mv -f "$_fzf_stamp_tmp" "$_fzf_stamp"
   else
     rm -f "$_fzf_tmp" "$_fzf_stamp_tmp"
@@ -182,14 +162,12 @@ fi
 
 _zoxide_cache="$cache_dir/zoxide.zsh"
 _zoxide_stamp="$cache_dir/zoxide.path"
-_zoxide_bin="${commands[zoxide]:-}"
-_zoxide_real="${_zoxide_bin:A}"
-if [[ -n "$_zoxide_bin" ]] && { [[ ! -r "$_zoxide_cache" ]] || [[ ! -r "$_zoxide_stamp" ]] || [[ "$(<"$_zoxide_stamp")" != "$_zoxide_real" ]]; }; then
+if [[ -n "$_ZBIN_ZOXIDE" ]] && { [[ ! -r "$_zoxide_cache" ]] || [[ ! -r "$_zoxide_stamp" ]] || [[ "$(<"$_zoxide_stamp")" != "$_ZBIN_ZOXIDE" ]]; }; then
   _zoxide_tmp="$cache_dir/zoxide.zsh.tmp.$$"
   _zoxide_stamp_tmp="$cache_dir/zoxide.path.tmp.$$"
-  if "$_zoxide_bin" init zsh >| "$_zoxide_tmp"; then
+  if "$_ZBIN_ZOXIDE" init zsh >| "$_zoxide_tmp"; then
     mv -f "$_zoxide_tmp" "$_zoxide_cache"
-    print -r -- "$_zoxide_real" >| "$_zoxide_stamp_tmp"
+    print -r -- "$_ZBIN_ZOXIDE" >| "$_zoxide_stamp_tmp"
     mv -f "$_zoxide_stamp_tmp" "$_zoxide_stamp"
   else
     rm -f "$_zoxide_tmp" "$_zoxide_stamp_tmp"
@@ -207,11 +185,9 @@ else
 fi
 
 unset DEFER_COMPINIT cache_dir sheldon_cache
-unset _direnv_bin _direnv_real _direnv_cache _direnv_stamp
-unset _direnv_tmp _direnv_stamp_tmp
-unset _starship_bin _starship_real _starship_cache _starship_stamp _starship_config
+unset _direnv_cache _direnv_stamp _direnv_tmp _direnv_stamp_tmp
+unset _starship_cache _starship_stamp _starship_config
 unset _starship_cache_version _starship_signature _starship_line
 unset _starship_tmp _starship_raw_tmp _starship_stamp_tmp
-unset _fzf_bin _fzf_real _fzf_cache _fzf_stamp _fzf_tmp _fzf_stamp_tmp
-unset _zoxide_bin _zoxide_real _zoxide_cache _zoxide_stamp
-unset _zoxide_tmp _zoxide_stamp_tmp
+unset _fzf_cache _fzf_stamp _fzf_tmp _fzf_stamp_tmp
+unset _zoxide_cache _zoxide_stamp _zoxide_tmp _zoxide_stamp_tmp

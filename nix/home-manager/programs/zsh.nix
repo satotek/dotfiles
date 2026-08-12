@@ -8,6 +8,21 @@ let
   homeDirectory = config.home.homeDirectory;
   deferCompinit = !pkgs.stdenv.isLinux;
   readZsh = name: builtins.readFile (./zsh + "/${name}.zsh");
+
+  # `${commands[x]}` の初回参照はPATH全体（20+ディレクトリ）を走査してコマンド
+  # ハッシュテーブルを構築するため、起動時に数msかかる。これらのツールの実体は
+  # Nixが評価時に知っているので、絶対パスを焼き込んで走査そのものを避ける。
+  # 無効化されているプログラムは空文字にして、zsh側の `[[ -n ... ]]` で弾く。
+  zbin =
+    varName: enable: package: exe:
+    "typeset -g ${varName}=${lib.optionalString enable "${package}/bin/${exe}"}";
+
+  binPrelude = lib.concatStringsSep "\n" [
+    (zbin "_ZBIN_DIRENV" config.programs.direnv.enable config.programs.direnv.package "direnv")
+    (zbin "_ZBIN_STARSHIP" config.programs.starship.enable config.programs.starship.package "starship")
+    (zbin "_ZBIN_FZF" config.programs.fzf.enable config.programs.fzf.package "fzf")
+    (zbin "_ZBIN_ZOXIDE" config.programs.zoxide.enable config.programs.zoxide.package "zoxide")
+  ];
 in
 {
   programs.zsh = {
@@ -58,6 +73,7 @@ in
         ${readZsh "widgets"}
         ${readZsh "vm"}
 
+        ${binPrelude}
         typeset -g DEFER_COMPINIT=${lib.boolToString deferCompinit}
         ${readZsh "init"}
         ${readZsh "prompt"}

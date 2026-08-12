@@ -1,7 +1,7 @@
 # Starship's standard Zsh integration renders PROMPT and RPROMPT sequentially.
 # Pre-render both in parallel while retaining Starship's status/duration hooks and
 # exact module output. The files are per-shell and overwritten on every prompt.
-typeset -gr _STARSHIP_PROMPT_BIN="${commands[starship]:-}"
+typeset -gr _STARSHIP_PROMPT_BIN="${_ZBIN_STARSHIP:-}"
 typeset -gr _STARSHIP_PROMPT_DIR="${XDG_CACHE_HOME:-$HOME/.local/cache}/zsh"
 typeset -gr _STARSHIP_PROMPT_LEFT="${_STARSHIP_PROMPT_DIR}/starship-prompt-${$}.left"
 typeset -gr _STARSHIP_PROMPT_RIGHT="${_STARSHIP_PROMPT_DIR}/starship-prompt-${$}.right"
@@ -58,3 +58,5 @@ if [[ -n "$_STARSHIP_PROMPT_BIN" ]]; then
     zle reset-prompt
   }
 fi
+
+unset _ZBIN_DIRENV _ZBIN_STARSHIP _ZBIN_FZF _ZBIN_ZOXIDE
