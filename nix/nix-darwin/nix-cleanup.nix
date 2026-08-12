@@ -9,7 +9,7 @@
         "clean"
         "profile"
         "--keep"
-        "5"
+        "2"
         "--keep-since"
         "7d"
         "--no-gc"

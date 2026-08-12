@@ -384,8 +384,8 @@ dotbench 30
 
 macOSでは毎週日曜に次を整理します。
 
-- 12:00: Home Managerの世代を最低5世代、直近7日分残して整理
-- 12:15: nix-darwinのシステム世代を最低5世代、直近7日分残して整理
+- 12:00: Home Managerの世代を最低2世代、直近7日分残して整理
+- 12:15: nix-darwinのシステム世代を最低2世代、直近7日分残して整理
 
 ストアのGCはDeterminate Nixdへ任せ、`nh clean profile`には
 `--no-gc --no-gcroots`を指定しています。
