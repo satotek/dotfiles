@@ -104,7 +104,16 @@ let
 
     # 共有 MCP サーバー定義（Claude Code と共通: ../data/mcp-servers.nix）。
     # TOML では [mcp_servers.<name>] テーブルとして出力される。
-    mcp_servers = sharedMcpServers;
+    # agent-browser は Codex の shell sandbox から CLI を直接起動せず、MCP 経由で使う。
+    mcp_servers = sharedMcpServers // {
+      "agent-browser" = {
+        command = "agent-browser";
+        args = [ "mcp" ];
+        env = {
+          AGENT_BROWSER_SOCKET_DIR = "/tmp/agent-browser";
+        };
+      };
+    };
 
     plugins = {
       "computer-use@openai-bundled".enabled = true;
