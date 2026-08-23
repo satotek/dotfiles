@@ -385,10 +385,11 @@ dotbench 30
 macOSでは毎週日曜に次を整理します。
 
 - 12:00: Home Managerの世代を最低2世代、直近7日分残して整理
-- 12:15: nix-darwinのシステム世代を最低2世代、直近7日分残して整理
+- 12:15: nix-darwinのシステム世代を最低2世代、直近7日分残して整理し、NixストアもGC
 
-ストアのGCはDeterminate Nixdへ任せ、`nh clean profile`には
-`--no-gc --no-gcroots`を指定しています。
+ストアのGCはsystem側の`nh clean profile`に集約しています。Home Manager側は
+`--no-gc --no-gcroots`で世代整理だけを行い、system側も`--no-gcroots`を指定して
+direnvなどの開発用GC rootを保持します。
 
 ## 自動更新
 

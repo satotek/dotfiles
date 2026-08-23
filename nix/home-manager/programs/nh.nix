@@ -15,7 +15,7 @@ in
 {
   programs.nh.enable = true;
 
-  # Store GC は Determinate Nixd に任せ、Home Manager の古い世代だけを
+  # Store GC は system 側の launchd job に集約し、Home Manager の古い世代だけを
   # 毎週整理する。7 日以内の世代と、最低 2 世代のロールバック先を残す。
   launchd.agents.nh-clean-home-manager-generations = {
     enable = true;

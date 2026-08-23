@@ -1,7 +1,7 @@
 { pkgs, ... }:
 {
-  # Determinate Nixd の Store GC と重複させず、nix-darwin の古い
-  # system generation だけを root 権限で毎週整理する。
+  # nix-darwin の古い system generation を整理し、Nix Store の GC も
+  # root 権限で毎週実行する。開発用の GC root は保持する。
   launchd.daemons.nh-clean-system-generations = {
     serviceConfig = {
       ProgramArguments = [
@@ -12,7 +12,6 @@
         "2"
         "--keep-since"
         "7d"
-        "--no-gc"
         "--no-gcroots"
         "/nix/var/nix/profiles/system"
       ];
