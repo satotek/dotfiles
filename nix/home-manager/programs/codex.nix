@@ -105,15 +105,27 @@ let
     # 共有 MCP サーバー定義（Claude Code と共通: ../data/mcp-servers.nix）。
     # TOML では [mcp_servers.<name>] テーブルとして出力される。
     # agent-browser は Codex の shell sandbox から CLI を直接起動せず、MCP 経由で使う。
-    mcp_servers = sharedMcpServers // {
-      "agent-browser" = {
-        command = "agent-browser";
-        args = [ "mcp" ];
-        env = {
-          AGENT_BROWSER_SOCKET_DIR = "/tmp/agent-browser";
+    mcp_servers =
+      sharedMcpServers
+      // {
+        "agent-browser" = {
+          command = "agent-browser";
+          args = [ "mcp" ];
+          env = {
+            AGENT_BROWSER_SOCKET_DIR = "/tmp/agent-browser";
+          };
+        };
+      }
+      // lib.optionalAttrs pkgs.stdenv.isDarwin {
+        # Xcode 26.3+ の組み込みMCP bridge。macOSのCodexにだけ生成する。
+        # Xcode > Settings > Intelligence > Model Context Protocol で
+        # "Allow external agents to use Xcode tools" を有効にし、プロジェクトを
+        # Xcodeで開いた状態で利用する。
+        xcode = {
+          command = "/usr/bin/xcrun";
+          args = [ "mcpbridge" ];
         };
       };
-    };
 
     plugins = {
       "computer-use@openai-bundled".enabled = true;
