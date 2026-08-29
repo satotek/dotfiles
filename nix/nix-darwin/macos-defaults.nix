@@ -12,6 +12,9 @@
       tilesize = 46;
       magnification = true;
       largesize = 69; # マウスオーバー時の拡大サイズ
+      # AeroSpace がウィンドウを画面外へ退避すると Mission Control が縮小表示になる。
+      # アプリ単位でまとめると回避できる。
+      expose-group-apps = true;
     };
 
     finder = {

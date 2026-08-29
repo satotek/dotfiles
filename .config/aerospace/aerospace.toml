@@ -1,0 +1,123 @@
+# AeroSpace — i3-like tiling window manager for macOS
+# https://nikitabobko.github.io/AeroSpace/guide
+#
+# キーバインドは上流のデフォルトどおり alt 系。ワークスペース切替も alt-数字。
+
+config-version = 2
+
+after-startup-command = []
+
+start-at-login = true
+auto-reload-config = true
+
+enable-normalization-flatten-containers = true
+enable-normalization-opposite-orientation-for-nested-containers = true
+
+accordion-padding = 30
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'auto'
+
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+
+automatically-unhide-macos-hidden-apps = false
+
+# よく使う 1-9 だけ残す。文字ワークスペースは必要になったら足す。
+persistent-workspaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+
+on-mode-changed = []
+
+focus-follows-mouse.enabled = false
+
+key-mapping.preset = 'qwerty'
+
+gaps.inner.horizontal = 8
+gaps.inner.vertical = 8
+gaps.outer.left = 8
+gaps.outer.bottom = 8
+gaps.outer.top = 8
+gaps.outer.right = 8
+
+# 設定アプリやパスワードマネージャはタイルせずフロートさせる。
+# Ghostty は macOS のネイティブタブを使う＝タブが別ウィンドウとして検出されるため、
+# 開いた場所にタイルさせてワークスペースが散らばるのを抑える（Ghostty 公式の回避策）。
+# https://ghostty.org/docs/help/macos-tiling-wms#aerospace
+on-window-detected = [
+    { if = 'test %{app-bundle-id} = com.mitchellh.ghostty', run = 'layout tiling' },
+    { if = 'test %{app-bundle-id} = com.apple.systempreferences', run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = com.1password.1password', run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = org.pqrs.Karabiner-Elements.Settings', run = 'layout floating' },
+    { if = 'test %{app-bundle-id} = org.pqrs.Karabiner-EventViewer', run = 'layout floating' },
+]
+
+[mode.main.binding]
+    # レイアウト切替
+    alt-slash = 'layout tiles horizontal vertical'
+    alt-comma = 'layout accordion horizontal vertical'
+
+    # フォーカス
+    alt-h = 'focus left'
+    alt-j = 'focus down'
+    alt-k = 'focus up'
+    alt-l = 'focus right'
+
+    # ウィンドウ移動
+    alt-shift-h = 'move left'
+    alt-shift-j = 'move down'
+    alt-shift-k = 'move up'
+    alt-shift-l = 'move right'
+
+    # リサイズ
+    alt-minus = 'resize smart -50'
+    alt-equal = 'resize smart +50'
+
+    # 最大化（AeroSpace 独自。macOS ネイティブ全画面ではない）
+    alt-f = 'fullscreen'
+
+    # ワークスペース
+    alt-1 = 'workspace 1'
+    alt-2 = 'workspace 2'
+    alt-3 = 'workspace 3'
+    alt-4 = 'workspace 4'
+    alt-5 = 'workspace 5'
+    alt-6 = 'workspace 6'
+    alt-7 = 'workspace 7'
+    alt-8 = 'workspace 8'
+    alt-9 = 'workspace 9'
+
+    alt-shift-1 = 'move-node-to-workspace 1'
+    alt-shift-2 = 'move-node-to-workspace 2'
+    alt-shift-3 = 'move-node-to-workspace 3'
+    alt-shift-4 = 'move-node-to-workspace 4'
+    alt-shift-5 = 'move-node-to-workspace 5'
+    alt-shift-6 = 'move-node-to-workspace 6'
+    alt-shift-7 = 'move-node-to-workspace 7'
+    alt-shift-8 = 'move-node-to-workspace 8'
+    alt-shift-9 = 'move-node-to-workspace 9'
+
+    alt-tab = 'workspace-back-and-forth'
+    alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
+
+    # モニタ間の移動。focus は既定で --boundaries workspace なので alt-hjkl では
+    # モニタを跨げない。focus-monitor に別途バインドが要る（上流の既定にも無い）。
+    ctrl-alt-h = 'focus-monitor --wrap-around left'
+    ctrl-alt-j = 'focus-monitor --wrap-around down'
+    ctrl-alt-k = 'focus-monitor --wrap-around up'
+    ctrl-alt-l = 'focus-monitor --wrap-around right'
+
+    ctrl-alt-shift-h = 'move-node-to-monitor --wrap-around --focus-follows-window left'
+    ctrl-alt-shift-j = 'move-node-to-monitor --wrap-around --focus-follows-window down'
+    ctrl-alt-shift-k = 'move-node-to-monitor --wrap-around --focus-follows-window up'
+    ctrl-alt-shift-l = 'move-node-to-monitor --wrap-around --focus-follows-window right'
+
+    alt-shift-semicolon = 'mode service'
+
+[mode.service.binding]
+    esc = ['reload-config', 'mode main']
+    r = ['flatten-workspace-tree', 'mode main'] # レイアウトをリセット
+    f = ['layout floating tiling', 'mode main'] # フロート / タイル切替
+    backspace = ['close-all-windows-but-current', 'mode main']
+
+    alt-shift-h = ['join-with left', 'mode main']
+    alt-shift-j = ['join-with down', 'mode main']
+    alt-shift-k = ['join-with up', 'mode main']
+    alt-shift-l = ['join-with right', 'mode main']

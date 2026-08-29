@@ -34,7 +34,7 @@ Determinate NixがNixデーモンとストアのGCを担当します。nix-darwi
 
 nix-darwinが次を管理します。
 
-- Homebrew cask: 1Password、1Password CLI、Karabiner-Elements、WezTerm Nightly
+- Homebrew cask: 1Password、1Password CLI、Karabiner-Elements、AeroSpace、WezTerm Nightly
 - フォント: HackGen NF、Moralerspace
 - Dock、Finder、キーボード、トラックパッド、スクリーンショットなどの設定
 - sudoのTouch ID認証
@@ -210,6 +210,7 @@ Nixストアの絶対パスで参照します。
 - `.config/nvchad`
 - `.config/wezterm`
 - `.config/hunk/config.toml`
+- `.config/aerospace/aerospace.toml`
 - `.config/karabiner/karabiner.json`
 - `.config/nix/nix.conf`
 - `nix/home-manager/home/profile.sh`
@@ -444,6 +445,7 @@ dotfiles/
 - [メンテナンス用コマンド](docs/maintenance.md)
 - [Zshのキーバインド](docs/zsh-keybindings.md)
 - [Neovimチートシート](docs/nvim-cheatsheet.md)
+- [AeroSpace](docs/aerospace.md)
 - [VMリモート作業手順](docs/vm-remote-workflow.md)
 
 ## 統計
