@@ -106,7 +106,11 @@ in
     settings = {
       theme = "dark";
       autoUpdates = false;
-      includeCoAuthoredBy = false;
+      # Co-author表記はプロジェクトごとに明示的に有効化する。
+      attribution = {
+        commit = "";
+        pr = "";
+      };
       outputStyle = "Explanatory";
       model = "opus";
       effortLevel = "medium";
