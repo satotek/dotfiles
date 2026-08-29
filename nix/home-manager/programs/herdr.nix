@@ -33,6 +33,9 @@ in
         rename_pane = "";
         new_workspace = "";
 
+        navigate_workspace_up = "k";
+        navigate_workspace_down = "j";
+
         split_vertical = "prefix+\\";
         split_horizontal = "prefix+minus";
 
