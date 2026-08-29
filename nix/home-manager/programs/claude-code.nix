@@ -142,19 +142,23 @@ in
         "Bash(pnpm test)"
         "Bash(pnpm lint)"
         "Bash(pnpm test:storybook)"
-        "mcp__plugin_claude-code-home-manager_playwright__browser_take_screenshot"
-        "mcp__plugin_claude-code-home-manager_playwright__browser_snapshot"
-        "mcp__plugin_claude-code-home-manager_context7__query-docs"
-        "mcp__plugin_claude-code-home-manager_context7__resolve-library-id"
+        # プレフィックスの "hm" は home-manager の claude-code モジュールが
+        # MCP サーバーを合成プラグインとして包むときの名前
+        # (modules/programs/claude-code/default.nix の generatedPluginName)。
+        # 以前は "claude-code-home-manager" だった＝上流が変えたら追従が要る。
+        "mcp__plugin_hm_playwright__browser_take_screenshot"
+        "mcp__plugin_hm_playwright__browser_snapshot"
+        "mcp__plugin_hm_context7__query-docs"
+        "mcp__plugin_hm_context7__resolve-library-id"
         # chrome-devtools: 読み取り・検査系のみ許可（遷移/クリック/JS実行など副作用系は都度確認）
-        "mcp__plugin_claude-code-home-manager_chrome-devtools__take_snapshot"
-        "mcp__plugin_claude-code-home-manager_chrome-devtools__take_screenshot"
-        "mcp__plugin_claude-code-home-manager_chrome-devtools__list_pages"
-        "mcp__plugin_claude-code-home-manager_chrome-devtools__list_console_messages"
-        "mcp__plugin_claude-code-home-manager_chrome-devtools__get_console_message"
-        "mcp__plugin_claude-code-home-manager_chrome-devtools__list_network_requests"
-        "mcp__plugin_claude-code-home-manager_chrome-devtools__get_network_request"
-        "mcp__plugin_claude-code-home-manager_chrome-devtools__performance_analyze_insight"
+        "mcp__plugin_hm_chrome-devtools__take_snapshot"
+        "mcp__plugin_hm_chrome-devtools__take_screenshot"
+        "mcp__plugin_hm_chrome-devtools__list_pages"
+        "mcp__plugin_hm_chrome-devtools__list_console_messages"
+        "mcp__plugin_hm_chrome-devtools__get_console_message"
+        "mcp__plugin_hm_chrome-devtools__list_network_requests"
+        "mcp__plugin_hm_chrome-devtools__get_network_request"
+        "mcp__plugin_hm_chrome-devtools__performance_analyze_insight"
       ];
       enabledPlugins = {
         "rust-analyzer-lsp@claude-plugins-official" = true;
