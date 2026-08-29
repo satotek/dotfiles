@@ -26,3 +26,6 @@ result-*
 
 # Home Manager backup files
 *.pre-home-manager
+
+# Claude Code のローカル設定（マシン固有の permission が溜まる）
+.claude/settings.local.json
