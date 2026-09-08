@@ -22,7 +22,11 @@ let
   # commandPath は nix store の絶対パスにして全ホスト(azureuser 含む)で有効にする。
   # 空の 2 行目は ccstatusline が畳むため、実表示は 2 行になる。
   ccstatuslineSettings = {
-    version = 3;
+    # ccstatusline の設定スキーマ版。パッケージ側の CURRENT_VERSION と揃える。
+    # 古いままだと ccstatusline が移行後の書き戻しを試み、nix store 上の
+    # read-only な settings.json で EACCES → 既定値へフォールバックし
+    # ステータスラインに "⚠ invalid config" が出る。
+    version = 4;
     lines = [
       [
         {
@@ -110,6 +114,8 @@ in
       attribution = {
         commit = "";
         pr = "";
+        # web/Remote Control セッションで付与される Claude-Session トレーラを抑止する。
+        sessionUrl = false;
       };
       outputStyle = "Explanatory";
       model = "opus";
