@@ -9,6 +9,7 @@ let
   context7ApiKeyFile = "${homeDir}/.config/context7/api-key";
   sharedMcpServers = import ../data/mcp-servers.nix {
     inherit context7ApiKeyFile;
+    isLinux = pkgs.stdenv.hostPlatform.isLinux;
   };
   trustedProjectRoots = [
     "${homeDir}/ghq"

@@ -9,6 +9,7 @@ let
   context7ApiKeyFile = "${homeDir}/.config/context7/api-key";
   sharedMcpServers = import ../data/mcp-servers.nix {
     inherit context7ApiKeyFile;
+    isLinux = pkgs.stdenv.hostPlatform.isLinux;
   };
   claudeStatuslineLine3 = pkgs.writeShellApplication {
     name = "claude-statusline-line3";
@@ -165,6 +166,11 @@ in
         "mcp__plugin_hm_chrome-devtools__list_network_requests"
         "mcp__plugin_hm_chrome-devtools__get_network_request"
         "mcp__plugin_hm_chrome-devtools__performance_analyze_insight"
+        # codex mcp-server が公開するのはこの 2 つだけ。呼び出し先の Codex 側で
+        # approval_policy = "on-request" と sandbox が別途効くため、ここでの許可は
+        # 「Claude が Codex を起動すること」までを対象にする。
+        "mcp__plugin_hm_codex__codex"
+        "mcp__plugin_hm_codex__codex-reply"
       ];
       enabledPlugins = {
         "rust-analyzer-lsp@claude-plugins-official" = true;
