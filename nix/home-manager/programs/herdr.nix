@@ -18,10 +18,8 @@ in
       session.resume_agents_on_restore = true;
 
       theme = {
-        name = "catppuccin";
-        auto_switch = true;
-        dark_name = "catppuccin";
-        light_name = "catppuccin-latte";
+        name = "terminal";
+        auto_switch = false;
       };
 
       keys = {
