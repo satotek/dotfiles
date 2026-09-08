@@ -14,7 +14,7 @@ local servers = {
   "nixd",
   "oxfmt",
   "oxlint",
-  "pyright",
+  "basedpyright",
   "ruff",
   "rumdl",
   "rust_analyzer",

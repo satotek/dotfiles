@@ -8,7 +8,7 @@
     nodejs
     oxfmt
     pnpm
-    pyright
+    basedpyright
     python3
     ruff
     tailwindcss-language-server
