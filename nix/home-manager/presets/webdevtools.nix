@@ -13,6 +13,7 @@
     ruff
     tailwindcss-language-server
     taplo
+    tree-sitter
     typescript-go
     uv
     vscode-langservers-extracted
