@@ -6,7 +6,7 @@
 }:
 let
   homeDirectory = config.home.homeDirectory;
-  deferCompinit = !pkgs.stdenv.isLinux;
+  deferCompinit = !pkgs.stdenv.hostPlatform.isLinux;
   readZsh = name: builtins.readFile (./zsh + "/${name}.zsh");
 
   # `${commands[x]}` の初回参照はPATH全体（20+ディレクトリ）を走査してコマンド

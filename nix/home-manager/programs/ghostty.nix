@@ -54,7 +54,7 @@ in
     enable = true;
 
     # macOS は公式 DMG の再パッケージ、Linux は GTK 版を使う。
-    package = if pkgs.stdenv.isDarwin then pkgs.ghostty-bin else pkgs.ghostty;
+    package = if pkgs.stdenv.hostPlatform.isDarwin then pkgs.ghostty-bin else pkgs.ghostty;
     systemd.enable = false;
 
     # Ghostty の自動 shell integration を使い、Home Manager からは
@@ -65,8 +65,8 @@ in
 
     settings =
       commonSettings
-      // lib.optionalAttrs pkgs.stdenv.isDarwin darwinSettings
-      // lib.optionalAttrs pkgs.stdenv.isLinux linuxSettings;
+      // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin darwinSettings
+      // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux linuxSettings;
 
     themes = {
       "Catppuccin Macchiato" = {

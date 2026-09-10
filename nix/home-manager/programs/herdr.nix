@@ -20,6 +20,7 @@ in
       theme = {
         name = "terminal";
         auto_switch = false;
+        custom.selection_bg = "black";
       };
 
       keys = {

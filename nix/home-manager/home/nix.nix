@@ -11,7 +11,7 @@ let
   nixSwitch = pkgs.writeShellApplication {
     name = "nix-switch";
     text =
-      if pkgs.stdenv.isDarwin then
+      if pkgs.stdenv.hostPlatform.isDarwin then
         ''
           cd "${dotfilesDir}"
           # 未管理ファイルと衝突しても、エラーで止めず自動で .hm-bak に退避してから
@@ -42,5 +42,5 @@ in
   xdg.configFile."nix/nix.conf".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/.config/nix/nix.conf";
 
-  home.packages = [ nixSwitch ] ++ lib.optionals pkgs.stdenv.isDarwin [ darwinSwitch ];
+  home.packages = [ nixSwitch ] ++ lib.optionals pkgs.stdenv.hostPlatform.isDarwin [ darwinSwitch ];
 }

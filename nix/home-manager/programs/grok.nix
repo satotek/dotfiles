@@ -18,6 +18,7 @@ let
     features = {
       telemetry = false;
       lsp_tools = true;
+      terminal_theme = true;
     };
 
     permission.deny = [
@@ -32,7 +33,7 @@ let
       yolo = false;
       compact_mode = false;
       permission_mode = "auto";
-      theme = "oscura-midnight";
+      theme = "terminal";
       vim_mode = true;
       auto_dark_theme = "oscura-midnight";
       screen_mode = "fullscreen";

@@ -84,8 +84,8 @@ let
     tui.alternate_screen = "never";
 
     # model setting
-    model = "gpt-5.6-sol";
-    model_reasoning_effort = "medium";
+    model = "gpt-5.6-luna";
+    model_reasoning_effort = "xhigh";
     model_reasoning_summary = "auto";
     model_verbosity = "medium";
     service_tier = "default";
@@ -117,7 +117,7 @@ let
           };
         };
       }
-      // lib.optionalAttrs pkgs.stdenv.isDarwin {
+      // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
         # Xcode 26.3+ の組み込みMCP bridge。macOSのCodexにだけ生成する。
         # Xcode > Settings > Intelligence > Model Context Protocol で
         # "Allow external agents to use Xcode tools" を有効にし、プロジェクトを

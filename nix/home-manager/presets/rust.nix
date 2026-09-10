@@ -7,7 +7,7 @@ in
     RUST_SRC_PATH = rustSrcPath;
   };
 
-  home.activation.setRustSrcPathForLaunchd = lib.mkIf pkgs.stdenv.isDarwin (
+  home.activation.setRustSrcPathForLaunchd = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       /bin/launchctl setenv RUST_SRC_PATH ${lib.escapeShellArg rustSrcPath}
     ''

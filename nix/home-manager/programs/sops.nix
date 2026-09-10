@@ -23,7 +23,7 @@ let
   };
 
   secrets =
-    lib.optional pkgs.stdenv.isDarwin cloudflareSecret
+    lib.optional pkgs.stdenv.hostPlatform.isDarwin cloudflareSecret
     ++ lib.optional hasContext7SopsFile context7Secret;
 
   installSecret = secret: ''

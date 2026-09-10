@@ -30,7 +30,7 @@ in
   # SSH 署名をローカルで検証（git log --show-signature / verify-commit）するための
   # 対応表。「メール 公開鍵」の行で、コミッタと署名鍵が一致するかを git が確認する。
   # 署名生成は 1Password(op-ssh-sign)なので Mac 限定でよい。
-  home.file = lib.mkIf pkgs.stdenv.isDarwin {
+  home.file = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     ".config/git/allowed_signers".text = ''
       konosuke.s0912@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEu/vDcjBdXbzqM6e6V56JX65xkjyK7Z6sDvnfeCTXLU
     '';
@@ -88,7 +88,7 @@ in
       # Azure DevOpsは各端末で作った専用RSA鍵をgitSshで選ぶ。
       # Macの1Password SSH Agentは公開鍵(~/.ssh/azure-devops.pub)、
       # Linux等は秘密鍵(~/.ssh/azure-devops)をIdentityFileとして使う。
-      if pkgs.stdenv.isDarwin then
+      if pkgs.stdenv.hostPlatform.isDarwin then
         {
           # GitHub: push だけ SSH 化する。fetch/clone は HTTPS のままにして、
           # lazy.nvim など public repo を読むツールが SSH port 22 に依存しないようにする。
