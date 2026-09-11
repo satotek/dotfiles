@@ -16,7 +16,7 @@
     (
       { lib, ... }:
       {
-        # WSL では React Aria の外部取得に依存しない。
+        # WSL では agent-skills の外部取得に依存しない。
         programs.agent-skills.enable = lib.mkForce false;
       }
     )

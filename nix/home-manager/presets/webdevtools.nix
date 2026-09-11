@@ -14,7 +14,7 @@
     tailwindcss-language-server
     taplo
     tree-sitter
-    typescript-go
+    typescript
     uv
     vscode-langservers-extracted
     yaml-language-server
