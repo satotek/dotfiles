@@ -1,29 +1,4 @@
 { pkgs, lib, ... }:
-let
-  gitSsh = pkgs.writeShellScript "git-ssh" ''
-    for arg in "$@"; do
-      case "$arg" in
-        git@ssh.dev.azure.com|ssh.dev.azure.com)
-          identity="$HOME/.ssh/azure-devops"
-          if [ ! -f "$identity" ]; then
-            identity="$identity.pub"
-          fi
-          if [ ! -f "$identity" ]; then
-            echo "Azure DevOps SSH identity not found: ~/.ssh/azure-devops[.pub]" >&2
-            exit 1
-          fi
-
-          exec ${pkgs.openssh}/bin/ssh \
-            -o IdentitiesOnly=yes \
-            -o IdentityFile="$identity" \
-            "$@"
-          ;;
-      esac
-    done
-
-    exec ${pkgs.openssh}/bin/ssh "$@"
-  '';
-in
 {
   home.packages = [ pkgs.delta ];
 
@@ -54,7 +29,6 @@ in
         pager = "delta --side-by-side";
         editor = "vim";
         autocrlf = "input";
-        sshCommand = toString gitSsh;
       };
       interactive.diffFilter = "delta --color-only";
       delta = {
@@ -85,9 +59,6 @@ in
       };
     }
     // (
-      # Azure DevOpsは各端末で作った専用RSA鍵をgitSshで選ぶ。
-      # Macの1Password SSH Agentは公開鍵(~/.ssh/azure-devops.pub)、
-      # Linux等は秘密鍵(~/.ssh/azure-devops)をIdentityFileとして使う。
       if pkgs.stdenv.hostPlatform.isDarwin then
         {
           # GitHub: push だけ SSH 化する。fetch/clone は HTTPS のままにして、
