@@ -1,7 +1,13 @@
--- OxfmtをWeb系のデフォルトformatterにする。
+-- Oxfmtは設定があるプロジェクトだけ起動する。
 -- BiomeまたはPrettierを明示したプロジェクトでは、それらを優先してattachしない。
 local util = require("lspconfig.util")
 
+local oxfmt_configs = {
+  ".oxfmtrc.json",
+  ".oxfmtrc.jsonc",
+  "oxfmt.config.ts",
+  "oxfmt.config.mts",
+}
 local biome_configs = { "biome.json", "biome.jsonc" }
 local prettier_configs = {
   ".prettierrc",
@@ -48,6 +54,9 @@ return {
       return
     end
     if has_formatter(prettier_configs, "prettier", filename, stop) then
+      return
+    end
+    if not has_formatter(oxfmt_configs, { "oxfmt", "vite%-plus" }, filename, stop) then
       return
     end
 
