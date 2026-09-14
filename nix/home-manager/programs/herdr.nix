@@ -77,7 +77,7 @@ in
     };
   };
 
-  # Claude/Codexの設定本体はHome Manager側で宣言し、hook scriptは現在のHerdrに
+  # Claude/Codex/Grokの設定本体はHome Manager側で宣言し、hook scriptは現在のHerdrに
   # 生成させる。Herdr更新後も次のnix-switchでintegrationの最新版へ追従する。
   home.activation.installHerdrAgentIntegrations = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     herdr_bin="${config.programs.herdr.package}/bin/herdr"
@@ -85,8 +85,10 @@ in
     trap '${pkgs.coreutils}/bin/rm -rf "$integration_tmp"' EXIT
 
     ${pkgs.coreutils}/bin/mkdir -p "$integration_tmp/claude" "$integration_tmp/codex"
+    ${pkgs.coreutils}/bin/mkdir -p "${homeDirectory}/.grok"
     CLAUDE_CONFIG_DIR="$integration_tmp/claude" "$herdr_bin" integration install claude
     CODEX_HOME="$integration_tmp/codex" "$herdr_bin" integration install codex
+    GROK_HOME="${homeDirectory}/.grok" "$herdr_bin" integration install grok
 
     ${pkgs.coreutils}/bin/install -Dm755 \
       "$integration_tmp/claude/hooks/herdr-agent-state.sh" \
