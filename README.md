@@ -34,7 +34,7 @@ Determinate NixがNixデーモンとストアのGCを担当します。nix-darwi
 
 nix-darwinが次を管理します。
 
-- Homebrew cask: 1Password、1Password CLI、Karabiner-Elements、AeroSpace、WezTerm Nightly
+- Homebrew cask: 1Password、1Password CLI、Karabiner-Elements、Raycast、AeroSpace、WezTerm Nightly
 - フォント: HackGen NF、Moralerspace
 - Dock、Finder、キーボード、トラックパッド、スクリーンショットなどの設定
 - sudoのTouch ID認証
