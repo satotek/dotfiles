@@ -14,7 +14,6 @@
 
     agent-skills.url = "github:Kyure-A/agent-skills-nix";
     agent-skills.inputs.nixpkgs.follows = "nixpkgs";
-    agent-skills.inputs.home-manager.follows = "home-manager";
 
     vercel-agent-skills = {
       url = "github:vercel-labs/agent-skills";
