@@ -286,4 +286,27 @@ in
     fi
     rm -f "$hooks_state_file"
   '';
+
+  # ChatGPTデスクトップアプリのペット表示は config.toml ではなく、
+  # Codex のグローバル状態ファイルに保存される。アップデートで表示状態が
+  # 戻っても、Home Manager の切り替え時に非表示を再適用する。
+  home.activation.disableCodexPet = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
+    lib.hm.dag.entryAfter [ "generateCodexConfig" ] ''
+      codex_global_state="${homeDir}/.codex/.codex-global-state.json"
+
+      if [ -f "$codex_global_state" ] && ! ${pkgs.jq}/bin/jq -e \
+        '."electron-avatar-overlay-open" == false' \
+        "$codex_global_state" >/dev/null 2>&1; then
+        codex_global_state_tmp="$(mktemp "''${codex_global_state}.tmp.XXXXXX")"
+        if ${pkgs.jq}/bin/jq -c \
+          '."electron-avatar-overlay-open" = false' \
+          "$codex_global_state" > "$codex_global_state_tmp"; then
+          mv -f "$codex_global_state_tmp" "$codex_global_state"
+        else
+          rm -f "$codex_global_state_tmp"
+          echo "WARNING: could not update $codex_global_state" >&2
+        fi
+      fi
+    ''
+  );
 }
