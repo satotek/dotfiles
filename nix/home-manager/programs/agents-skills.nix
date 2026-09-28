@@ -66,11 +66,12 @@ in
       };
 
       # hunk 公式 skill (hunk-review)。パッケージに同梱されているため flake input 不要。
-      # ${hunk}/skills/hunk-review/SKILL.md の単一ファイルツリーをそのまま source にする
-      # (herdr のような symlink 混入が無いので runCommand 抽出も不要)。
+      # llm-agents は実体を $out/share/hunk に置き、$out/bin/hunk はそこへのラッパー。
+      # skill は実体の隣 ($out/share/hunk/skills/hunk-review/SKILL.md) にある。
+      # symlink 混入は無いので runCommand 抽出は不要。
       # CLI 本体 (pkgs.llm-agents.hunk) は programs/hunk.nix で導入済み＝skill と同一パッケージ由来。
       hunk = {
-        path = "${pkgs.llm-agents.hunk}/skills";
+        path = "${pkgs.llm-agents.hunk}/share/hunk/skills";
       };
     };
 
