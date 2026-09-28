@@ -151,7 +151,11 @@ in
 {
   programs.codex = {
     enable = true;
-    package = pkgs.llm-agents.codex;
+    # llm-agents の codex は単体バイナリだけなので、daemon が要求する
+    # codex-package.json と codex-path/rg を添えたパッケージに組み直す。
+    package = pkgs.callPackage ../../packages/codex-complete.nix {
+      codex = pkgs.llm-agents.codex;
+    };
   };
 
   home.file.".codex/rules/default.rules".force = true;
