@@ -84,7 +84,7 @@ let
     tui.alternate_screen = "never";
 
     # model setting
-    model = "gpt-5.6-luna";
+    model = "gpt-6-luna";
     model_reasoning_effort = "xhigh";
     model_reasoning_summary = "auto";
     model_verbosity = "medium";
