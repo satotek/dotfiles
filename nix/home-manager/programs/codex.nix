@@ -21,7 +21,6 @@ let
   tomlFormat = pkgs.formats.toml { };
   codexConfig = {
     personality = "friendly";
-    network_access = true;
     web_search = "live";
 
     analytics.enabled = false;
