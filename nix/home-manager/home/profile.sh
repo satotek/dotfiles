@@ -72,5 +72,8 @@ path_append "$HOME/bin"
 path_append "$PNPM_HOME"
 export PATH
 
+# OpenCode の /editor は EDITOR が空だと起動せず戻る。
+export EDITOR="nvim"
+
 # Load local secrets (not tracked by git)
 [ -f "$XDG_CONFIG_HOME/secrets" ] && . "$XDG_CONFIG_HOME/secrets"

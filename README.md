@@ -320,11 +320,12 @@ Sheldon、Starship、zoxideの生成結果は`$XDG_CACHE_HOME/zsh`へ
 - Grok
 - Herdr
 - Hunk
+- OpenCode
 - agent-browser
 - 選定したエージェントスキル
 
 Herdr本体はNixパッケージとして管理しています。Home Managerの適用時に
-Claude Code、Codex、GrokのHerdr連携を生成し、セッション復元に必要なフックを設定します。
+Claude Code、Codex、Grok、OpenCodeのHerdr連携を生成し、セッション復元に必要なフックを設定します。
 
 Herdrのリモート運用とSSHポート転送は
 [VMリモート作業手順](docs/vm-remote-workflow.md)を参照してください。

@@ -7,10 +7,10 @@
 }:
 
 # 共有 MCP サーバー定義（純データ）。
-# Claude Code (settings.json の mcpServers) と Codex (config.toml の [mcp_servers])
-# の両方からこの 1 ファイルを import して使う。
+# Claude Code (settings.json の mcpServers)、Codex (config.toml の [mcp_servers])、
+# OpenCode (opencode.jsonc の mcp.servers) からこの 1 ファイルを import して使う。
 # ここには起動方法（command / args）だけを書き、エージェント固有の項目
-# （Claude の type = "stdio" など）は各 import 側で付与する。
+# （Claude の type = "stdio"、OpenCode の type = "local" など）は各 import 側で付与する。
 {
   context7 = {
     command = "sh";
