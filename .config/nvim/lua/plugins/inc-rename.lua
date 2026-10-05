@@ -23,6 +23,8 @@ return {
         command_palette = true,
         long_message_to_split = true,
         inc_rename = true,
+        -- hover を角丸枠で、カーソルから下2行・右2列に開く。
+        lsp_doc_border = true,
       },
     },
     keys = {

@@ -135,7 +135,8 @@
             {
               home.username = userName;
               home.homeDirectory = homeDirectory;
-              home.stateVersion = "25.05";
+              # 26.11 に上げ済み。macOS では Home Manager Apps が実体コピーになる。下げない。
+              home.stateVersion = "26.11";
 
               programs.home-manager.enable = true;
             }
