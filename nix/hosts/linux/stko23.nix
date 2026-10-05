@@ -11,8 +11,6 @@
       dotfiles.sops.enable = false;
     }
     ../../home-manager/platforms/linux.nix
-    ../../home-manager/presets/base.nix
-    ../../home-manager/presets/agents.nix
     (
       { lib, ... }:
       {
@@ -20,9 +18,6 @@
         programs.agent-skills.enable = lib.mkForce false;
       }
     )
-    ../../home-manager/presets/cloud.nix
-    ../../home-manager/presets/devtools.nix
-    ../../home-manager/presets/rust.nix
-    ../../home-manager/presets/webdevtools.nix
-  ];
+  ]
+  ++ import ../../home-manager/presets/select.nix { };
 }

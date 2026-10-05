@@ -9,6 +9,5 @@
     ../programs/herdr.nix
     ../programs/hunk.nix
     ../programs/opencode.nix
-    ../programs/sops.nix
   ];
 }

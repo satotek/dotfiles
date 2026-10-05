@@ -1,17 +1,18 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
-    bash-language-server
     ast-grep
-    ffmpeg
-    gh
-    go
-    gopls
+    bash-language-server
+    efm-langserver
     lua-language-server
     marksman
-    mermaid-cli
+    nixd
+    nixfmt
     shellcheck
     shfmt
     stylua
+    taplo
+    tree-sitter
+    yaml-language-server
   ];
 }

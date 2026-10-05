@@ -192,13 +192,8 @@
         hostname = darwinHostname;
         extraModules = [
           ./nix/home-manager/platforms/darwin.nix
-          ./nix/home-manager/presets/base.nix
-          ./nix/home-manager/presets/agents.nix
-          ./nix/home-manager/presets/cloud.nix
-          ./nix/home-manager/presets/devtools.nix
-          ./nix/home-manager/presets/rust.nix
-          ./nix/home-manager/presets/webdevtools.nix
-        ];
+        ]
+        ++ import ./nix/home-manager/presets/select.nix { };
       };
 
       homeConfigurations."nosuke@linux-x86_64" = mkHomeConfiguration linuxNosukeX86_64;

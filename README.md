@@ -207,7 +207,6 @@ Nixストアの絶対パスで参照します。
 シンボリックリンクを作ります。
 
 - `.config/nvim`
-- `.config/nvchad`
 - `.config/wezterm`
 - `.config/hunk/config.toml`
 - `.config/aerospace/aerospace.toml`
@@ -263,7 +262,7 @@ gcloud auth application-default set-quota-project nosuke-net
 | 暗号化ファイル | 復号先 | 対象 |
 |---|---|---|
 | `secrets/cloudflare.yaml` | `~/.config/cloudflare/cloudflare-infra.env` | macOSのみ |
-| `secrets/context7.yaml` | `~/.config/context7/api-key` | `agents`プリセットを使うホスト |
+| `secrets/context7.yaml` | `~/.config/context7/api-key` | `secrets`プリセットを使うホスト |
 
 既存ファイルの暗号化先にKMSキーを追加した場合は、復号可能なマシンで
 暗号化し直します。
@@ -336,14 +335,23 @@ Home Managerのパッケージは用途別のプリセットに分けていま�
 
 | プリセット | 用途 |
 |---|---|
-| `base` | シェル、エディター、Git、常用CLI |
-| `agents` | AIエージェント、スキル、MCP、Herdr、sops |
-| `cloud` | Azure CLI、Google Cloud SDK、SOPS、Terraform/OpenTofu関連ツール |
-| `devtools` | Go、シェル/Lua/Markdown関連ツール、Mermaid、ffmpeg |
+| `shell` | Zsh、Starship、Sheldon、direnv、zoxide |
+| `cli` | bat、eza、fd、ripgrep、yazi、btop、gh などの常用CLI |
+| `git` | Git、delta、lazygit |
+| `editor` | Neovim |
+| `terminal` | Ghostty、WezTerm。GUI のないサーバでは外す |
+| `agents` | AIエージェント、スキル、MCP、Herdr |
+| `secrets` | SOPS と復号の activation |
+| `cloud` | Azure CLI、Google Cloud SDK |
+| `infra` | tenv、Terraform 言語サーバ、hadolint、lazydocker |
+| `go` | Go、gopls |
 | `rust` | rustc、cargo、clippy、rustfmt、rust-analyzer |
-| `webdevtools` | Node.js、Bun、pnpm、Python、NixとWeb系の言語サーバー |
+| `node` | Node.js、Bun、pnpm、TypeScript、Web系の言語サーバ |
+| `python` | Python、uv、ruff、basedpyright |
+| `editor-lsp` | シェル、Lua、Markdown、YAML、Nix、TOML の言語サーバ |
+| `media` | ffmpeg、Mermaid |
 
-ホストごとのプリセットの組み合わせは`flake.nix`と`nix/hosts/`で定義します。
+ホストは`nix/home-manager/presets/select.nix`を読みます。引数を省くと上の一式です。`withRust`、`withSecrets`、`withTerminal`だけ外せます。ヘッドレスなサーバは`withTerminal = false`にします。
 
 ## 検証とメンテナンス
 
@@ -431,7 +439,6 @@ dotfiles/
 │       └── data/
 ├── .config/
 │   ├── nvim/
-│   ├── nvchad/
 │   └── wezterm/
 ├── docs/
 ├── secrets/

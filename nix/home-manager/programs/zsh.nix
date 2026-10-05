@@ -47,7 +47,6 @@ in
     shellAliases = {
       vi = "nvim";
       vim = "nvim";
-      nvchad = "NVIM_APPNAME=nvchad nvim";
       code = "code-insiders";
       sudo = "sudo ";
       python = "python3";

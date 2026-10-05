@@ -34,26 +34,14 @@ in
     dotbench
     eza
     fd
+    gh
     ghq
     ripgrep
     roots
-    rumdl # markdown linter & formatter (nvim の markdown LSP)
     yazi
   ];
 
   imports = [
     ../programs/btop.nix
-    ../programs/direnv.nix
-    ../programs/ghostty.nix
-    ../programs/git.nix
-    ../programs/lazygit
-    ../programs/nvim.nix
-    ../programs/sheldon.nix
-    ../programs/starship.nix
-    ../programs/tmux.nix
-    ../programs/wezterm.nix
-    ../programs/wget.nix
-    ../programs/zoxide.nix
-    ../programs/zsh.nix
   ];
 }
