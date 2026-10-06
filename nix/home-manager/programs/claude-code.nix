@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   pkgs,
   lib,
   ...
@@ -166,11 +167,6 @@ in
         "mcp__plugin_hm_chrome-devtools__list_network_requests"
         "mcp__plugin_hm_chrome-devtools__get_network_request"
         "mcp__plugin_hm_chrome-devtools__performance_analyze_insight"
-        # codex mcp-server が公開するのはこの 2 つだけ。呼び出し先の Codex 側で
-        # approval_policy = "on-request" と sandbox が別途効くため、ここでの許可は
-        # 「Claude が Codex を起動すること」までを対象にする。
-        "mcp__plugin_hm_codex__codex"
-        "mcp__plugin_hm_codex__codex-reply"
       ];
       enabledPlugins = {
         "rust-analyzer-lsp@claude-plugins-official" = true;
@@ -187,14 +183,13 @@ in
     };
 
     # 共有定義（../data/mcp-servers.nix）に Claude 固有の type = "stdio" を付与。
-    # Codex は Claude Code から専門エージェントとして呼ぶため、Claude 専用に追加する。
-    mcpServers = (lib.mapAttrs (_name: server: { type = "stdio"; } // server) sharedMcpServers) // {
-      codex = {
-        type = "stdio";
-        command = "codex";
-        args = [ "mcp-server" ];
-      };
-    };
+    mcpServers = lib.mapAttrs (_name: server: { type = "stdio"; } // server) sharedMcpServers;
+
+    # OpenAI 公式の Codex プラグイン (/codex:review, /codex:rescue など)。
+    # Codex 連携はこれに一本化し、codex mcp-server は使わない。
+    # マーケットプレイス経由ではなく flake input で固定し、リポジトリ内の
+    # plugins/codex をそのまま読ませる。
+    plugins.codex = "${inputs.codex-plugin-cc}/plugins/codex";
 
   };
 

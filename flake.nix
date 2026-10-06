@@ -58,6 +58,12 @@
       flake = false;
     };
 
+    # OpenAI 公式の Claude Code 用 Codex プラグイン。
+    codex-plugin-cc = {
+      url = "github:openai/codex-plugin-cc";
+      flake = false;
+    };
+
     # Orca 公式 agent skill (orca-cli / orchestration)。本体は llm-agents.nix から入れる。
     orca-skills = {
       url = "github:stablyai/orca";
