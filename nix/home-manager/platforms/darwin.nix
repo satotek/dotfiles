@@ -8,6 +8,35 @@ let
   homebrewPrefix = "/opt/homebrew";
   # Android Studio の SDK Manager が管理する SDK。adb を Studio と揃えるため Nix では入れない。
   androidHome = "${config.home.homeDirectory}/Library/Android/sdk";
+
+  # nixpkgs の 1.6.2 は Apple のサインイン変更に追従しておらず、ログインが
+  # DecodingError で失敗する。修正は 2.1.0 から。nixpkgs 版は SwiftPM の依存を
+  # 生成し直さないと上げられないので、公式の署名済みバイナリをそのまま使う。
+  # nixpkgs が 2.1.0 以上になったら pkgs.xcodes に戻す。
+  xcodes = pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
+    pname = "xcodes";
+    version = "2.1.0";
+
+    src = pkgs.fetchzip {
+      url = "https://github.com/XcodesOrg/xcodes/releases/download/${finalAttrs.version}/xcodes.zip";
+      stripRoot = false;
+      hash = "sha256-yffHopseb030I95h0aTwlTk5Qbsmz5AB7ZjHnrX2wD4=";
+    };
+
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+
+    # strip などで署名を壊さないよう、バイナリには手を加えない。
+    dontFixup = true;
+
+    installPhase = ''
+      runHook preInstall
+      install -Dm755 xcodes $out/bin/xcodes
+      wrapProgram $out/bin/xcodes --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.aria2 ]}
+      runHook postInstall
+    '';
+
+    meta.platforms = pkgs.lib.platforms.darwin;
+  });
 in
 {
   imports = [
@@ -18,8 +47,11 @@ in
 
   # Xcode.app は Nix にも Homebrew にも載せず、xcodes で導入と切り替えを行う。
   home.packages = [
-    pkgs.xcodes
+    xcodes
+    pkgs.xcodegen
     pkgs.llm-agents.orca
+    # 常駐させず、使うときに ollama serve する。モデルは ~/.ollama に残る。
+    pkgs.ollama
   ];
 
   home.sessionVariables = {
