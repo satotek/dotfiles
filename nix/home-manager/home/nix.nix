@@ -58,6 +58,7 @@ in
     # 世代を積むため、片方だけでなく `nh clean user` で両方を整理する。
     # 7 日以内の世代と最低 2 世代のロールバック先を残し、direnv などの開発用
     # GC root は保持する。macOS は Store GC を system 側の job に集約している。
+    # GC 後に同一内容のファイルをハードリンクでまとめ、store を 15% ほど縮める。
     clean = {
       enable = true;
       dates = "weekly";
@@ -68,7 +69,7 @@ in
         "7d"
         "--no-gcroots"
       ]
-      ++ lib.optional pkgs.stdenv.hostPlatform.isDarwin "--no-gc";
+      ++ (if pkgs.stdenv.hostPlatform.isDarwin then [ "--no-gc" ] else [ "--optimise" ]);
     };
   };
   systemd.user.services.nh-clean.Service.Environment = lib.mkIf pkgs.stdenv.hostPlatform.isLinux [

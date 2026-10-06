@@ -321,11 +321,12 @@ Home Managerの`programs.nh.clean`で、ユーザーのプロファイル（`hom
 
 | OS | 実行タイミング | 内容 |
 |---|---|---|
-| Linux | 毎週月曜0:00（systemd timer、停止中に過ぎた分は起動時に実行） | 世代整理とNixストアのGC |
+| Linux | 毎週月曜0:00（systemd timer、停止中に過ぎた分は起動時に実行） | 世代整理、NixストアのGCと最適化 |
 | macOS | 毎週日曜12:00 | 世代整理のみ（`--no-gc`） |
-| macOS | 毎週日曜12:15 | nix-darwinのシステム世代を同じ条件で整理し、NixストアもGC |
+| macOS | 毎週日曜12:15 | nix-darwinのシステム世代を同じ条件で整理し、NixストアのGCと最適化 |
 
 macOSのストアGCはroot権限で動くsystem側の`nh clean profile`に集約しています。
+最適化（`--optimise`）は同じ内容のファイルをハードリンクでまとめ、ストアを15%ほど縮めます。
 
 ### 自動更新
 

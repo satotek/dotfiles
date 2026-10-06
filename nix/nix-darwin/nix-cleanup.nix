@@ -1,7 +1,9 @@
 { pkgs, ... }:
 {
-  # nix-darwin の古い system generation を整理し、Nix Store の GC も
-  # root 権限で毎週実行する。開発用の GC root は保持する。
+  # nix-darwin の古い system generation を整理し、Nix Store の GC と
+  # 最適化（同一ファイルのハードリンク化）も root 権限で毎週実行する。
+  # macOS では auto-optimise-store がビルドと競合して失敗し得るため、定期実行にする。
+  # 開発用の GC root は保持する。
   launchd.daemons.nh-clean-system-generations = {
     serviceConfig = {
       ProgramArguments = [
@@ -13,6 +15,7 @@
         "--keep-since"
         "7d"
         "--no-gcroots"
+        "--optimise"
         "/nix/var/nix/profiles/system"
       ];
       # nh は内部で `nix --version` を実行する。launchd はログインシェルの PATH も
