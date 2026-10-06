@@ -64,15 +64,6 @@ in
         input = "herdr-skill";
         subdir = "skills";
       };
-
-      # hunk 公式 skill (hunk-review)。パッケージに同梱されているため flake input 不要。
-      # llm-agents は実体を $out/share/hunk に置き、$out/bin/hunk はそこへのラッパー。
-      # skill は実体の隣 ($out/share/hunk/skills/hunk-review/SKILL.md) にある。
-      # symlink 混入は無いので runCommand 抽出は不要。
-      # CLI 本体 (pkgs.llm-agents.hunk) は programs/hunk.nix で導入済み＝skill と同一パッケージ由来。
-      hunk = {
-        path = "${pkgs.llm-agents.hunk}/share/hunk/skills";
-      };
     };
 
     skills.explicit = {
@@ -81,10 +72,6 @@ in
       };
 
       frontend-design = {
-        from = "anthropic-skills";
-      };
-
-      webapp-testing = {
         from = "anthropic-skills";
       };
 
@@ -180,10 +167,6 @@ in
 
       herdr = {
         from = "herdr";
-      };
-
-      hunk-review = {
-        from = "hunk";
       };
     };
 
