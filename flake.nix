@@ -35,11 +35,6 @@
       flake = false;
     };
 
-    mattpocock-skills = {
-      url = "github:mattpocock/skills";
-      flake = false;
-    };
-
     # herdr 公式 agent skill (リポジトリ直下の SKILL.md)。
     # パッケージ本体は llm-agents.nix から入れ、ここでは skill のソースだけを取得する。
     herdr-skill = {

@@ -45,11 +45,6 @@ in
         subdir = "skills";
       };
 
-      mattpocock-skills = {
-        input = "mattpocock-skills";
-        subdir = "skills";
-      };
-
       agent-browser = {
         input = "agent-browser";
         subdir = "skills";
@@ -101,11 +96,6 @@ in
 
       next-dev-loop = {
         from = "vercel-next-skills";
-      };
-
-      grill-me = {
-        from = "mattpocock-skills";
-        path = "productivity/grill-me";
       };
 
       agent-browser = {
