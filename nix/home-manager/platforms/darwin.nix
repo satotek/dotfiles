@@ -9,5 +9,6 @@
   # Xcode.app は Nix にも Homebrew にも載せず、xcodes で導入と切り替えを行う。
   home.packages = [
     pkgs.xcodes
+    pkgs.llm-agents.orca
   ];
 }
