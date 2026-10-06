@@ -31,9 +31,17 @@
 
   security.pam.services.sudo_local = {
     touchIdAuth = true;
+    # クラムシェルなどで Touch ID が使えないときは Apple Watch で承認する。
+    watchIdAuth = true;
     # tmux などの中からでも Touch ID の認証ダイアログを利用できるようにする。
     reattach = true;
   };
+
+  # 再生キーで Music.app が起動しないよう、キーを拾う rcd をユーザーの launchd で
+  # 無効にする。次回ログインから効く。
+  system.activationScripts.postActivation.text = ''
+    /bin/launchctl disable "gui/$(/usr/bin/id -u -- ${username})/com.apple.rcd"
+  '';
 
   programs.zsh.enable = true;
   # Home Manager 側の zshrc が compinit をキャッシュ付きで遅延実行するので、
