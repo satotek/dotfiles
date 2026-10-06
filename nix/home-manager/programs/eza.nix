@@ -5,7 +5,4 @@
     enable = true;
     git = true;
   };
-
-  # 既定の la は eza -a だが、以前の ls -al と同じ長形式を保つ。
-  programs.zsh.shellAliases.la = "eza -la";
 }
