@@ -39,6 +39,7 @@ in
   ];
 
   imports = [
+    ../programs/atuin.nix
     ../programs/bat.nix
     ../programs/btop.nix
     ../programs/eza.nix
