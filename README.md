@@ -170,7 +170,7 @@ Nixストアの絶対パスで参照します。
 
 頻繁に直接編集したい設定には、Home Managerがリポジトリを参照する
 シンボリックリンクを作ります。対象は`.config/nvim`、`.config/wezterm`、
-Hunk・AeroSpace・Karabiner・Nixの設定、`nix/home-manager/home/profile.sh`です。
+Hunk・AeroSpace・Karabiner・Nixの設定です。
 
 これらには、編集直後にアプリケーションから読めるものと、再起動・再読み込み・
 `nix-switch`が必要なものがあります。各モジュールの管理方法を確認してください。
