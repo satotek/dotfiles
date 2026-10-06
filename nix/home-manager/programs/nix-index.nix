@@ -6,4 +6,8 @@
   imports = [ inputs.nix-index-database.homeModules.nix-index ];
 
   programs.nix-index-database.comma.enable = true;
+
+  # comma や `nix run nixpkgs#...` が Home Manager と同じ nixpkgs を使うようにし、
+  # レジストリ経由で最新 unstable を都度取得しない。store も共有できる。
+  nix.registry.nixpkgs.flake = inputs.nixpkgs;
 }
