@@ -28,7 +28,7 @@ jobs:
             extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
 
       - name: Update stable inputs
-        run: nix flake update nixpkgs nix-darwin home-manager
+        run: nix flake update nixpkgs nix-darwin home-manager nix-index-database
 
       # 自動マージの安全弁: 更新後の inputs で Linux home 構成が実際にビルドできるか検証。
       - name: Validate (build linux home config)
@@ -39,10 +39,10 @@ jobs:
         uses: peter-evans/create-pull-request@v8
         with:
           commit-message: 'chore(nix): update stable inputs'
-          title: 'chore(nix): update stable inputs (nixpkgs/darwin/home-manager)'
+          title: 'chore(nix): update stable inputs (nixpkgs/darwin/home-manager/nix-index)'
           body: |
             基盤系 flake input の更新（3日おき・ビルド検証済み）:
-            nixpkgs / nix-darwin / home-manager。
+            nixpkgs / nix-darwin / home-manager / nix-index-database。
 
             _このPRは update-flake-stable ワークフローが自動生成し、自動マージされます。_
           branch: chore/update-flake-stable

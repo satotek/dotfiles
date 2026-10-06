@@ -335,7 +335,7 @@ GitHub Actionsがflakeの入力を更新し、Linux用Home Manager構成のビ�
 | ワークフロー | 実行間隔 | 更新対象 |
 |---|---|---|
 | `update-flake-ai.yml` | 毎日 | `llm-agents`、エージェントブラウザー、エージェントスキル |
-| `update-flake-stable.yml` | 3日ごと | `nixpkgs`、`nix-darwin`、`home-manager` |
+| `update-flake-stable.yml` | 3日ごと | `nixpkgs`、`nix-darwin`、`home-manager`、`nix-index-database` |
 
 両ワークフローとも`cache.numtide.com`を利用し、
 `homeConfigurations."nosuke@linux-x86_64".activationPackage`を検証します。
