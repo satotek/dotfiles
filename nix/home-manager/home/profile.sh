@@ -65,6 +65,21 @@ if [[ "$OSTYPE" == darwin* ]]; then
   fi
 fi
 
+# /etc/paths.d is where pkg installers (.NET, TeX, Wireshark, ...) register
+# their bin directories. nix-darwin's /etc/zprofile does not run path_helper,
+# and path_helper would reorder PATH ahead of Nix, so append the entries here.
+if [[ -d /etc/paths.d ]]; then
+  for paths_file in $(command ls /etc/paths.d 2>/dev/null); do
+    while IFS= read -r paths_entry || [[ -n "$paths_entry" ]]; do
+      [[ -z "$paths_entry" || "$paths_entry" == \#* ]] && continue
+      # dotnet-cli-tools registers "~/.dotnet/tools", which path_helper never expands.
+      paths_entry="${paths_entry/#\~/$HOME}"
+      [[ -d "$paths_entry" ]] && path_append "$paths_entry"
+    done < "/etc/paths.d/$paths_file"
+  done
+  unset paths_file paths_entry
+fi
+
 # Keep user-local bins available, but let Nix-managed tools win first.
 path_append "$HOME/.local/bin"
 path_append "$HOME/.cargo/bin"
