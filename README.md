@@ -1,14 +1,139 @@
 # dotfiles
 
-macOSとLinuxの開発環境を、Nix Flakes・nix-darwin・Home Managerで管理する個人用dotfilesです。
+macOS・Linux・WSLで、いつもの開発環境を再現する。
 
-- macOSはnix-darwinのシステム層と、単独のHome Managerによるホーム環境を分離
-- LinuxとWSLは単独のHome Managerで管理
-- CLI、シェル、エディター、AIエージェント環境をNixで再現
-- 頻繁に編集する設定は、リポジトリを参照するシンボリックリンクで管理
-- マシン固有の設定と平文の機密情報はリポジトリ外に保持
+Nix Flakes・nix-darwin・Home Managerで管理する個人用dotfilesです。
+シェル、Neovim、開発ツール、AIエージェントをまとめて管理し、
+macOSのシステム設定とホーム環境は独立して更新できます。
 
-## 構成
+| 環境 | 管理するもの | 適用コマンド |
+|---|---|---|
+| macOS / Linux / WSL | シェル・エディター・CLI・AIエージェント | `nix-switch` |
+| macOSのみ | GUIアプリ・フォント・OS設定 | `darwin-switch` |
+
+[セットアップ](#セットアップ) · [日常の操作](#日常の操作) ·
+[設定を変更する](#設定を変更する) · [ドキュメント](#ドキュメント)
+
+## この環境に含まれるもの
+
+- **シェル** — Zsh、Sheldon、Starship、Zeno、zoxide、direnv
+- **エディターとGit** — Neovim、tmux、Git、delta、lazygit
+- **ターミナル** — Ghostty、WezTerm。macOSではAeroSpace・Karabinerも設定
+- **開発ツール** — Go、Rust、Node.js、Bun、pnpm、Python、uv、各種言語サーバー
+- **AIエージェント** — Claude Code、Codex、OpenCode、Antigravity CLI、Grok、Herdr、Hunk
+- **共通基盤** — エージェント向けルール・スキル・MCP設定、sopsによる機密情報の管理
+
+導入するツールはホストごとのプリセットで選択します。
+たとえば`azureuser`のLinux構成はRustを除外し、OrcaのSSHトンネル待受は`gem-ai`だけに追加します。
+
+## セットアップ
+
+このリポジトリは個人のユーザー名・ホスト名に合わせた構成です。
+そのまま汎用インストーラーとして使うものではありません。
+クローン先は`~/dotfiles`を前提とし、別の環境では
+`flake.nix`と`nix/hosts/`のユーザー名・ホームディレクトリ・ホスト名を調整してください。
+
+### 1. Nixをインストール
+
+[Determinate Nix](https://docs.determinate.systems/)を使用します。
+`llm-agents.nix`のバイナリキャッシュも登録し、大きなパッケージのソースビルドを避けます。
+このコマンドはNixをインストールし、現在のユーザーと指定のキャッシュを信頼対象に追加します。
+
+```bash
+curl -fsSL https://install.determinate.systems/nix | sh -s -- install \
+  --extra-conf "trusted-users = root $(id -un)" \
+  --extra-conf "extra-substituters = https://cache.numtide.com" \
+  --extra-conf "extra-trusted-substituters = https://cache.numtide.com" \
+  --extra-conf "extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+```
+
+シェルを開き直し、`nix --version`でインストールを確認します。
+
+### 2. クローンして構成を選ぶ
+
+```bash
+git clone https://github.com/satotek/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+```
+
+Home Managerの構成名は次から選びます。
+
+| 構成名 | プラットフォーム | 用途 |
+|---|---|---|
+| `nosuke@nosuke-M5-MBP` | `aarch64-darwin` | macOS |
+| `nosuke@linux-x86_64` | `x86_64-linux` | 汎用Linux |
+| `nosuke@linux-aarch64` | `aarch64-linux` | 汎用Linux |
+| `nosuke@nosuke-windows` | `x86_64-linux` | WSL |
+| `stko23@stko23-windows` | `x86_64-linux` | WSL |
+| `azureuser@linux-x86_64` | `x86_64-linux` | Azure / 汎用Linux |
+| `azureuser@linux-aarch64` | `aarch64-linux` | Azure / 汎用Linux |
+| `azureuser@gem-ai` | `x86_64-linux` | `gem-ai` |
+
+macOSのシステム構成は`darwinConfigurations.nosuke-M5-MBP`です。
+すべての出力は`nix flake show`で確認できます。
+
+### 3. 初回適用
+
+**macOS** — システム層を適用してからホーム環境を適用します。
+HomebrewアプリやmacOSの既定値も変更されるため、先に`nix/nix-darwin/`を確認してください。
+
+```bash
+sudo nix run nix-darwin/master#darwin-rebuild -- \
+  switch --flake "path:$PWD#nosuke-M5-MBP"
+
+nix run home-manager/master -- \
+  switch -b backup --flake "path:$PWD#nosuke@nosuke-M5-MBP"
+```
+
+**Linux / WSL** — `<home-configuration>`を上の構成名に置き換えます。
+
+```bash
+nix run home-manager/master -- \
+  switch -b backup --flake "path:$PWD#<home-configuration>"
+```
+
+ホーム環境の適用にsudoは不要です。`-b backup`は既存ファイルとリンクが
+衝突した場合の退避用です。同名のバックアップがある場合は確認してから整理してください。
+機密情報の復号を使うホストでは、[機密情報](#機密情報)の認証設定も必要です。
+
+### 4. ローカル設定を用意
+
+Gitのユーザー情報と任意のZsh上書き設定は、リポジトリ外で管理します。
+既存ファイルがない場合にテンプレートをコピーし、自分の環境に合わせて編集してください。
+
+```bash
+cp -n ~/dotfiles/.config/git.local.example ~/.config/git.local
+cp -n ~/dotfiles/.config/zsh.local.example ~/.config/zsh.local
+```
+
+## 日常の操作
+
+初回適用後はラッパーコマンドを利用できます。
+
+```bash
+cd ~/dotfiles
+git pull
+nix-switch
+```
+
+| 変更したもの | 実行するコマンド |
+|---|---|
+| シェル、CLI、Neovim、エージェントなど | `nix-switch` |
+| Homebrew cask、フォント、macOS設定 | `darwin-switch`（sudoが必要） |
+| 両方 | `darwin-switch`の後に`nix-switch` |
+
+`nix-switch`は現在のユーザー名とホスト名から構成を選びます。
+ホスト名が構成名と一致しない環境では、対象を明示して適用してください。
+
+```bash
+home-manager switch --flake 'path:/home/azureuser/dotfiles#azureuser@linux-x86_64'
+```
+
+新規ファイルは通常のGit flake入力に含まれません。
+追加したパスだけを`git add -N <path>`で認識させるか、
+初回セットアップと同様に`path:$PWD#...`を指定して検証します。
+
+## 管理の仕組み
 
 ```text
                             flake.nix
@@ -30,172 +155,12 @@ macOSとLinuxの開発環境を、Nix Flakes・nix-darwin・Home Managerで管�
 Determinate NixがNixデーモンとストアのGCを担当します。nix-darwinでは
 `nix.enable = false`とし、同じNix環境を二重管理しません。
 
-### macOSのシステム層
-
-nix-darwinが次を管理します。
-
-- Homebrew cask: 1Password、1Password CLI、Karabiner-Elements、Raycast、AeroSpace、WezTerm Nightly
-- フォント: HackGen NF、Moralerspace
-- Dock、Finder、キーボード、トラックパッド、スクリーンショットなどの設定
-- sudoのTouch ID認証
-- ログインシェルとしてのZsh
-- 古いnix-darwinシステム世代の定期整理
-
-### Home Managerによるホーム環境
-
-macOSとLinuxで共有するホーム環境です。
-
-- XDG Base Directory
-- Zsh、Sheldon、Starship、Zeno、zoxide、direnv
-- Git、delta、lazygit、tmux
-- Neovim、Ghostty、WezTerm、Karabiner設定
-- 開発ツールチェーンと言語サーバー
-- Claude Code、Codex、Antigravity CLI、Grok、Herdr、Hunk
-- エージェントスキル、MCPサーバー設定、Herdr連携
-- sopsとGCP Cloud KMSによる機密情報の復号
-
-## 対応する構成
-
-| Flake出力 | プラットフォーム | ユーザー / ホスト |
-|---|---|---|
-| `darwinConfigurations.nosuke-M5-MBP` | `aarch64-darwin` | macOSのシステム層 |
-| `homeConfigurations."nosuke@nosuke-M5-MBP"` | `aarch64-darwin` | macOSのホーム環境 |
-| `homeConfigurations."nosuke@linux-x86_64"` | `x86_64-linux` | 汎用Linux |
-| `homeConfigurations."nosuke@linux-aarch64"` | `aarch64-linux` | 汎用Linux |
-| `homeConfigurations."nosuke@nosuke-windows"` | `x86_64-linux` | WSL |
-| `homeConfigurations."stko23@stko23-windows"` | `x86_64-linux` | WSL |
-| `homeConfigurations."azureuser@linux-x86_64"` | `x86_64-linux` | Azure / 汎用Linux |
-| `homeConfigurations."azureuser@linux-aarch64"` | `aarch64-linux` | Azure / 汎用Linux |
-| `homeConfigurations."azureuser@gem-ai"` | `x86_64-linux` | `gem-ai` |
-
-すべての出力は次で確認できます。
-
-```bash
-nix flake show
-```
-
-この構成はリポジトリを`~/dotfiles`へクローンする前提です。別のユーザー、
-ホスト、クローン先を使う場合は、`flake.nix`、ホスト定義、またはHome Manager
-モジュール内の`dotfilesDir`を調整してください。
-
-## Nixのインストール
-
-[Determinate Nix](https://docs.determinate.systems/)を使用します。
-`llm-agents.nix`のバイナリキャッシュを信頼済みの配布元として登録し、
-Codexなどの大きなRustパッケージを毎回ソースからビルドしないようにします。
-
-```bash
-curl -fsSL https://install.determinate.systems/nix | sh -s -- install \
-  --extra-conf "trusted-users = root $(id -un)" \
-  --extra-conf "extra-substituters = https://cache.numtide.com" \
-  --extra-conf "extra-trusted-substituters = https://cache.numtide.com" \
-  --extra-conf "extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
-```
-
-インストール後にシェルを開き直し、確認します。
-
-```bash
-nix --version
-nix config show | grep experimental-features
-nix config show | grep cache.numtide.com
-```
-
-Determinate Nixは通常`nix-command`と`flakes`を有効化します。新規インストール
-直後に無効と表示される場合だけ、代替手段として次を設定します。
-
-```bash
-mkdir -p ~/.config/nix
-grep -qxF 'experimental-features = nix-command flakes' \
-  ~/.config/nix/nix.conf 2>/dev/null \
-  || printf '%s\n' 'experimental-features = nix-command flakes' >> ~/.config/nix/nix.conf
-```
-
-初回のHome Manager適用後は、リポジトリ内の`.config/nix/nix.conf`が管理対象になります。
-
-## 初回セットアップ
-
-### macOS
-
-```bash
-git clone https://github.com/satotek/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-
-# システム層
-sudo nix run nix-darwin/master#darwin-rebuild -- \
-  switch --flake "path:$PWD#nosuke-M5-MBP"
-
-# ホーム環境
-nix run home-manager/master -- \
-  switch --flake "path:$PWD#nosuke@nosuke-M5-MBP"
-```
-
-システム層にはsudoが必要ですが、ホーム環境には不要です。
-
-### Linux / WSL
-
-```bash
-git clone https://github.com/satotek/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-
-nix run home-manager/master -- \
-  switch -b backup --flake "path:$PWD#<home-configuration>"
-```
-
-例:
-
-```bash
-nix run home-manager/master -- \
-  switch -b backup --flake "path:$PWD#azureuser@gem-ai"
-```
-
-`-b backup`は、初回適用時に既存ファイルとHome Managerのリンクが
-衝突した場合の退避用です。
-
-## 日常的な更新
-
-初回適用後は次のラッパーコマンドがインストールされます。
-
-```bash
-nix-switch
-```
-
-現在のユーザーとホストに対応するHome Manager構成を適用します。
-macOSでもLinuxでもsudoは不要です。
-
-macOSのシステム層を変更した場合だけ次を実行します。
-
-```bash
-darwin-switch
-```
-
-使い分け:
-
-| 変更 | コマンド |
-|---|---|
-| シェル、CLI、Neovim、Ghostty、エージェント、Lazygit | `nix-switch` |
-| Homebrew cask、フォント、macOS設定、システムのZsh | `darwin-switch` |
-| 両方 | `darwin-switch`の後に`nix-switch` |
-
-flakeはGit管理対象だけを入力として扱います。新しいNixモジュールや`.zsh`
-スニペットを追加した場合は、切り替えまたは通常のflake評価より先に`git add`
-してください。未追跡ファイルを含めて一時的に評価するときは
-`path:$PWD#...`を使用できます。
-
-## 設定の管理方法
+## 設定を変更する
 
 ### Home Managerの標準オプション
 
-可能なものはHome Managerのオプションから生成します。
-
-- Git
-- Zshの履歴とエイリアス
-- Sheldonプラグイン
-- Starship
-- direnv / nix-direnv
-- zoxide
-- tmux
-- Ghostty
-- Lazygit
+Git、Zsh、Sheldon、Starship、direnv、zoxide、tmux、Ghostty、Lazygitなどは
+Home Managerのオプションから生成します。変更後は`nix-switch`で適用します。
 
 Lazygitの`config.yml`は`programs.lazygit.settings`から生成され、適用時に
 公式スキーマで検証されます。ページャーとして使うdeltaは、
@@ -204,15 +169,8 @@ Nixストアの絶対パスで参照します。
 ### リポジトリで管理する設定
 
 頻繁に直接編集したい設定には、Home Managerがリポジトリを参照する
-シンボリックリンクを作ります。
-
-- `.config/nvim`
-- `.config/wezterm`
-- `.config/hunk/config.toml`
-- `.config/aerospace/aerospace.toml`
-- `.config/karabiner/karabiner.json`
-- `.config/nix/nix.conf`
-- `nix/home-manager/home/profile.sh`
+シンボリックリンクを作ります。対象は`.config/nvim`、`.config/wezterm`、
+Hunk・AeroSpace・Karabiner・Nixの設定、`nix/home-manager/home/profile.sh`です。
 
 これらには、編集直後にアプリケーションから読めるものと、再起動・再読み込み・
 `nix-switch`が必要なものがあります。各モジュールの管理方法を確認してください。
@@ -227,18 +185,6 @@ Nixストアの絶対パスで参照します。
 - `~/.ssh/azure-devops`
 - `~/.ssh/azure-devops.pub`
 - `$XDG_CACHE_HOME/zsh/`
-
-Gitのユーザー情報:
-
-```bash
-cp ~/dotfiles/.config/git.local.example ~/.config/git.local
-```
-
-任意のZsh上書き設定:
-
-```bash
-cp ~/dotfiles/.config/zsh.local.example ~/.config/zsh.local
-```
 
 ## 機密情報
 
@@ -273,27 +219,12 @@ sops updatekeys secrets/*.yaml
 
 リポジトリ管理外のシェル用機密情報は`~/.config/secrets`へ置けます。
 
-## シェル
+## シェルの操作
 
 ZshプラグインはSheldon、プロンプトはStarship、スニペットと履歴UIはZenoが担当します。
 
-Zshコードは役割ごとに分割し、Nix評価時に最終`.zshrc`へ埋め込みます。
-実行時に分割ファイルを追加で読み込まないため、ファイル分割による
-起動時I/Oは増えません。
-
-```text
-nix/home-manager/programs/
-├── zsh.nix
-└── zsh/
-    ├── early.zsh
-    ├── widgets.zsh
-    ├── vm.zsh
-    └── init.zsh
-```
-
-Sheldon、Starship、zoxideの生成結果は`$XDG_CACHE_HOME/zsh`へ
-アトミックに保存し、Zshバイトコードへコンパイルします。Nixストアの
-更新時刻に依存せず、パッケージ本体や設定の変更に応じてキャッシュを更新します。
+Zshコードは`nix/home-manager/programs/zsh/`に分割し、Nix評価時に`.zshrc`へ
+埋め込みます。Sheldon、Starship、zoxideの生成結果は`$XDG_CACHE_HOME/zsh`にキャッシュします。
 
 主なキーバインド:
 
@@ -307,21 +238,11 @@ Sheldon、Starship、zoxideの生成結果は`$XDG_CACHE_HOME/zsh`へ
 
 詳細は[Zshのキーバインド](docs/zsh-keybindings.md)を参照してください。
 
-## AIエージェントとHerdr
+## AIエージェントの設定
 
 エージェントのパッケージは主に`llm-agents.nix`オーバーレイから導入します。
 設定はHome Managerで生成し、共通のMCP定義は
 `nix/home-manager/data/mcp-servers.nix`に置きます。
-
-- Claude Code
-- Codex
-- Antigravity CLI
-- Grok
-- Herdr
-- Hunk
-- OpenCode
-- agent-browser
-- 選定したエージェントスキル
 
 Herdr本体はNixパッケージとして管理しています。Home Managerの適用時に
 Claude Code、Codex、Grok、OpenCodeのHerdr連携を生成し、セッション復元に必要なフックを設定します。
@@ -351,7 +272,9 @@ Home Managerのパッケージは用途別のプリセットに分けていま�
 | `editor-lsp` | シェル、Lua、Markdown、YAML、Nix、TOML の言語サーバ |
 | `media` | ffmpeg、Mermaid |
 
-ホストは`nix/home-manager/presets/select.nix`を読みます。引数を省くと上の一式です。`withRust`、`withSecrets`、`withTerminal`だけ外せます。ヘッドレスなサーバは`withTerminal = false`にします。
+ホストは`nix/home-manager/presets/select.nix`を読みます。引数を省くと上の一式です。
+`withRust`、`withSecrets`、`withTerminal`でそれぞれのプリセットを除外できます。
+GUIのないサーバでは`withTerminal = false`にします。
 
 ## 検証とメンテナンス
 
@@ -401,7 +324,7 @@ macOSでは毎週日曜に次を整理します。
 `--no-gc --no-gcroots`で世代整理だけを行い、system側も`--no-gcroots`を指定して
 direnvなどの開発用GC rootを保持します。
 
-## 自動更新
+### 自動更新
 
 GitHub Actionsがflakeの入力を更新し、Linux用Home Manager構成のビルドに
 成功した場合だけPRを作成して自動マージします。
@@ -448,7 +371,7 @@ dotfiles/
     └── workflows/
 ```
 
-## 関連ドキュメント
+## ドキュメント
 
 - [メンテナンス用コマンド](docs/maintenance.md)
 - [Zshのキーバインド](docs/zsh-keybindings.md)
