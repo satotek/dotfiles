@@ -182,8 +182,8 @@ Hunk・AeroSpace・Karabiner・Nixの設定、`nix/home-manager/home/profile.sh`
 - `~/.config/git.local`
 - `~/.config/zsh.local`
 - `~/.config/secrets`
-- `~/.ssh/azure-devops`
-- `~/.ssh/azure-devops.pub`
+- `~/.ssh/id_rsa`（Azure DevOps用。ed25519非対応のためRSA）
+- `~/.ssh/id_rsa.pub`
 - `$XDG_CACHE_HOME/zsh/`
 
 ## 機密情報
