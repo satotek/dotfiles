@@ -1,6 +1,7 @@
 { ... }:
 {
   imports = [
+    ../programs/agents-context.nix
     ../programs/agents-skills.nix
     ../programs/antigravity-cli.nix
     ../programs/claude-code.nix
