@@ -12,6 +12,10 @@
 
     llm-agents.url = "github:numtide/llm-agents.nix";
 
+    # comma と command-not-found 用の nix-index データベース（毎週ビルド済みを配布）。
+    nix-index-database.url = "github:nix-community/nix-index-database";
+    nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+
     agent-skills.url = "github:Kyure-A/agent-skills-nix";
     agent-skills.inputs.nixpkgs.follows = "nixpkgs";
 
