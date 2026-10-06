@@ -33,7 +33,7 @@
     touchIdAuth = true;
     # クラムシェルなどで Touch ID が使えないときは Apple Watch で承認する。
     watchIdAuth = true;
-    # tmux などの中からでも Touch ID の認証ダイアログを利用できるようにする。
+    # ターミナルマルチプレクサの中からでも Touch ID の認証ダイアログを利用できるようにする。
     reattach = true;
   };
 

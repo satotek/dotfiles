@@ -17,7 +17,6 @@
     # contain individually managed files, so convert old symlinks to real dirs.
     migrate_config_dir "$HOME/.config/git"
     migrate_config_dir "$HOME/.config/karabiner"
-    migrate_config_dir "$HOME/.config/tmux"
     migrate_config_dir "$HOME/.config/wget"
     migrate_config_dir "$HOME/.config/zsh"
   '';
