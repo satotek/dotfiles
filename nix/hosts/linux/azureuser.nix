@@ -9,5 +9,7 @@
   extraModules = [
     ../../home-manager/platforms/linux.nix
   ]
-  ++ import ../../home-manager/presets/select.nix { withRust = false; };
+  ++ import ../../home-manager/presets/select.nix { withRust = false; }
+  # Orca の SSH トンネル待受は gem-ai だけ。他の azureuser ホストには置かない。
+  ++ (if hostname == "gem-ai" then [ ../../home-manager/programs/orca.nix ] else [ ]);
 }
