@@ -50,8 +50,6 @@ in
       code = "code-insiders";
       sudo = "sudo ";
       python = "python3";
-      ll = "ls -l";
-      la = "ls -al";
       lg = "lazygit";
       "..." = "../../";
       "...." = "../../../";

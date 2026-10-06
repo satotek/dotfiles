@@ -30,18 +30,20 @@ let
 in
 {
   home.packages = with pkgs; [
+    aria2
     bat
     dotbench
-    eza
     fd
     gh
     ghq
     ripgrep
     roots
+    xh
     yazi
   ];
 
   imports = [
     ../programs/btop.nix
+    ../programs/eza.nix
   ];
 }
