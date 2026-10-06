@@ -58,7 +58,7 @@ in
       "....." = "../../../../";
       nfu = "nix flake update --flake ~/dotfiles";
       nfs = "nix flake show ~/dotfiles";
-      ngc = "nix-collect-garbage -d";
+      ngc = "nh clean user --keep 2 --no-gcroots";
     };
 
     envExtra = ''

@@ -66,7 +66,7 @@ Zsh の履歴を fzf で検索する。選択したコマンドはプロンプ�
 |---|---|
 | `nfu` | `nix flake update --flake ~/dotfiles` |
 | `nfs` | `nix flake show ~/dotfiles` |
-| `ngc` | `nix-collect-garbage -d` |
+| `ngc` | `nh clean user --keep 2 --no-gcroots`（最新2世代とdirenvなどの開発用GC rootを残して即座に整理） |
 
 ## 反映と調査
 
