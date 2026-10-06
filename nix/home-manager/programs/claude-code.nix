@@ -103,7 +103,11 @@ in
 
   # statusLine.command は nix store の絶対パス参照なので PATH には入らない。
   # 設定 TUI（ccstatusline コマンド）を手動起動できるよう PATH にも追加する。
-  home.packages = [ pkgs.llm-agents.ccstatusline ];
+  # ccusage は cleanupPeriodDays で残しているセッション履歴を集計するため。
+  home.packages = [
+    pkgs.llm-agents.ccstatusline
+    pkgs.llm-agents.ccusage
+  ];
 
   programs.claude-code = {
     enable = true;
