@@ -21,6 +21,9 @@ in
     '';
   };
 
+  # OpenCode はフックではなくプラグインで書き換える。rtk 同梱のものは v1 用で v2 では読めないので自作版を置く。
+  xdg.configFile."opencode/plugins/rtk.js".source = ../../../.config/opencode/plugins/rtk.js;
+
   # Bash の出力を圧縮して読ませ、コンテキストを節約する。
   # rtk は permissionDecision を返さないので、書き換え後のコマンドにも通常の権限判定が掛かる。
   programs.claude-code.settings.hooks.PreToolUse = [
