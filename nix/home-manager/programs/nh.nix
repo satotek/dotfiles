@@ -13,8 +13,6 @@ let
   launchdPath = "/nix/var/nix/profiles/default/bin:/usr/bin:/bin:/usr/sbin:/sbin";
 in
 {
-  programs.nh.enable = true;
-
   # Store GC は system 側の launchd job に集約し、Home Manager の古い世代だけを
   # 毎週整理する。7 日以内の世代と、最低 2 世代のロールバック先を残す。
   launchd.agents.nh-clean-home-manager-generations = {

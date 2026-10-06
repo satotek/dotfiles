@@ -148,7 +148,7 @@ VM 側で portless 等の subdomain ルーティング(例: `a.localhost:1355` �
 - **zsh 関数**(`zsh.nix`)… home レイヤーなので `nix-switch` 後に有効化。
 
 ```console
-nix-switch   # = nix run home-manager/master -- switch --flake "path:$PWD#nosuke@nosuke-M5-MBP"
+nix-switch   # = nh home switch ~/dotfiles -c nosuke@nosuke-M5-MBP -b hm-bak
 ```
 
 ---
