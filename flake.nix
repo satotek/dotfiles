@@ -10,6 +10,22 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Homebrew 本体とサードパーティ tap を flake.lock で固定する。
+    # homebrew/core と homebrew/cask は JSON API から引くので tap として持たない。
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    nix-homebrew.inputs.brew-src.follows = "brew-src";
+
+    # nix-homebrew の既定より新しいリリースを追う。タグを上げて更新する。
+    brew-src = {
+      url = "github:Homebrew/brew/7.0.8";
+      flake = false;
+    };
+
+    homebrew-nikitabobko-tap = {
+      url = "github:nikitabobko/homebrew-tap";
+      flake = false;
+    };
+
     llm-agents.url = "github:numtide/llm-agents.nix";
 
     # comma と command-not-found 用の nix-index データベース（毎週ビルド済みを配布）。

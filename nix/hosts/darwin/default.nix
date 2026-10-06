@@ -22,6 +22,7 @@ inputs.nix-darwin.lib.darwinSystem {
   };
 
   modules = [
+    inputs.nix-homebrew.darwinModules.nix-homebrew
     ../../nix-darwin/system.nix
     {
       users.users.${username} = {

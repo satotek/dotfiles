@@ -7,6 +7,7 @@
 }:
 {
   imports = [
+    ./fonts.nix
     ./homebrew.nix
     ./macos-defaults.nix
     ./nix-cleanup.nix
@@ -26,11 +27,6 @@
   environment.systemPackages = with pkgs; [
     git
     vim
-  ];
-
-  fonts.packages = with pkgs; [
-    hackgen-nf-font
-    moralerspace
   ];
 
   security.pam.services.sudo_local = {

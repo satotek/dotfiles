@@ -42,6 +42,7 @@ in
   imports = [
     ../programs/aerospace.nix
     ../programs/karabiner.nix
+    ../programs/mpv.nix
     ../programs/nh.nix
     ../presets/terminal.nix
   ];
@@ -94,6 +95,12 @@ in
         done < "/etc/paths.d/$paths_file"
       done
       unset paths_file paths_entry
+    '')
+
+    # OrbStack の docker / compose / credential helper。OrbStack に shell の設定を
+    # 書き換えさせず、ここで PATH に入れる。
+    (lib.mkOrder 1200 ''
+      path_append "${config.home.homeDirectory}/.orbstack/bin"
     '')
 
     (lib.mkOrder 1200 ''
