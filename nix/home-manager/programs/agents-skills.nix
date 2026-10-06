@@ -69,6 +69,11 @@ in
         input = "orca-skills";
         subdir = "skills";
       };
+
+      # このリポジトリで書いた自作スキル (agents/skills)。
+      local = {
+        path = ../../../agents/skills;
+      };
     };
 
     skills.explicit = {
@@ -172,6 +177,10 @@ in
 
       herdr = {
         from = "herdr";
+      };
+
+      commit = {
+        from = "local";
       };
 
       # Orca のランタイム (gem-ai の serve や Mac のアプリ) を CLI から操作する。
