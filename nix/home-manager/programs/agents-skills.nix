@@ -64,6 +64,11 @@ in
         input = "herdr-skill";
         subdir = "skills";
       };
+
+      orca = {
+        input = "orca-skills";
+        subdir = "skills";
+      };
     };
 
     skills.explicit = {
@@ -167,6 +172,15 @@ in
 
       herdr = {
         from = "herdr";
+      };
+
+      # Orca のランタイム (gem-ai の serve や Mac のアプリ) を CLI から操作する。
+      orca-cli = {
+        from = "orca";
+      };
+
+      orchestration = {
+        from = "orca";
       };
     };
 
