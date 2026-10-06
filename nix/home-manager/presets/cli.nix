@@ -31,19 +31,20 @@ in
 {
   home.packages = with pkgs; [
     aria2
-    bat
     dotbench
     fd
-    gh
     ghq
-    ripgrep
     roots
     xh
-    yazi
   ];
 
   imports = [
+    ../programs/bat.nix
     ../programs/btop.nix
     ../programs/eza.nix
+    ../programs/gh.nix
+    ../programs/nix-your-shell.nix
+    ../programs/ripgrep.nix
+    ../programs/yazi.nix
   ];
 }

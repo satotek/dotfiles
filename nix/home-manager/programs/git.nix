@@ -1,7 +1,5 @@
 { pkgs, lib, ... }:
 {
-  home.packages = [ pkgs.delta ];
-
   # SSH 署名をローカルで検証（git log --show-signature / verify-commit）するための
   # 対応表。「メール 公開鍵」の行で、コミッタと署名鍵が一致するかを git が確認する。
   # 署名生成は 1Password(op-ssh-sign)なので Mac 限定でよい。
@@ -9,6 +7,18 @@
     ".config/git/allowed_signers".text = ''
       konosuke.s0912@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEu/vDcjBdXbzqM6e6V56JX65xkjyK7Z6sDvnfeCTXLU
     '';
+  };
+
+  # core.pager と interactive.diffFilter はこの git 連携が設定する。
+  # diffFilter は --color-only なので、side-by-side は add -p には効かない。
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
+    options = {
+      navigate = true;
+      dark = true;
+      side-by-side = true;
+    };
   };
 
   programs.git = {
@@ -26,14 +36,8 @@
       color.ui = true;
       init.defaultBranch = "main";
       core = {
-        pager = "delta --side-by-side";
         editor = "vim";
         autocrlf = "input";
-      };
-      interactive.diffFilter = "delta --color-only";
-      delta = {
-        navigate = true;
-        dark = true;
       };
       merge.conflictstyle = "zdiff3";
       alias = {
