@@ -53,8 +53,9 @@ in
   programs.ghostty = {
     enable = true;
 
-    # macOS は公式 DMG の再パッケージ、Linux は GTK 版を使う。
-    package = if pkgs.stdenv.hostPlatform.isDarwin then pkgs.ghostty-bin else pkgs.ghostty;
+    # macOS は Homebrew cask の /Applications/Ghostty.app を使い、ここでは設定だけ書く。
+    # store パスは世代ごとに変わり、Dock と Spotlight が追従できないため。
+    package = if pkgs.stdenv.hostPlatform.isDarwin then null else pkgs.ghostty;
     systemd.enable = false;
 
     # Ghostty の自動 shell integration を使い、Home Manager からは

@@ -10,6 +10,7 @@
       "raycast"
       "nikitabobko/tap/aerospace" # i3 風タイリングウィンドウマネージャ
       "wezterm@nightly"
+      "ghostty" # 設定は home-manager/programs/ghostty.nix
     ];
   };
 }
