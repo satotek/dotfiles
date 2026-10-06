@@ -86,15 +86,23 @@ in
       # /etc/paths.d is where pkg installers (.NET, TeX, Wireshark, ...) register
       # their bin directories. nix-darwin's /etc/zprofile does not run path_helper,
       # and path_helper would reorder PATH ahead of Nix, so append the entries here.
-      for paths_file in $(command ls /etc/paths.d 2>/dev/null); do
-        while IFS= read -r paths_entry || [ -n "$paths_entry" ]; do
-          case "$paths_entry" in "" | "#"*) continue ;; esac
-          # dotnet-cli-tools registers "~/.dotnet/tools", which path_helper never expands.
-          case "$paths_entry" in "~"*) paths_entry="$HOME''${paths_entry#\~}" ;; esac
-          [ -d "$paths_entry" ] && path_append "$paths_entry"
-        done < "/etc/paths.d/$paths_file"
-      done
-      unset paths_file paths_entry
+      # Glob instead of $(ls) to avoid forking on every shell start. zsh's nomatch
+      # would error on an empty directory, so null_glob is scoped to this function.
+      paths_d_append() {
+        local paths_file paths_entry
+        [ -n "''${ZSH_VERSION:-}" ] && setopt local_options null_glob
+        for paths_file in /etc/paths.d/*; do
+          [ -f "$paths_file" ] || continue
+          while IFS= read -r paths_entry || [ -n "$paths_entry" ]; do
+            case "$paths_entry" in "" | "#"*) continue ;; esac
+            # dotnet-cli-tools registers "~/.dotnet/tools", which path_helper never expands.
+            case "$paths_entry" in "~"*) paths_entry="$HOME''${paths_entry#\~}" ;; esac
+            [ -d "$paths_entry" ] && path_append "$paths_entry"
+          done < "$paths_file"
+        done
+      }
+      paths_d_append
+      unset -f paths_d_append
     '')
 
     # OrbStack の docker / compose / credential helper。OrbStack に shell の設定を
