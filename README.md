@@ -315,14 +315,17 @@ dotbench 30
 
 ### 世代の整理
 
-macOSでは毎週日曜に次を整理します。
+Home Managerの`programs.nh.clean`で、ユーザーのプロファイル（`home-manager`と
+`home-manager-path`を入れる`profile`）を毎週`nh clean user`で整理します。
+最低2世代と直近7日分を残し、`--no-gcroots`でdirenvなどの開発用GC rootは保持します。
 
-- 12:00: Home Managerの世代を最低2世代、直近7日分残して整理
-- 12:15: nix-darwinのシステム世代を最低2世代、直近7日分残して整理し、NixストアもGC
+| OS | 実行タイミング | 内容 |
+|---|---|---|
+| Linux | 毎週月曜0:00（systemd timer、停止中に過ぎた分は起動時に実行） | 世代整理とNixストアのGC |
+| macOS | 毎週日曜12:00 | 世代整理のみ（`--no-gc`） |
+| macOS | 毎週日曜12:15 | nix-darwinのシステム世代を同じ条件で整理し、NixストアもGC |
 
-ストアのGCはsystem側の`nh clean profile`に集約しています。Home Manager側は
-`--no-gc --no-gcroots`で世代整理だけを行い、system側も`--no-gcroots`を指定して
-direnvなどの開発用GC rootを保持します。
+macOSのストアGCはroot権限で動くsystem側の`nh clean profile`に集約しています。
 
 ### 自動更新
 

@@ -7,6 +7,11 @@
 let
   homeDirectory = config.home.homeDirectory;
   dotfilesDir = "${homeDirectory}/dotfiles";
+  # nh は内部で `nix --version` を実行するため、nix が PATH に無いと
+  # "No output from nix --version command" で失敗する。launchd も systemd の
+  # user manager もログインシェルの PATH を引き継がないので、ジョブ側で明示する。
+  # store パスではなく profile を指し、nix 更新に追随させる。
+  nhCleanPath = "/nix/var/nix/profiles/default/bin:/usr/bin:/bin:/usr/sbin:/sbin";
   # nix-output-monitor は TUI を描き直し続けるため、エージェントの実行ログや
   # パイプに流れると読めなくなる。端末でないときは通常のビルドログに切り替える。
   nomFlag = ''
@@ -45,11 +50,32 @@ let
 in
 {
   # switch は nh に任せる。NH_FLAKE も設定されるので、素の `nh home switch` でも
-  # dotfiles を参照できる。世代の自動整理は macOS 側の programs/nh.nix にある。
+  # dotfiles を参照できる。
   programs.nh = {
     enable = true;
     flake = dotfilesDir;
+    # standalone HM は home-manager と profile (home-manager-path) の 2 プロファイルに
+    # 世代を積むため、片方だけでなく `nh clean user` で両方を整理する。
+    # 7 日以内の世代と最低 2 世代のロールバック先を残し、direnv などの開発用
+    # GC root は保持する。macOS は Store GC を system 側の job に集約している。
+    clean = {
+      enable = true;
+      dates = "weekly";
+      extraArgs = [
+        "--keep"
+        "2"
+        "--keep-since"
+        "7d"
+        "--no-gcroots"
+      ]
+      ++ lib.optional pkgs.stdenv.hostPlatform.isDarwin "--no-gc";
+    };
   };
+  systemd.user.services.nh-clean.Service.Environment = lib.mkIf pkgs.stdenv.hostPlatform.isLinux [
+    "PATH=${nhCleanPath}"
+  ];
+  launchd.agents.nh-clean.config.EnvironmentVariables.PATH =
+    lib.mkIf pkgs.stdenv.hostPlatform.isDarwin nhCleanPath;
 
   xdg.configFile."nix/nix.conf".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/.config/nix/nix.conf";
