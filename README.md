@@ -9,16 +9,18 @@ macOSのシステム設定とホーム環境は独立して更新できます。
 | 環境 | 管理するもの | 適用コマンド |
 |---|---|---|
 | macOS / Linux / WSL | シェル・エディター・CLI・AIエージェント | `nix-switch` |
-| macOSのみ | GUIアプリ・フォント・OS設定 | `darwin-switch` |
+| macOSのみ | Homebrewのアプリ・フォント・OS設定 | `darwin-switch` |
 
 [セットアップ](#セットアップ) · [日常の操作](#日常の操作) ·
 [設定を変更する](#設定を変更する) · [ドキュメント](#ドキュメント)
 
 ## この環境に含まれるもの
 
-- **シェル** — Zsh、Sheldon、Starship、Zeno、zoxide、direnv
-- **エディターとGit** — Neovim、tmux、Git、delta、lazygit
+- **シェル** — Zsh、Sheldon、Starship、atuin、fzf、zoxide、direnv
+- **エディターとGit** — Neovim、Git、delta、lazygit
+- **CLI** — bat、eza、fd、ripgrep、yazi、gh、xh など
 - **ターミナル** — Ghostty。macOSではAeroSpace・Karabinerも設定
+- **macOSのアプリ** — Homebrewのformula・caskをnix-homebrewで宣言。Xcodeはxcodesで導入
 - **開発ツール** — Go、Rust、Node.js、Bun、pnpm、Python、uv、各種言語サーバー
 - **AIエージェント** — Claude Code、Codex、OpenCode、Antigravity CLI、Grok、Herdr、Hunk
 - **共通基盤** — エージェント向けルール・スキル・MCP設定、sopsによる機密情報の管理
@@ -76,6 +78,7 @@ macOSのシステム構成は`darwinConfigurations.nosuke-M5-MBP`です。
 
 **macOS** — システム層を適用してからホーム環境を適用します。
 HomebrewアプリやmacOSの既定値も変更されるため、先に`nix/nix-darwin/`を確認してください。
+Homebrew本体はnix-homebrewが導入するので、事前のインストールは不要です。
 
 ```bash
 sudo nix run nix-darwin/master#darwin-rebuild -- \
@@ -91,6 +94,11 @@ nix run home-manager/master -- \
 nix run home-manager/master -- \
   switch -b backup --flake "path:$PWD#<home-configuration>"
 ```
+
+既存の`/opt/homebrew`がある場合は、nix-homebrewが初回の適用で引き継ぎます。
+tapは宣言したものだけにするため、`/opt/homebrew/Library/Taps`が残っていると
+適用が止まります。中のtapは宣言から作り直されるので、退避してから再実行してください。
+宣言にないformula・caskが入っている場合も適用は止まります（[Homebrew](#homebrew)）。
 
 ホーム環境の適用にsudoは不要です。`-b backup`は既存ファイルとリンクが
 衝突した場合の退避用です。同名のバックアップがある場合は確認してから整理してください。
@@ -119,7 +127,7 @@ nix-switch
 | 変更したもの | 実行するコマンド |
 |---|---|
 | シェル、CLI、Neovim、エージェントなど | `nix-switch` |
-| Homebrew cask、フォント、macOS設定 | `darwin-switch`（sudoが必要） |
+| Homebrewのformula・cask、フォント、macOS設定 | `darwin-switch`（sudoが必要） |
 | 両方 | `darwin-switch`の後に`nix-switch` |
 
 `nix-switch`は現在のユーザー名とホスト名から構成を選びます。
@@ -145,8 +153,8 @@ home-manager switch --flake 'path:/home/azureuser/dotfiles#azureuser@linux-x86_6
                  │                             │
         nix/nix-darwin/                 nix/home-manager/
                  │                             │
-   Homebrew cask / フォント /       シェル / エディター / CLI /
-   macOSの既定値 / Touch ID        エージェント / リポジトリ内の設定
+   Homebrew / フォント /            シェル / エディター / CLI /
+   macOSの既定値 / sudo認証        エージェント / リポジトリ内の設定
                  │                             │
           darwin-switch                    nix-switch
              sudo必須                      sudo不要
@@ -159,8 +167,10 @@ Determinate NixがNixデーモンとストアのGCを担当します。nix-darwi
 
 ### Home Managerの標準オプション
 
-Git、Zsh、Sheldon、Starship、direnv、zoxide、tmux、Ghostty、Lazygitなどは
-Home Managerのオプションから生成します。変更後は`nix-switch`で適用します。
+Git、Zsh、Sheldon、Starship、direnv、zoxide、fzf、atuin、bat、eza、yazi、gh、
+ripgrep、delta、Ghostty、Lazygitなどは、Home Managerのオプションから生成します。
+変更後は`nix-switch`で適用します。ghの`config.yml`のように生成したファイルは
+読み取り専用になるので、`gh config set`などアプリ側からは変更できません。
 
 Lazygitの`config.yml`は`programs.lazygit.settings`から生成され、適用時に
 公式スキーマで検証されます。ページャーとして使うdeltaは、
@@ -170,10 +180,26 @@ Nixストアの絶対パスで参照します。
 
 頻繁に直接編集したい設定には、Home Managerがリポジトリを参照する
 シンボリックリンクを作ります。対象は`.config/nvim`、
-Hunk・AeroSpace・Karabiner・Nixの設定です。
+Hunk・AeroSpace・Karabiner・OpenCode・Nix（`nix.conf`）の設定です。
 
 これらには、編集直後にアプリケーションから読めるものと、再起動・再読み込み・
 `nix-switch`が必要なものがあります。各モジュールの管理方法を確認してください。
+
+### Homebrew
+
+macOSのGUIアプリと一部のformulaは、`nix/nix-darwin/homebrew.nix`に用途別に宣言します。
+mpv・IINA・SVPのように連携して使うものは`homebrew-video.nix`に分けています。
+
+- **brew本体とtap** — nix-homebrewが管理します。brew本体は`flake.nix`の`brew-src`で
+  リリースのタグに固定し、サードパーティのtapもflake inputで固定します。
+  `brew tap`で宣言にないtapは追加できません。
+- **宣言にないパッケージ** — `onActivation.cleanup = "check"`なので、`brew install`で
+  入れただけのものがあると`darwin-switch`が止まります。先に宣言へ追加してください。
+- **Nixとcaskの使い分け** — 版を`flake.lock`で決めたいアプリはNixで入れ、アプリ自身の
+  自動更新を切ります（Ghosttyなど）。アプリが自分で更新するものはcaskにします。
+- **更新** — formulaと自動更新のないcaskは`brew upgrade`で上げます。brew本体を上げるときは
+  `brew-src`のタグを書き換え、`nix flake update brew-src`の後に`darwin-switch`します。
+- **Xcode** — NixにもHomebrewにも載せず、`xcodes`で導入と切り替えを行います。
 
 ### ローカルだけで管理するファイル
 
@@ -221,10 +247,13 @@ sops updatekeys secrets/*.yaml
 
 ## シェルの操作
 
-ZshプラグインはSheldon、プロンプトはStarship、スニペットと履歴UIはZenoが担当します。
+ZshプラグインはSheldon、プロンプトはStarship、履歴検索はatuin、
+ファイル選択と補完はfzfが担当します。
 
 Zshコードは`nix/home-manager/programs/zsh/`に分割し、Nix評価時に`.zshrc`へ
-埋め込みます。Sheldon、Starship、zoxideの生成結果は`$XDG_CACHE_HOME/zsh`にキャッシュします。
+埋め込みます。Sheldon、Starship、direnv、fzf、zoxideの生成結果は`$XDG_CACHE_HOME/zsh`に
+キャッシュします。出力がパッケージだけで決まるatuinとnix-your-shellの初期化は、
+ビルド時に生成します。
 
 主なキーバインド:
 
@@ -232,9 +261,10 @@ Zshコードは`nix/home-manager/programs/zsh/`に分割し、Nix評価時に`.z
 |---|---|
 | `Ctrl-B` | Gitブランチをfzfで選択 |
 | `Ctrl-G` | ghq / rootsのプロジェクトへ移動 |
-| `Ctrl-R` | Zenoで履歴を検索 |
+| `Ctrl-R` | atuinで履歴を検索 |
+| `Ctrl-T` / `Alt-C` | ファイルをfzfで選んで挿入 / ディレクトリへ移動 |
 | `Ctrl-X` → `Ctrl-K` | プロセスをfzfで選択して終了 |
-| `Tab` | Zenoによる補完 |
+| `**` → `Tab` | fzfによる補完 |
 
 詳細は[Zshのキーバインド](docs/zsh-keybindings.md)を参照してください。
 
@@ -256,15 +286,15 @@ Home Managerのパッケージは用途別のプリセットに分けていま�
 
 | プリセット | 用途 |
 |---|---|
-| `shell` | Zsh、Starship、Sheldon、direnv、zoxide |
-| `cli` | bat、eza、fd、ripgrep、yazi、btop、gh などの常用CLI |
+| `shell` | Zsh、Starship、Sheldon、direnv、zoxide、nix-index（comma） |
+| `cli` | atuin、bat、eza、fd、ripgrep、yazi、btop、gh、xh、nix-your-shell などの常用CLI |
 | `git` | Git、delta、lazygit |
-| `editor` | Neovim |
+| `editor` | Neovim、rumdl |
 | `terminal` | Ghostty。macOS だけで読む（`platforms/darwin.nix`） |
 | `agents` | AIエージェント、スキル、MCP、Herdr |
 | `secrets` | SOPS と復号の activation |
 | `cloud` | Azure CLI、Google Cloud SDK |
-| `infra` | tenv、Terraform 言語サーバ、hadolint、lazydocker |
+| `infra` | tenv、Terraform 言語サーバ、hadolint、lazydocker、psql |
 | `go` | Go、gopls |
 | `rust` | rustc、cargo、clippy、rustfmt、rust-analyzer |
 | `node` | Node.js、Bun、pnpm、TypeScript、Web系の言語サーバ |
@@ -309,7 +339,7 @@ dotbench 30
 ```
 
 環境間または変更前後の比較には、バックグラウンド処理の影響を受けにくい
-中央値を使います。macOSでは一部のZsh初期化を`zsh-defer`へ渡しているため、
+中央値を使います。Zshプラグインやatuin、macOSではcompinitを`zsh-defer`へ渡しているため、
 `dotbench`のZsh値はプロンプト表示までの同期処理を中心に測ります。
 
 ### 世代の整理
@@ -340,7 +370,8 @@ GitHub Actionsがflakeの入力を更新し、Linux用Home Manager構成のビ�
 両ワークフローとも`cache.numtide.com`を利用し、
 `homeConfigurations."nosuke@linux-x86_64".activationPackage`を検証します。
 更新はリポジトリへマージされるだけなので、各マシンでは`git pull`後に
-必要な切り替えを実行します。
+必要な切り替えを実行します。Homebrewの`brew-src`、`nix-homebrew`、tapは対象外で、
+必要なときに手動で更新します。
 
 ## リポジトリ構成
 
@@ -355,6 +386,8 @@ dotfiles/
 │   ├── nix-darwin/
 │   │   ├── system.nix
 │   │   ├── homebrew.nix
+│   │   ├── homebrew-video.nix
+│   │   ├── fonts.nix
 │   │   ├── macos-defaults.nix
 │   │   └── nix-cleanup.nix
 │   └── home-manager/
