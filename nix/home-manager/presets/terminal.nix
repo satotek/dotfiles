@@ -1,8 +1,7 @@
-# GUI のターミナル。ヘッドレスなサーバでは select.nix の withTerminal を外す。
+# GUI のターミナル。Linux の各ホストは画面のない環境なので macOS だけで読む。
 { ... }:
 {
   imports = [
     ../programs/ghostty.nix
-    ../programs/wezterm.nix
   ];
 }

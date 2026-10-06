@@ -1,7 +1,6 @@
 # ホストが選ぶ preset の並び。省略すると今の開発マシンと同じ一式になる。
-# ヘッドレスなサーバは withTerminal = false にして Ghostty と WezTerm を外す。
+# GUI のターミナル（terminal.nix）は macOS だけなので platforms/darwin.nix が読む。
 {
-  withTerminal ? true,
   withSecrets ? true,
   withRust ? true,
 }:
@@ -14,7 +13,6 @@ in
   ./git.nix
   ./editor.nix
 ]
-++ optional withTerminal ./terminal.nix
 ++ [ ./agents.nix ]
 ++ optional withSecrets ./secrets.nix
 ++ [

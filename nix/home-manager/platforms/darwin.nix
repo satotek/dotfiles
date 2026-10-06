@@ -43,6 +43,7 @@ in
     ../programs/aerospace.nix
     ../programs/karabiner.nix
     ../programs/nh.nix
+    ../presets/terminal.nix
   ];
 
   # Xcode.app は Nix にも Homebrew にも載せず、xcodes で導入と切り替えを行う。

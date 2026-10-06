@@ -3,7 +3,7 @@
   programs.btop = {
     enable = true;
     settings = {
-      # ターミナル(wezterm/ghostty)に合わせて Catppuccin Mocha。
+      # ターミナル(Ghostty)に合わせて Catppuccin Mocha。
       # テーマ実体は下の xdg.configFile で取得する。
       color_theme = "catppuccin_mocha";
       theme_background = true;

@@ -1,10 +1,6 @@
-{
-  lib,
-  pkgs,
-  ...
-}:
+{ pkgs, ... }:
 let
-  commonSettings = {
+  settings = {
     "font-family" = "Moralerspace Neon";
     "font-size" = 12.5;
     theme = "light:Catppuccin Macchiato, dark:Catppuccin Mocha";
@@ -35,27 +31,19 @@ let
       "super+shift+bracket_right=next_tab"
       "super+shift+comma=reload_config"
     ];
-  };
 
-  darwinSettings = {
     "macos-titlebar-style" = "tabs";
     "macos-option-as-alt" = "left";
-    "auto-update" = "download";
-    "auto-update-channel" = "tip";
-  };
-
-  linuxSettings = {
-    "freetype-load-flags" = "hinting,force-autohint,monochrome,autohint";
-    "linux-cgroup" = "single-instance";
+    # 版は flake.lock で決める。アプリ自身の更新は copyApps のコピーと食い違う。
+    "auto-update" = "off";
   };
 in
 {
   programs.ghostty = {
     enable = true;
 
-    # macOS は Homebrew cask の /Applications/Ghostty.app を使い、ここでは設定だけ書く。
-    # store パスは世代ごとに変わり、Dock と Spotlight が追従できないため。
-    package = if pkgs.stdenv.hostPlatform.isDarwin then null else pkgs.ghostty;
+    # 公式 DMG を包んだ ghostty-bin。presets/terminal.nix ごと macOS だけで読む。
+    package = pkgs.ghostty-bin;
     systemd.enable = false;
 
     # Ghostty の自動 shell integration を使い、Home Manager からは
@@ -64,10 +52,7 @@ in
     enableFishIntegration = false;
     enableZshIntegration = false;
 
-    settings =
-      commonSettings
-      // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin darwinSettings
-      // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux linuxSettings;
+    inherit settings;
 
     themes = {
       "Catppuccin Macchiato" = {

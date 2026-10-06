@@ -18,7 +18,7 @@ macOSのシステム設定とホーム環境は独立して更新できます。
 
 - **シェル** — Zsh、Sheldon、Starship、Zeno、zoxide、direnv
 - **エディターとGit** — Neovim、tmux、Git、delta、lazygit
-- **ターミナル** — Ghostty、WezTerm。macOSではAeroSpace・Karabinerも設定
+- **ターミナル** — Ghostty。macOSではAeroSpace・Karabinerも設定
 - **開発ツール** — Go、Rust、Node.js、Bun、pnpm、Python、uv、各種言語サーバー
 - **AIエージェント** — Claude Code、Codex、OpenCode、Antigravity CLI、Grok、Herdr、Hunk
 - **共通基盤** — エージェント向けルール・スキル・MCP設定、sopsによる機密情報の管理
@@ -169,7 +169,7 @@ Nixストアの絶対パスで参照します。
 ### リポジトリで管理する設定
 
 頻繁に直接編集したい設定には、Home Managerがリポジトリを参照する
-シンボリックリンクを作ります。対象は`.config/nvim`、`.config/wezterm`、
+シンボリックリンクを作ります。対象は`.config/nvim`、
 Hunk・AeroSpace・Karabiner・Nixの設定です。
 
 これらには、編集直後にアプリケーションから読めるものと、再起動・再読み込み・
@@ -260,7 +260,7 @@ Home Managerのパッケージは用途別のプリセットに分けていま�
 | `cli` | bat、eza、fd、ripgrep、yazi、btop、gh などの常用CLI |
 | `git` | Git、delta、lazygit |
 | `editor` | Neovim |
-| `terminal` | Ghostty、WezTerm。GUI のないサーバでは外す |
+| `terminal` | Ghostty。macOS だけで読む（`platforms/darwin.nix`） |
 | `agents` | AIエージェント、スキル、MCP、Herdr |
 | `secrets` | SOPS と復号の activation |
 | `cloud` | Azure CLI、Google Cloud SDK |
@@ -273,8 +273,7 @@ Home Managerのパッケージは用途別のプリセットに分けていま�
 | `media` | ffmpeg、Mermaid |
 
 ホストは`nix/home-manager/presets/select.nix`を読みます。引数を省くと上の一式です。
-`withRust`、`withSecrets`、`withTerminal`でそれぞれのプリセットを除外できます。
-GUIのないサーバでは`withTerminal = false`にします。
+`withRust`、`withSecrets`でそれぞれのプリセットを除外できます。
 
 ## 検証とメンテナンス
 
@@ -365,8 +364,7 @@ dotfiles/
 │       ├── programs/
 │       └── data/
 ├── .config/
-│   ├── nvim/
-│   └── wezterm/
+│   └── nvim/
 ├── docs/
 ├── secrets/
 ├── tools/
