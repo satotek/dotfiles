@@ -274,15 +274,16 @@ Zshコードは`nix/home-manager/programs/zsh/`に分割し、Nix評価時に`.z
 設定はHome Managerで生成し、共通のMCP定義は
 `nix/home-manager/data/mcp-servers.nix`に置きます。
 
-Herdr本体はNixパッケージとして管理しています。Home Managerの適用時に
+Herdr本体はNixパッケージとして管理しています。`ai`ロールのホストでは、Home Managerの適用時に
 Claude Code、Codex、Grok、OpenCodeのHerdr連携を生成し、セッション復元に必要なフックを設定します。
 
 Herdrのリモート運用とSSHポート転送は
 [VMリモート作業手順](docs/vm-remote-workflow.md)を参照してください。
 
-## ツールのプリセット
+## ロールとプリセット
 
-Home Managerのパッケージは用途別のプリセットに分けています。
+Home Managerのパッケージは用途別のプリセットに分け、プリセットをロールに束ねています。
+ホストは`nix/home-manager/roles.nix`の`select`でロールを選びます。
 
 | プリセット | 用途 |
 |---|---|
@@ -302,8 +303,20 @@ Home Managerのパッケージは用途別のプリセットに分けていま�
 | `editor-lsp` | シェル、Lua、Markdown、YAML、Nix、TOML の言語サーバ |
 | `media` | ffmpeg、Mermaid |
 
-ホストは`nix/home-manager/presets/select.nix`を読みます。引数を省くと上の一式です。
-`withRust`、`withSecrets`でそれぞれのプリセットを除外できます。
+| ロール | プリセット |
+|---|---|
+| `base` | `shell`、`cli`、`git`、`editor` |
+| `dev` | `editor-lsp`、`node`、`python`、`go`、`infra`、`cloud`、`media` |
+| `rust` | `rust` |
+| `ai` | `agents` |
+| `secrets` | `secrets` |
+
+| ホスト | ロール |
+|---|---|
+| macOS（`nosuke@nosuke-M5-MBP`） | `base`、`dev`、`rust`、`ai`、`secrets` |
+| `nosuke@*`（Linux、WSL） | `base`、`dev`、`rust`、`ai`、`secrets` |
+| `azureuser@*`（Azure VM） | `base`、`dev`、`ai`、`secrets` |
+| `stko23@stko23-windows`（業務用WSL） | `base`、`dev`、`rust`、`ai`、`secrets` |
 
 ## 検証とメンテナンス
 
@@ -393,6 +406,7 @@ dotfiles/
 │   └── home-manager/
 │       ├── home/
 │       ├── platforms/
+│       ├── roles.nix
 │       ├── presets/
 │       ├── programs/
 │       └── data/

@@ -220,7 +220,13 @@
         extraModules = [
           ./nix/home-manager/platforms/darwin.nix
         ]
-        ++ import ./nix/home-manager/presets/select.nix { };
+        ++ (import ./nix/home-manager/roles.nix).select [
+          "base"
+          "dev"
+          "rust"
+          "ai"
+          "secrets"
+        ];
       };
 
       homeConfigurations."nosuke@linux-x86_64" = mkHomeConfiguration linuxNosukeX86_64;
