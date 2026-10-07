@@ -172,6 +172,7 @@ in
         "mcp__plugin_hm_chrome-devtools__get_network_request"
         "mcp__plugin_hm_chrome-devtools__performance_analyze_insight"
       ];
+      autoMode = import ../data/claude-auto-mode.nix;
       enabledPlugins = {
         "rust-analyzer-lsp@claude-plugins-official" = true;
         "gopls-lsp@claude-plugins-official" = true;
