@@ -4,12 +4,6 @@ zmodload -u zsh/files 2>/dev/null
 cache_dir="${XDG_CACHE_HOME:-$HOME/.local/cache}/zsh"
 [[ -d "$cache_dir" ]] || mkdir -p "$cache_dir"
 
-# Sheldonのキャッシュはhome-managerのactivation(sheldon.nix)が生成・zcompile済み。
-# ここでplugins.toml/lockのmtimeを見て再生成する必要はなく、sheldonの実体を探す
-# ための `${commands[sheldon]}` がPATH全走査を誘発していた。読むだけにする。
-sheldon_cache="$cache_dir/sheldon.zsh"
-[[ -r "$sheldon_cache" ]] && builtin source "$sheldon_cache"
-
 _direnv_cache="$cache_dir/direnv.zsh"
 _direnv_stamp="$cache_dir/direnv.path"
 if [[ -n "$_ZBIN_DIRENV" ]] && { [[ ! -r "$_direnv_cache" ]] || [[ ! -r "$_direnv_stamp" ]] || [[ "$(<"$_direnv_stamp")" != "$_ZBIN_DIRENV" ]]; }; then
@@ -47,6 +41,7 @@ _deferred_compinit() {
 
   ensure_zcompiled "$_comp_dump"
   unset _comp_dump
+  _load_zsh_interactive_plugins
 }
 
 if [[ "$DEFER_COMPINIT" == true ]] && (( $+functions[zsh-defer] )); then
@@ -115,7 +110,17 @@ typeset -gr _FZF_INIT_CACHE="$_fzf_cache"
 _fzf_lazy_load() {
   (( $+functions[fzf-file-widget] )) && return
   [[ -r "$_FZF_INIT_CACHE" ]] || return 1
+  local keymap binding
+  local -A tab_bindings
+  for keymap in emacs vicmd viins; do
+    binding="$(bindkey -M "$keymap" '^I')"
+    tab_bindings[$keymap]="${${(z)binding}[2]}"
+  done
   builtin source "$_FZF_INIT_CACHE"
+  # fzfの初回ロードでTabがfzf-completionに戻るのを防ぐ。
+  for keymap in emacs vicmd viins; do
+    bindkey -M "$keymap" '^I' "$tab_bindings[$keymap]"
+  done
 }
 
 _fzf_lazy_file_widget() {
@@ -133,30 +138,16 @@ _fzf_lazy_history_widget() {
   zle fzf-history-widget
 }
 
-_fzf_lazy_completion_widget() {
-  _fzf_lazy_load || return
-  zle fzf-completion
-}
-
 if [[ -r "$_FZF_INIT_CACHE" && $options[zle] = on ]]; then
-  typeset -g fzf_default_completion=expand-or-complete
-  _fzf_binding="$(bindkey '^I')"
-  if [[ "$_fzf_binding" != *undefined-key* ]]; then
-    typeset -g fzf_default_completion="${${(z)_fzf_binding}[2]}"
-  fi
-  unset _fzf_binding
-
   zle -N _fzf_lazy_file_widget
   zle -N _fzf_lazy_cd_widget
   zle -N _fzf_lazy_history_widget
-  zle -N _fzf_lazy_completion_widget
 
   for _fzf_keymap in emacs vicmd viins; do
     bindkey -M "$_fzf_keymap" '^T' _fzf_lazy_file_widget
     bindkey -M "$_fzf_keymap" '\ec' _fzf_lazy_cd_widget
     bindkey -M "$_fzf_keymap" '^R' _fzf_lazy_history_widget
   done
-  bindkey '^I' _fzf_lazy_completion_widget
   unset _fzf_keymap
 fi
 
@@ -179,12 +170,12 @@ if [[ -r "$_zoxide_cache" ]]; then
 fi
 
 if (( $+functions[zsh-defer] )); then
-  zsh-defer unfunction ensure_zcompiled _deferred_compinit
+  zsh-defer unfunction ensure_zcompiled _deferred_compinit _load_zsh_interactive_plugins
 else
-  unfunction ensure_zcompiled _deferred_compinit 2>/dev/null
+  unfunction ensure_zcompiled _deferred_compinit _load_zsh_interactive_plugins 2>/dev/null
 fi
 
-unset DEFER_COMPINIT cache_dir sheldon_cache
+unset DEFER_COMPINIT cache_dir
 unset _direnv_cache _direnv_stamp _direnv_tmp _direnv_stamp_tmp
 unset _starship_cache _starship_stamp _starship_config
 unset _starship_cache_version _starship_signature _starship_line

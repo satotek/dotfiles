@@ -25,6 +25,16 @@ let
   ];
 in
 {
+  imports = [ ./zsh/plugins.nix ];
+
+  # Nixで補完が追加・更新されたら次のシェルで再登録する。
+  # 通常の起動ではcompinit -Cによるキャッシュ利用を維持する。
+  home.activation.invalidateZshCompletionCache = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    run ${pkgs.coreutils}/bin/rm -f \
+      ${lib.escapeShellArg "${config.xdg.cacheHome}/zsh/.zcompdump"} \
+      ${lib.escapeShellArg "${config.xdg.cacheHome}/zsh/.zcompdump.zwc"}
+  '';
+
   programs.zsh = {
     enable = true;
     dotDir = "${config.xdg.configHome}/zsh";
