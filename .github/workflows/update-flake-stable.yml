@@ -17,11 +17,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       # numtide キャッシュを設定 = AI/各種ツールをビルド済みで DL（ソースコンパイル回避）。
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
+        uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa # v23
         with:
           extra-conf: |
             extra-substituters = https://cache.numtide.com
@@ -36,7 +38,7 @@ jobs:
 
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           commit-message: 'chore(nix): update stable inputs'
           title: 'chore(nix): update stable inputs (nixpkgs/darwin/home-manager/nix-index)'
@@ -53,7 +55,8 @@ jobs:
         if: steps.cpr.outputs.pull-request-number
         env:
           GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
         run: |
-          pr="${{ steps.cpr.outputs.pull-request-number }}"
+          pr="$PR_NUMBER"
           gh pr merge --auto --squash --delete-branch "$pr" \
             || gh pr merge --squash --delete-branch "$pr"
