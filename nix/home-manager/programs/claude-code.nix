@@ -124,6 +124,9 @@ in
         sessionUrl = false;
       };
       outputStyle = "Explanatory";
+      # 共有 AGENTS.md の「日本語で話す」は他エージェント向けにも残し、
+      # Claude Code では設定でも応答言語を固定する。
+      language = "japanese";
       model = "opus";
       effortLevel = "medium";
       fastMode = false;
