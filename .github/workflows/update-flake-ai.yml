@@ -7,7 +7,8 @@ name: 'Bot: Update AI agent inputs'
 
 on:
   schedule:
-    - cron: '0 21 * * *' # 毎日 21:00 UTC（= 翌 06:00 JST）
+    # llm-agents.nix への反映が多い朝 5〜8 時の後。毎時 0 分は混んで数時間遅れるので避ける。
+    - cron: '17 23 * * *' # 毎日 23:17 UTC（= 翌 08:17 JST）
   workflow_dispatch: {}
 
 permissions:

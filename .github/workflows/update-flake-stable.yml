@@ -5,7 +5,8 @@ name: 'Bot: Update stable inputs'
 
 on:
   schedule:
-    - cron: '0 21 */3 * *' # 3日おき 21:00 UTC（= 翌 06:00 JST）。月境界で間隔は多少変動。
+    # AI 側と同時に flake.lock を書き換えないよう 30 分ずらす。
+    - cron: '47 23 */3 * *' # 3日おき 23:47 UTC（= 翌 08:47 JST）。月境界で間隔は多少変動。
   workflow_dispatch: {}
 
 permissions:
