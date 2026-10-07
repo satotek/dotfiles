@@ -106,7 +106,7 @@
         system = "aarch64-linux";
         hostname = "linux-aarch64";
       };
-      linuxNosukeWSL = import ./nix/hosts/linux/nosuke.nix {
+      linuxNosukeWSL = import ./nix/hosts/linux/nosuke-wsl.nix {
         system = "x86_64-linux";
         hostname = "nosuke-windows";
       };
