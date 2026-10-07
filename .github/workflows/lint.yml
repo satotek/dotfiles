@@ -1,0 +1,44 @@
+name: Lint
+
+# pre-commit を経ないコミット（Web 編集、--no-verify、フック未導入の環境）もここで捕まえる。
+# ビルドはせず、整形とワークフローの検査だけなので 1 分程度で終わる。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  nixfmt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa # v23
+
+      - name: Check formatting
+        run: nix build --no-link '.#checks.x86_64-linux.nix-format'
+
+  zizmor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa # v23
+
+      - name: Audit workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: nix run --inputs-from . nixpkgs#zizmor -- --no-progress .github
