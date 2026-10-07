@@ -3,6 +3,7 @@ let
   homeDirectory = config.home.homeDirectory;
   inherit (config.xdg) configHome dataHome;
   pnpmHome = "${dataHome}/pnpm";
+  binHome = "${homeDirectory}/.local/bin";
 in
 {
   xdg = {
@@ -17,6 +18,12 @@ in
     WGETRC = "${configHome}/wget/wgetrc";
     INPUTRC = "${configHome}/readline/inputrc";
     PNPM_HOME = pnpmHome;
+    # 手で入れるコマンドは uv と同じ ~/.local/bin に集め、PATH に足す場所を増やさない。
+    # cargo は rustup 本体が ~/.cargo/bin にあるため、pnpm は 11 以降の配置に任せるため対象外。
+    GOBIN = binHome;
+    NPM_CONFIG_PREFIX = "${homeDirectory}/.local";
+    BUN_INSTALL_BIN = binHome;
+    DENO_INSTALL_ROOT = "${homeDirectory}/.local";
     # OpenCode の /editor は EDITOR が空だと起動せず戻る。
     EDITOR = "nvim";
   };
@@ -46,7 +53,7 @@ in
 
     ''
       # Keep user-local bins available, but let Nix-managed tools win first.
-      path_append "${homeDirectory}/.local/bin"
+      path_append "${binHome}"
       path_append "${homeDirectory}/.cargo/bin"
       path_append "${homeDirectory}/bin"
       path_append "${pnpmHome}/bin"
