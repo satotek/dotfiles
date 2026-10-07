@@ -14,12 +14,14 @@ in
   };
 
   # macOS の rtk は XDG ではなく Application Support を見る。
-  home.file."Library/Application Support/rtk/config.toml" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
-    text = ''
-      [telemetry]
-      enabled = false
-    '';
-  };
+  home.file."Library/Application Support/rtk/config.toml" =
+    lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
+      {
+        text = ''
+          [telemetry]
+          enabled = false
+        '';
+      };
 
   # OpenCode はフックではなくプラグインで書き換える。rtk 同梱のものは v1 用で v2 では読めないので自作版を置く。
   xdg.configFile."opencode/plugins/rtk.js".source = ../../../.config/opencode/plugins/rtk.js;
