@@ -5,8 +5,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
-	"sort"
+	"slices"
 	"strconv"
 	"time"
 )
@@ -18,63 +17,6 @@ type benchmark struct {
 	command string
 	args    []string
 	env     []string
-}
-
-func main() {
-	runs, err := parseRuns(os.Args[1:])
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(2)
-	}
-
-	workDir, err := os.MkdirTemp("", "dotfiles-benchmark.*")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "create temporary directory: %v\n", err)
-		os.Exit(1)
-	}
-	defer os.RemoveAll(workDir)
-
-	benchmarks := []benchmark{
-		{
-			name:    "zsh interactive",
-			command: "zsh",
-			args:    []string{"-i", "-c", "exit"},
-		},
-		{
-			name:    "nvim headless",
-			command: "nvim",
-			args:    []string{"--headless", "--cmd", "set shadafile=NONE", "+qa"},
-			env:     []string{"NVIM_LOG_FILE=" + filepath.Join(workDir, "nvim.log")},
-		},
-	}
-
-	for _, b := range benchmarks {
-		if _, err := exec.LookPath(b.command); err != nil {
-			fmt.Fprintf(os.Stderr, "required command not found: %s\n", b.command)
-			os.Exit(1)
-		}
-		if _, err := run(b); err != nil {
-			fmt.Fprintf(os.Stderr, "warm up %s: %v\n", b.name, err)
-			os.Exit(1)
-		}
-	}
-
-	results := make([][]time.Duration, len(benchmarks))
-	for i := 0; i < runs; i++ {
-		for j, b := range benchmarks {
-			duration, err := run(b)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "benchmark %s: %v\n", b.name, err)
-				os.Exit(1)
-			}
-			results[j] = append(results[j], duration)
-		}
-	}
-
-	fmt.Printf("Startup benchmark (%d runs, one warm-up; lower is better)\n", runs)
-	for i, b := range benchmarks {
-		printSummary(b.name, results[i])
-	}
 }
 
 func parseRuns(args []string) (int, error) {
@@ -103,25 +45,35 @@ func run(b benchmark) (time.Duration, error) {
 	return time.Since(start), err
 }
 
-func printSummary(name string, durations []time.Duration) {
-	sorted := append([]time.Duration(nil), durations...)
-	sort.Slice(sorted, func(i, j int) bool { return sorted[i] < sorted[j] })
+func sortedCopy(samples []time.Duration) []time.Duration {
+	sorted := slices.Clone(samples)
+	slices.Sort(sorted)
+	return sorted
+}
+
+func medianMS(samples []time.Duration) float64 {
+	sorted := sortedCopy(samples)
+	n := len(sorted)
+	if n%2 == 0 {
+		return milliseconds((sorted[n/2-1] + sorted[n/2]) / 2)
+	}
+	return milliseconds(sorted[n/2])
+}
+
+func printSummary(w io.Writer, name string, samples []time.Duration) {
+	sorted := sortedCopy(samples)
 
 	var total time.Duration
 	for _, duration := range sorted {
 		total += duration
 	}
 
-	median := sorted[len(sorted)/2]
-	if len(sorted)%2 == 0 {
-		median = (sorted[len(sorted)/2-1] + sorted[len(sorted)/2]) / 2
-	}
-
-	fmt.Printf(
+	fmt.Fprintf(
+		w,
 		"%-16s min %8.3f ms  median %8.3f ms  mean %8.3f ms  max %8.3f ms\n",
 		name,
 		milliseconds(sorted[0]),
-		milliseconds(median),
+		medianMS(sorted),
 		milliseconds(total/time.Duration(len(sorted))),
 		milliseconds(sorted[len(sorted)-1]),
 	)
