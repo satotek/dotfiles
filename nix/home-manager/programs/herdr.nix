@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   programs.herdr = {
     enable = true;
@@ -8,6 +8,9 @@
       onboarding = false;
 
       session.resume_agents_on_restore = true;
+
+      # OS標準zshではNix製のバイナリモジュールとglibcが一致しない。
+      terminal.default_shell = "${config.programs.zsh.package}/bin/zsh";
 
       theme = {
         name = "terminal";
@@ -46,7 +49,7 @@
           {
             key = "prefix+t";
             type = "pane";
-            command = "exec \"\${SHELL:-zsh}\"";
+            command = "exec \"${config.programs.zsh.package}/bin/zsh\"";
             description = "scratch terminal";
           }
         ];
