@@ -39,6 +39,8 @@ in
     enable = true;
     dotDir = "${config.xdg.configHome}/zsh";
     autocd = true;
+    # 指定しないと EDITOR に "vi" が含まれるかで方式が変わるため、明示する。
+    defaultKeymap = "viins";
     enableCompletion = false;
     setOptions = [ "NO_FLOW_CONTROL" ];
 
@@ -84,6 +86,7 @@ in
         typeset -g DEFER_COMPINIT=${lib.boolToString deferCompinit}
         ${readZsh "init"}
         ${readZsh "prompt"}
+        ${readZsh "vi-mode"}
       ''
     ];
   };
