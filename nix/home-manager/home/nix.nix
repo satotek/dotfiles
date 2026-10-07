@@ -32,12 +32,47 @@ let
       echo "  echo ${nixZsh} | sudo tee -a /etc/shells && chsh -s ${nixZsh}" >&2
     fi
   '';
+  # llm-agents.nix の codex は Rust のフルビルドになるため、numtide のバイナリ
+  # キャッシュが無いと input が動くたびに数十分かかる。このキャッシュはデーモン層
+  # (/etc/nix/nix.custom.conf) にしか書けず——非 trusted-user が ~/.config/nix や
+  # --option で足しても Nix は警告なく黙殺する——Home Manager の管理外にある。
+  # 実際 Determinate Nix の再インストールで設定ごと消えた実績があるので、漏れを知らせる。
+  # activation では遅い (その時点でビルドは終わっている) ため、switch の先頭で止める。
+  numtideCache = "https://cache.numtide.com";
+  numtideCacheKey = "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=";
+  checkBinaryCaches = ''
+    if nix_config="$(nix config show 2>/dev/null)"; then
+      substituters="$(printf '%s\n' "$nix_config" | sed -n 's/^substituters = //p')"
+      trusted_keys="$(printf '%s\n' "$nix_config" | sed -n 's/^trusted-public-keys = //p')"
+      configured=1
+      case " $substituters " in *" ${numtideCache} "*) ;; *) configured=0 ;; esac
+      case " $trusted_keys " in *" ${numtideCacheKey} "*) ;; *) configured=0 ;; esac
+      case "$configured" in
+        1) ;;
+        *)
+          echo "error: ${numtideCache} is not an active substituter." >&2
+          echo "  codex and friends would be built from source. Configure it once with:" >&2
+          echo "" >&2
+          echo "  sudo tee -a /etc/nix/nix.custom.conf <<'EOF'" >&2
+          echo "  extra-substituters = ${numtideCache}" >&2
+          echo "  extra-trusted-substituters = ${numtideCache}" >&2
+          echo "  extra-trusted-public-keys = ${numtideCacheKey}" >&2
+          echo "  EOF" >&2
+          echo "  sudo systemctl restart nix-daemon   # macOS: sudo launchctl kickstart -k system/org.nixos.nix-daemon" >&2
+          echo "" >&2
+          echo "  To build anyway, set NIX_SWITCH_ALLOW_MISSING_CACHE=1." >&2
+          [ "''${NIX_SWITCH_ALLOW_MISSING_CACHE:-}" = "1" ] || exit 1
+          ;;
+      esac
+    fi
+  '';
   # ホーム層の切り替え。両 OS とも standalone Home Manager なので sudo 不要。
   # macOS の hostname はネットワーク次第で変わるため、設定上の名前を使う。
   nixSwitch = pkgs.writeShellApplication {
     name = "nix-switch";
     runtimeInputs = [ config.programs.nh.package ];
     text = ''
+      ${checkBinaryCaches}
       ${nomFlag}
       # 未管理ファイルと衝突しても、エラーで止めず自動で .hm-bak に退避してから
       # symlink を張る。
