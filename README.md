@@ -287,11 +287,11 @@ Home Managerのパッケージは用途別のプリセットに分けていま�
 | プリセット | 用途 |
 |---|---|
 | `shell` | Zsh、Starship、Sheldon、direnv、zoxide、nix-index（comma） |
-| `cli` | atuin、bat、eza、fd、ripgrep、yazi、btop、gh、xh、nix-your-shell などの常用CLI |
+| `cli` | atuin、bat、eza、fd、ripgrep、yazi、btop、gh、xh、nix-your-shell、Herdr、hunk などの常用CLI |
 | `git` | Git、delta、lazygit |
 | `editor` | Neovim、rumdl |
 | `terminal` | Ghostty。macOS だけで読む（`platforms/darwin.nix`） |
-| `agents` | AIエージェント、スキル、MCP、Herdr |
+| `agents` | AIエージェント、スキル、MCP、Herdrとの連携 |
 | `secrets` | SOPS と復号の activation |
 | `cloud` | Azure CLI、Google Cloud SDK |
 | `infra` | tenv、Terraform 言語サーバ、hadolint、lazydocker、psql |

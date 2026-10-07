@@ -44,6 +44,8 @@ in
     ../programs/btop.nix
     ../programs/eza.nix
     ../programs/gh.nix
+    ../programs/herdr.nix
+    ../programs/hunk.nix
     ../programs/nix-your-shell.nix
     ../programs/ripgrep.nix
     ../programs/yazi.nix

@@ -7,8 +7,7 @@
     ../programs/claude-code.nix
     ../programs/codex.nix
     ../programs/grok.nix
-    ../programs/herdr.nix
-    ../programs/hunk.nix
+    ../programs/herdr-agent-integrations.nix
     ../programs/opencode.nix
     ../programs/rtk.nix
   ];
