@@ -1,8 +1,8 @@
 # Global Agent Instructions
 
 Shared by every coding agent on this machine. Nix concatenates this file and
-`rules/*.md` into `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`; edit the
-sources in the dotfiles repository, not the generated files.
+`rules/*.md` into each agent's global instructions. Edit the sources in the
+dotfiles repository, not the generated files.
 
 ## About Me
 
