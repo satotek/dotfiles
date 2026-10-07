@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -151,5 +152,40 @@ func TestMedian(t *testing.T) {
 	}
 	if samples[0] != 3*time.Millisecond {
 		t.Fatal("modified input")
+	}
+}
+
+func TestInteractiveWithMinimalConfig(t *testing.T) {
+	if _, err := exec.LookPath("zsh"); err != nil {
+		t.Skip("zsh is not available")
+	}
+	// 利用者の設定に左右されないよう、最小の起動ファイルだけを持つ HOME で測る。
+	home := t.TempDir()
+	if err := os.WriteFile(filepath.Join(home, ".zshrc"), []byte("PS1='> '\nRPROMPT=''\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("HOME", home)
+	t.Setenv("ZDOTDIR", "")
+	output := filepath.Join(t.TempDir(), "interactive.json")
+	cmd := newCommand()
+	var buf bytes.Buffer
+	cmd.SetOut(&buf)
+	cmd.SetErr(&buf)
+	cmd.SetArgs([]string{"interactive", "--runs", "1", "--warmup", "0", "--output", output})
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("%v\n%s", err, buf.String())
+	}
+	data, err := os.ReadFile(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var saved report
+	if err := json.Unmarshal(data, &saved); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range interactiveMetrics {
+		if samples := saved.Samples[name]; len(samples) != 1 || samples[0] <= 0 {
+			t.Fatalf("%s samples: %v", name, samples)
+		}
 	}
 }

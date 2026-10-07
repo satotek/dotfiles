@@ -41,7 +41,7 @@
 | `dotbench --help` | 計測オプションを確認する |
 | `dotbench --only zsh --runs 50 --output before.json` | Zshだけ計測し、新しいJSONファイルへ結果と環境情報を保存する |
 | `dotbench --only zsh --compare before.json` | 保存した中央値と比較する（環境の違いは警告） |
-| `dotbench interactive --runs 10` | zsh-benchでプロンプト・入力・コマンド応答を測る（Tab計測・JSON保存は未対応） |
+| `dotbench interactive --runs 10` | 擬似端末でプロンプト表示・最初のコマンド・Enter応答・終了の待ち時間を測る（`--output` / `--compare` 対応） |
 | `nix flake update nixpkgs` | Zsh plugin を含む nixpkgs のパッケージを更新する |
 
 Zshプラグインは `nix/home-manager/programs/zsh/plugins.nix` で管理する。

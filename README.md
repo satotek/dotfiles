@@ -357,7 +357,8 @@ dotbench 30
 dotbench --only zsh --runs 50 --warmup 2 --output before.json
 dotbench --only zsh --warmup 2 --compare before.json
 dotbench --only zsh --zsh "$HOME/.nix-profile/bin/zsh"
-dotbench interactive --runs 10
+dotbench interactive --runs 10 --output before.json
+dotbench interactive --compare before.json
 ```
 
 環境間または変更前後の比較には、バックグラウンド処理の影響を受けにくい
@@ -369,11 +370,18 @@ JSONには生の時間（ナノ秒）とOS・CPU・ホスト・実行パス・�
 `--output`は既存ファイルを上書きしません。比較は中央値の増減率を表示し、環境の違いは警告します。
 設定内容やシステム負荷の同一性までは確認しないため、条件を揃えて比較してください。
 
-`interactive`は同梱の`zsh-bench`を使い、非ログイン・Gitなしの環境でプロンプト・入力・
-コマンド応答を測ります。出力は既定で10回分の生データ（時間はミリ秒）で、
-プロンプトにホスト名か現在のディレクトリ名が必要です。遅延ロードのプラグインは
-検出前に読み込まれない場合があります。Tabの待ち時間や対話結果のJSON保存・比較は未対応です。
-Nixなしで実行する場合、対話計測には別途`zsh-bench`が必要です。
+`interactive`は擬似端末の中で自分の設定のZshを起動し、操作したときの待ち時間を測ります。
+起動ファイルの最後にプロンプトの目印を出すフックを足すため、プロンプトの内容には依存しません。
+
+| 項目 | 測る区間 |
+|---|---|
+| `first_prompt` | 起動から最初のプロンプトが入力を受け付けるまで |
+| `first_command` | 起動直後に押したEnterが処理され、次のプロンプトが出るまで（遅延読み込みの待ちが現れる） |
+| `command` | 遅延読み込みが落ち着いた後、空のEnterから次のプロンプトまで |
+| `exit` | Ctrl-Dからプロセスが終了するまで |
+
+空行とCtrl-Dしか入力しないため、履歴は増えません。非ログインシェルで測り、
+キー入力ごとの描画やTabの待ち時間は測りません。`--output`と`--compare`は起動時間の計測と同じように使えます。
 
 ヘルプは`dotbench --help`を参照してください。Bash・Zsh・fishの補完はNixパッケージに同梱します。
 

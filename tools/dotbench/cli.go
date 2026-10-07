@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 
@@ -130,29 +129,16 @@ func runStartup(stdout, stderr io.Writer, opts startupOptions) (err error) {
 
 	var previous *report
 	if opts.baseline != "" {
-		if previous, err = loadBaseline(opts.baseline, opts.warmup); err != nil {
+		if previous, err = loadBaseline(opts.baseline, "startup", opts.warmup); err != nil {
 			return err
 		}
 	}
 
-	// 計測後に「既に存在する」で失敗すると、長い計測が無駄になるため先に作る。
-	var out *os.File
-	if opts.output != "" {
-		out, err = os.OpenFile(opts.output, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
-		if err != nil {
-			return err
-		}
-		defer func() {
-			closeErr := out.Close()
-			if err == nil {
-				err = closeErr
-			}
-			// 空のファイルが残ると、次回の同名指定が O_EXCL で弾かれる。
-			if err != nil {
-				os.Remove(opts.output)
-			}
-		}()
+	out, err := createOutput(opts.output)
+	if err != nil {
+		return err
 	}
+	defer func() { err = out.close(err) }()
 
 	dir, err := os.MkdirTemp("", "dotbench-")
 	if err != nil {
@@ -189,11 +175,11 @@ func runStartup(stdout, stderr io.Writer, opts startupOptions) (err error) {
 		if previous != nil && len(previous.Samples[b.name]) == 0 {
 			return fmt.Errorf("baseline has no %s samples", b.name)
 		}
-		info, err := resolveExecutable(b.command)
+		resolved, info, err := resolveExecutable(b.command)
 		if err != nil {
 			return fmt.Errorf("%s executable: %w", b.name, err)
 		}
-		b.command = info.Path
+		b.command = resolved
 		result.Environment.Executables[b.name] = info
 	}
 	if previous != nil {
@@ -208,29 +194,75 @@ func runStartup(stdout, stderr io.Writer, opts startupOptions) (err error) {
 		result.Samples[b.name] = samples
 	}
 
-	fmt.Fprintf(stdout, "Startup benchmark (%d runs, %d warm-ups; lower is better)\n", opts.runs, opts.warmup)
-	for _, b := range targets {
-		samples := result.Samples[b.name]
-		printSummary(stdout, b.name, samples)
-		if previous != nil {
-			before := medianMS(previous.Samples[b.name])
-			fmt.Fprintf(stdout, "  median change: %+.2f%%\n", 100*(medianMS(samples)/before-1))
-		}
-	}
-
-	if out != nil {
-		data, err := json.MarshalIndent(result, "", "  ")
-		if err != nil {
-			return err
-		}
-		if _, err := out.Write(append(data, '\n')); err != nil {
-			return err
-		}
-	}
-	return nil
+	title := fmt.Sprintf("Startup benchmark (%d runs, %d warm-ups; lower is better)", opts.runs, opts.warmup)
+	printReport(stdout, title, targetNames(targets), &result, previous)
+	return out.write(&result)
 }
 
-func loadBaseline(path string, warmup int) (*report, error) {
+func targetNames(targets []benchmark) []string {
+	names := make([]string, 0, len(targets))
+	for _, b := range targets {
+		names = append(names, b.name)
+	}
+	return names
+}
+
+func printReport(w io.Writer, title string, names []string, result, previous *report) {
+	fmt.Fprintln(w, title)
+	for _, name := range names {
+		samples := result.Samples[name]
+		printSummary(w, name, samples)
+		if previous != nil {
+			before := medianMS(previous.Samples[name])
+			fmt.Fprintf(w, "  median change: %+.2f%%\n", 100*(medianMS(samples)/before-1))
+		}
+	}
+}
+
+// 結果ファイルは計測の前に作る。計測後に「既に存在する」で失敗すると、長い計測が無駄になるため。
+type outputFile struct {
+	path string
+	file *os.File
+}
+
+func createOutput(path string) (*outputFile, error) {
+	if path == "" {
+		return nil, nil
+	}
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if err != nil {
+		return nil, err
+	}
+	return &outputFile{path: path, file: file}, nil
+}
+
+func (o *outputFile) write(result *report) error {
+	if o == nil {
+		return nil
+	}
+	data, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		return err
+	}
+	_, err = o.file.Write(append(data, '\n'))
+	return err
+}
+
+func (o *outputFile) close(err error) error {
+	if o == nil {
+		return err
+	}
+	if closeErr := o.file.Close(); err == nil {
+		err = closeErr
+	}
+	// 空のファイルが残ると、次回の同名指定が O_EXCL で弾かれる。
+	if err != nil {
+		os.Remove(o.path)
+	}
+	return err
+}
+
+func loadBaseline(path, mode string, warmup int) (*report, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -239,8 +271,8 @@ func loadBaseline(path string, warmup int) (*report, error) {
 	if err := json.Unmarshal(data, &previous); err != nil {
 		return nil, err
 	}
-	if previous.Schema != 1 || previous.Mode != "startup" {
-		return nil, fmt.Errorf("incompatible baseline")
+	if previous.Schema != 1 || previous.Mode != mode {
+		return nil, fmt.Errorf("incompatible baseline: want %s results", mode)
 	}
 	if previous.Warmup != warmup {
 		return nil, fmt.Errorf("baseline warmup differs")
@@ -253,21 +285,21 @@ func loadBaseline(path string, warmup int) (*report, error) {
 	return &previous, nil
 }
 
-// 計測には PATH 解決済みのパスを使い、記録には実体のパスを残す。
+// 計測には PATH で見つけたパスを使い、記録には実体のパスを残す。
 // Nix の profile 経由のリンクは更新後も同じパスのままなので、比較では実体で判別する。
-func resolveExecutable(command string) (executableInfo, error) {
+func resolveExecutable(command string) (string, executableInfo, error) {
 	resolved, err := exec.LookPath(command)
 	if err != nil {
-		return executableInfo{}, err
+		return "", executableInfo{}, err
 	}
 	if resolved, err = filepath.Abs(resolved); err != nil {
-		return executableInfo{}, err
+		return "", executableInfo{}, err
 	}
 	real, err := filepath.EvalSymlinks(resolved)
 	if err != nil {
-		return executableInfo{}, err
+		return "", executableInfo{}, err
 	}
-	return executableInfo{Path: real, Version: commandLine(resolved, "--version")}, nil
+	return resolved, executableInfo{Path: real, Version: commandLine(resolved, "--version")}, nil
 }
 
 func measure(b benchmark, warmup, runs int) ([]time.Duration, error) {
@@ -348,39 +380,4 @@ func warnEnvironment(w io.Writer, old, current *environment) {
 			fmt.Fprintf(w, "Warning: %s version could not be detected.\n", name)
 		}
 	}
-}
-
-func interactiveCommand() *cobra.Command {
-	var runs int
-	cmd := &cobra.Command{
-		Use:   "interactive",
-		Short: "Measure prompt, command and input latency with zsh-bench",
-		Long: strings.Join([]string{
-			"Measure prompt, command and input latency using an installed zsh-bench.",
-			"Requires a prompt containing hostname or the current directory.",
-			"This does not measure Tab/fzf selection latency. Uses non-login shells.",
-		}, "\n"),
-		Args: cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			if runs < 1 {
-				return fmt.Errorf("runs must be positive")
-			}
-			path, err := exec.LookPath("zsh-bench")
-			if err != nil {
-				return fmt.Errorf("zsh-bench is required for interactive measurements: %w", err)
-			}
-			// zsh-bench は 1 回に数秒かかるため、固定の上限だと回数を増やしたときに打ち切られる。
-			ctx, cancel := context.WithTimeout(cmd.Context(), time.Minute+time.Duration(runs)*30*time.Second)
-			defer cancel()
-			process := exec.CommandContext(ctx, path, "--iters", strconv.Itoa(runs), "--login", "no", "--git", "no", "--raw")
-			process.Stdout = cmd.OutOrStdout()
-			process.Stderr = cmd.ErrOrStderr()
-			if err := process.Run(); err != nil {
-				return fmt.Errorf("interactive benchmark: %w", err)
-			}
-			return nil
-		},
-	}
-	cmd.Flags().IntVarP(&runs, "runs", "n", defaultRuns, "Number of zsh-bench iterations (raw samples)")
-	return cmd
 }
