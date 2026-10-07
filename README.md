@@ -100,6 +100,15 @@ tapは宣言したものだけにするため、`/opt/homebrew/Library/Taps`が�
 適用が止まります。中のtapは宣言から作り直されるので、退避してから再実行してください。
 宣言にないformula・caskが入っている場合も適用は止まります（[Homebrew](#homebrew)）。
 
+Linux / WSLでは、初回適用後にログインシェルをNixのZshへ一度だけ切り替えます。
+OSのZshのままだと、Nixでビルドしたfzf-tabのモジュールがglibcの違いで読み込めません。
+Home Managerは`/etc/passwd`を変更できないため手動で行い、未設定なら適用時に警告します。
+
+```bash
+echo ~/.nix-profile/bin/zsh | sudo tee -a /etc/shells
+chsh -s ~/.nix-profile/bin/zsh
+```
+
 ホーム環境の適用にsudoは不要です。`-b backup`は既存ファイルとリンクが
 衝突した場合の退避用です。同名のバックアップがある場合は確認してから整理してください。
 機密情報の復号を使うホストでは、[機密情報](#機密情報)の認証設定も必要です。

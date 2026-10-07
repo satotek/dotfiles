@@ -20,6 +20,18 @@ let
       nom_flag=(--no-nom)
     fi
   '';
+  # OS の zsh では、Nix でビルドした fzf-tab のモジュールが glibc の違いで読み込めない。
+  # Home Manager は /etc/passwd を変えられないため、切り替えは各マシンで一度だけ手で行い、ここでは漏れを知らせる。
+  # nh は activation の出力を隠すので、nix-switch の後にも同じ確認を出す。
+  # profile のパスは世代が変わっても同じなので、/etc/shells と chsh への登録は一度で済む。
+  nixZsh = "${config.home.profileDirectory}/bin/zsh";
+  checkLoginShell = pkgs.writeShellScript "check-login-shell" ''
+    login_shell="$(${lib.getExe' pkgs.getent "getent"} passwd "$(${pkgs.coreutils}/bin/id -un)" | ${pkgs.coreutils}/bin/cut -d: -f7)"
+    if [ "$login_shell" != ${lib.escapeShellArg nixZsh} ]; then
+      echo "warning: login shell is $login_shell, not ${nixZsh}. Switch it once with:" >&2
+      echo "  echo ${nixZsh} | sudo tee -a /etc/shells && chsh -s ${nixZsh}" >&2
+    fi
+  '';
   # ホーム層の切り替え。両 OS とも standalone Home Manager なので sudo 不要。
   # macOS の hostname はネットワーク次第で変わるため、設定上の名前を使う。
   nixSwitch = pkgs.writeShellApplication {
@@ -29,12 +41,13 @@ let
       ${nomFlag}
       # 未管理ファイルと衝突しても、エラーで止めず自動で .hm-bak に退避してから
       # symlink を張る。
-      exec nh home switch "${dotfilesDir}" \
+      nh home switch "${dotfilesDir}" \
         -c "$(id -un)@${
           if pkgs.stdenv.hostPlatform.isDarwin then "$(scutil --get LocalHostName)" else "$(hostname)"
         }" \
         -b "''${HOME_MANAGER_BACKUP_EXT:-hm-bak}" \
         "''${nom_flag[@]}" "$@"
+      ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux "${checkLoginShell}"}
     '';
   };
   # システム層 (nix-darwin: Homebrew casks, fonts, macOS 設定) の切り替え。
@@ -49,6 +62,10 @@ let
   };
 in
 {
+  home.activation.checkLoginShell = lib.mkIf pkgs.stdenv.hostPlatform.isLinux (
+    lib.hm.dag.entryAfter [ "writeBoundary" ] "${checkLoginShell}"
+  );
+
   # switch は nh に任せる。NH_FLAKE も設定されるので、素の `nh home switch` でも
   # dotfiles を参照できる。
   programs.nh = {
