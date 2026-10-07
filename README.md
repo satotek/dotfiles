@@ -316,7 +316,7 @@ Home Managerのパッケージは用途別のプリセットに分け、プリ�
 | macOS（`nosuke@nosuke-M5-MBP`） | `base`、`dev`、`rust`、`ai`、`secrets` |
 | `nosuke@*`（Linux、WSL） | `base`、`dev`、`rust`、`ai`、`secrets` |
 | `azureuser@*`（Azure VM） | `base`、`dev`、`ai`、`secrets` |
-| `stko23@stko23-windows`（業務用WSL） | `base`、`dev`、`rust`、`ai`、`secrets` |
+| `stko23@stko23-windows`（業務用WSL） | `base`、`dev`、`rust` |
 
 ## 検証とメンテナンス
 
