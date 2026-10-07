@@ -316,6 +316,7 @@ Home Managerのパッケージは用途別のプリセットに分け、プリ�
 | `python` | Python、uv、ruff、basedpyright |
 | `editor-lsp` | シェル、Lua、Markdown、YAML、Nix、TOML の言語サーバ |
 | `media` | ffmpeg、Mermaid |
+| `linux-desktop` | wl-clipboard、xclip（Linux のデスクトップ用。画面のない環境では動かない） |
 
 | ロール | プリセット |
 |---|---|
@@ -324,6 +325,7 @@ Home Managerのパッケージは用途別のプリセットに分け、プリ�
 | `rust` | `rust` |
 | `ai` | `agents` |
 | `secrets` | `secrets` |
+| `linux-desktop` | `linux-desktop`（今は選んでいるホストがない） |
 
 | ホスト | ロール |
 |---|---|

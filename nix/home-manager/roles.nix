@@ -24,6 +24,8 @@ let
     ai = [ ./presets/agents.nix ];
     # SOPS で暗号化したシークレットを activation で復号する。
     secrets = [ ./presets/secrets.nix ];
+    # 画面のある Linux。今のホストはどれも画面がないため、まだ選んでいない。
+    linux-desktop = [ ./presets/linux-desktop.nix ];
   };
 in
 {
