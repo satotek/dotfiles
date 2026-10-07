@@ -49,7 +49,7 @@ in
       path_append "${homeDirectory}/.local/bin"
       path_append "${homeDirectory}/.cargo/bin"
       path_append "${homeDirectory}/bin"
-      path_append "${pnpmHome}"
+      path_append "${pnpmHome}/bin"
     ''
 
     (lib.mkAfter ''
