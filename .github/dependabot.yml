@@ -1,0 +1,12 @@
+version: 2
+updates:
+  # SHA で固定したアクションを、公開から 7 日経ったリリースに追従させる。
+  # flake.lock は Dependabot 非対応なので update-flake-*.yml が担当する。
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    labels:
+      - dependencies
