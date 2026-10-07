@@ -3,10 +3,14 @@ name: Lint
 # pre-commit を経ないコミット（Web 編集、--no-verify、フック未導入の環境）もここで捕まえる。
 # ビルドはせず、整形とワークフローの検査だけなので 1 分程度で終わる。
 
+# 更新ボットの PR は flake.lock だけを変え、数秒で自動マージされてブランチが消えるため、
+# 起動が間に合わず失敗扱いになる。検査対象もないので起動しない。
 on:
   push:
     branches: [main]
+    paths-ignore: [flake.lock]
   pull_request:
+    paths-ignore: [flake.lock]
   workflow_dispatch: {}
 
 permissions:
