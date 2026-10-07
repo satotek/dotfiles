@@ -129,6 +129,8 @@ in
       language = "japanese";
       # alt-screen 描画でちらつきを抑える。
       tui = "fullscreen";
+      # 離席中もスマホから続きを操作できるよう、毎セッション Remote Control に繋ぐ。
+      remoteControlAtStartup = true;
       model = "opus";
       effortLevel = "medium";
       fastMode = false;
