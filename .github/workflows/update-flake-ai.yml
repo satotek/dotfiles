@@ -38,8 +38,10 @@ jobs:
             agent-browser \
             agent-skills \
             anthropic-skills \
+            ast-grep-skill \
+            codex-plugin-cc \
             herdr-skill \
-            mattpocock-skills \
+            orca-skills \
             vercel-agent-skills \
             vercel-next-skills \
             vercel-skills
