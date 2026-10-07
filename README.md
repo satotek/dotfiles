@@ -16,7 +16,7 @@ macOSのシステム設定とホーム環境は独立して更新できます。
 
 ## この環境に含まれるもの
 
-- **シェル** — Zsh、Sheldon、Starship、atuin、fzf、zoxide、direnv
+- **シェル** — Zsh、fzf-tab、Starship、atuin、fzf、zoxide、direnv
 - **エディターとGit** — Neovim、Git、delta、lazygit
 - **CLI** — bat、eza、fd、ripgrep、yazi、gh、xh など
 - **ターミナル** — Ghostty。macOSではAeroSpace・Karabinerも設定
@@ -167,7 +167,7 @@ Determinate NixがNixデーモンとストアのGCを担当します。nix-darwi
 
 ### Home Managerの標準オプション
 
-Git、Zsh、Sheldon、Starship、direnv、zoxide、fzf、atuin、bat、eza、yazi、gh、
+Git、Zsh、Starship、direnv、zoxide、fzf、atuin、bat、eza、yazi、gh、
 ripgrep、delta、Ghostty、Lazygitなどは、Home Managerのオプションから生成します。
 変更後は`nix-switch`で適用します。ghの`config.yml`のように生成したファイルは
 読み取り専用になるので、`gh config set`などアプリ側からは変更できません。
@@ -247,13 +247,15 @@ sops updatekeys secrets/*.yaml
 
 ## シェルの操作
 
-ZshプラグインはSheldon、プロンプトはStarship、履歴検索はatuin、
-ファイル選択と補完はfzfが担当します。
+Zshプラグインはnixpkgsで取得し、`zsh-defer`でハイライトと入力候補を遅延読み込みします。
+プロンプトはStarship、履歴検索はatuin、ファイル選択はfzf、Tab補完はfzf-tabが担当します。
 
 Zshコードは`nix/home-manager/programs/zsh/`に分割し、Nix評価時に`.zshrc`へ
-埋め込みます。Sheldon、Starship、direnv、fzf、zoxideの生成結果は`$XDG_CACHE_HOME/zsh`に
+埋め込みます。Starship、direnv、fzf、zoxideの生成結果は`$XDG_CACHE_HOME/zsh`に
 キャッシュします。出力がパッケージだけで決まるatuinとnix-your-shellの初期化は、
-ビルド時に生成します。
+ビルド時に生成します。プラグインのローダーもビルド時に生成・コンパイルします。
+補完は自前の`compinit`で初期化し、通常は`compinit -C`でキャッシュを利用します。
+Home Manager適用時に補完キャッシュを無効化するため、新しいシェルで追加・更新に追従します。
 
 主なキーバインド:
 
@@ -264,7 +266,7 @@ Zshコードは`nix/home-manager/programs/zsh/`に分割し、Nix評価時に`.z
 | `Ctrl-R` | atuinで履歴を検索 |
 | `Ctrl-T` / `Alt-C` | ファイルをfzfで選んで挿入 / ディレクトリへ移動 |
 | `Ctrl-X` → `Ctrl-K` | プロセスをfzfで選択して終了 |
-| `**` → `Tab` | fzfによる補完 |
+| `Tab` | fzf-tabで説明付きの補完候補を選択 |
 
 詳細は[Zshのキーバインド](docs/zsh-keybindings.md)を参照してください。
 
@@ -277,6 +279,9 @@ Zshコードは`nix/home-manager/programs/zsh/`に分割し、Nix評価時に`.z
 Herdr本体はNixパッケージとして管理しています。`ai`ロールのホストでは、Home Managerの適用時に
 Claude Code、Codex、Grok、OpenCodeのHerdr連携を生成し、セッション復元に必要なフックを設定します。
 
+Herdrの新規ペインとscratch terminalはHome ManagerのNix製Zshを起動します。
+OS標準ZshとNix製fzf-tabのバイナリモジュール間でglibcの不一致が起きるのを避けるためです。
+
 Herdrのリモート運用とSSHポート転送は
 [VMリモート作業手順](docs/vm-remote-workflow.md)を参照してください。
 
@@ -287,7 +292,7 @@ Home Managerのパッケージは用途別のプリセットに分け、プリ�
 
 | プリセット | 用途 |
 |---|---|
-| `shell` | Zsh、Starship、Sheldon、direnv、zoxide、nix-index（comma） |
+| `shell` | Zsh（nixpkgsプラグイン・fzf-tab）、Starship、direnv、zoxide、nix-index（comma） |
 | `cli` | atuin、bat、eza、fd、ripgrep、yazi、btop、gh、xh、nix-your-shell、Herdr、hunk などの常用CLI |
 | `git` | Git、delta、lazygit |
 | `editor` | Neovim、rumdl |
@@ -349,11 +354,28 @@ done
 ```bash
 dotbench
 dotbench 30
+dotbench --only zsh --runs 50 --warmup 2 --output before.json
+dotbench --only zsh --warmup 2 --compare before.json
+dotbench --only zsh --zsh "$HOME/.nix-profile/bin/zsh"
+dotbench interactive --runs 10
 ```
 
 環境間または変更前後の比較には、バックグラウンド処理の影響を受けにくい
-中央値を使います。Zshプラグインやatuin、macOSではcompinitを`zsh-defer`へ渡しているため、
-`dotbench`のZsh値はプロンプト表示までの同期処理を中心に測ります。
+中央値を使います。通常のZsh計測は`zsh -i -c exit`の起動・終了時間であり、
+プロンプト表示や遅延プラグインの読み込み完了、入力応答を直接測るものではありません。
+
+`--only`で対象、`--runs`と`--warmup`で回数、`--zsh`と`--nvim`で実行ファイルを指定できます。
+JSONには生の時間（ナノ秒）とOS・CPU・ホスト・実行パス・バージョンを保存します。
+`--output`は既存ファイルを上書きしません。比較は中央値の増減率を表示し、環境の違いは警告します。
+設定内容やシステム負荷の同一性までは確認しないため、条件を揃えて比較してください。
+
+`interactive`は同梱の`zsh-bench`を使い、非ログイン・Gitなしの環境でプロンプト・入力・
+コマンド応答を測ります。出力は既定で10回分の生データ（時間はミリ秒）で、
+プロンプトにホスト名か現在のディレクトリ名が必要です。遅延ロードのプラグインは
+検出前に読み込まれない場合があります。Tabの待ち時間や対話結果のJSON保存・比較は未対応です。
+Nixなしで実行する場合、対話計測には別途`zsh-bench`が必要です。
+
+ヘルプは`dotbench --help`を参照してください。Bash・Zsh・fishの補完はNixパッケージに同梱します。
 
 ### 世代の整理
 

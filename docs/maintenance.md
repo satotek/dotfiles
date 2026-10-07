@@ -38,7 +38,22 @@
 | `time zsh -i -c exit` | zsh 起動時間をざっくり測る |
 | `dotbench` | ZshとNeovimの起動時間を10回測り、min/median/mean/maxを表示する |
 | `dotbench 20` | 実行回数を指定して起動時間を測る |
-| `sheldon lock --update` | Sheldon plugin lock を更新する |
+| `dotbench --help` | 計測オプションを確認する |
+| `dotbench --only zsh --runs 50 --output before.json` | Zshだけ計測し、新しいJSONファイルへ結果と環境情報を保存する |
+| `dotbench --only zsh --compare before.json` | 保存した中央値と比較する（環境の違いは警告） |
+| `dotbench interactive --runs 10` | zsh-benchでプロンプト・入力・コマンド応答を測る（Tab計測・JSON保存は未対応） |
+| `nix flake update nixpkgs` | Zsh plugin を含む nixpkgs のパッケージを更新する |
+
+Zshプラグインは `nix/home-manager/programs/zsh/plugins.nix` で管理する。
+更新後はHome Managerを適用して、新しいシェルを開く。
+適用時に補完キャッシュ（`.zcompdump` / `.zwc`）を無効化し、次の起動で再生成する。
+Nix外で補完を手動追加した場合は、別途このキャッシュを削除してシェルを起動し直す。
+
+dotbenchの通常計測は `zsh -i -c exit` / ヘッドレスNeovimの起動・終了時間であり、
+Zshの遅延読み込み完了や操作の応答時間ではない。
+対話計測の条件と制約は [README](../README.md#起動時間の計測) を参照する。
+Go依存を更新する場合は `tools/dotbench/` で `go mod tidy` を実行し、
+`nix/home-manager/presets/cli.nix` のdotbenchの `vendorHash` も更新する。
 
 ## Git
 
