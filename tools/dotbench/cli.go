@@ -186,14 +186,18 @@ func runStartup(stdout, stderr io.Writer, opts startupOptions) (err error) {
 		warnEnvironment(stderr, previous.Environment, result.Environment)
 	}
 
+	prog := newProgress(stderr, len(targets)*(opts.warmup+opts.runs))
+	defer prog.clear()
+	prog.begin(targets[0].name)
 	for _, b := range targets {
-		samples, err := measure(b, opts.warmup, opts.runs)
+		samples, err := measure(b, opts.warmup, opts.runs, prog)
 		if err != nil {
 			return fmt.Errorf("%s: %w", b.name, err)
 		}
 		result.Samples[b.name] = samples
 	}
 
+	prog.clear()
 	title := fmt.Sprintf("Startup benchmark (%d runs, %d warm-ups; lower is better)", opts.runs, opts.warmup)
 	printReport(stdout, title, targetNames(targets), &result, previous)
 	return out.write(&result)
@@ -302,13 +306,14 @@ func resolveExecutable(command string) (string, executableInfo, error) {
 	return resolved, executableInfo{Path: real, Version: commandLine(resolved, "--version")}, nil
 }
 
-func measure(b benchmark, warmup, runs int) ([]time.Duration, error) {
+func measure(b benchmark, warmup, runs int, prog *progress) ([]time.Duration, error) {
 	samples := make([]time.Duration, 0, runs)
 	for i := 0; i < warmup+runs; i++ {
 		d, err := run(b)
 		if err != nil {
 			return nil, err
 		}
+		prog.step(b.name, i < warmup, fmt.Sprintf("last %.1f ms", milliseconds(d)))
 		if i >= warmup {
 			samples = append(samples, d)
 		}

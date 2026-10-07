@@ -136,11 +136,15 @@ func runInteractive(stdout, stderr io.Writer, opts interactiveOptions) (err erro
 		return err
 	}
 
+	prog := newProgress(stderr, opts.warmup+opts.runs)
+	defer prog.clear()
+	prog.begin("interactive")
 	for i := 0; i < opts.warmup+opts.runs; i++ {
 		samples, err := measureInteractive(zsh, env)
 		if err != nil {
 			return err
 		}
+		prog.step("interactive", i < opts.warmup, fmt.Sprintf("first prompt %.1f ms", milliseconds(samples["first_prompt"])))
 		if i < opts.warmup {
 			continue
 		}
@@ -149,6 +153,7 @@ func runInteractive(stdout, stderr io.Writer, opts interactiveOptions) (err erro
 		}
 	}
 
+	prog.clear()
 	title := fmt.Sprintf("Interactive zsh benchmark (%d runs, %d warm-ups; lower is better)", opts.runs, opts.warmup)
 	printReport(stdout, title, interactiveMetrics, &result, previous)
 	return out.write(&result)
