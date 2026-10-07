@@ -1,13 +1,13 @@
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
 {
   # SSH 署名をローカルで検証（git log --show-signature / verify-commit）するための
   # 対応表。「メール 公開鍵」の行で、コミッタと署名鍵が一致するかを git が確認する。
-  # 署名生成は 1Password(op-ssh-sign)なので Mac 限定でよい。
-  home.file = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
-    ".config/git/allowed_signers".text = ''
-      konosuke.s0912@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEu/vDcjBdXbzqM6e6V56JX65xkjyK7Z6sDvnfeCTXLU
-    '';
-  };
+  # 署名生成は 1Password に任せており、macOS の op-ssh-sign と WSL の
+  # op-ssh-sign-wsl.exe が同じ鍵を使うため、どちらのホストでも必要になる。
+  # 署名しないホストに置いても害は無いので、プラットフォームで分けない。
+  home.file.".config/git/allowed_signers".text = ''
+    konosuke.s0912@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEu/vDcjBdXbzqM6e6V56JX65xkjyK7Z6sDvnfeCTXLU
+  '';
 
   # core.pager と interactive.diffFilter はこの git 連携が設定する。
   # diffFilter は --color-only なので、side-by-side は add -p には効かない。

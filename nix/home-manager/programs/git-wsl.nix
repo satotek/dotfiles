@@ -1,6 +1,12 @@
-{ ... }:
+{ config, ... }:
 let
   windowsApps = "/mnt/c/Users/konos/AppData/Local/Microsoft/WindowsApps";
+
+  # 署名の検証も Windows 側の op-ssh-sign-wsl.exe が行う。あれは WSL のパス変換で
+  # Linux のパスは読めるが、その先の Linux symlink を辿れない。home.file は必ず
+  # symlink を張るため ~/.config/git/allowed_signers を渡すと開けずに失敗し、
+  # 署名があるのに "No signature" と表示される。store の実ファイルを直接指す。
+  allowedSigners = config.home.file.".config/git/allowed_signers".source;
 in
 {
   # 公式 WSL 連携で Windows の 1Password に認証と署名を依頼する。
@@ -10,7 +16,10 @@ in
     core.sshCommand = "/mnt/c/Windows/System32/OpenSSH/ssh.exe";
     gpg = {
       format = "ssh";
-      ssh.program = "${windowsApps}/op-ssh-sign-wsl.exe";
+      ssh = {
+        program = "${windowsApps}/op-ssh-sign-wsl.exe";
+        allowedSignersFile = "${allowedSigners}";
+      };
     };
     # エージェントには 8 本の鍵が入っており、先頭が GitHub 用とは限らない
     # (今は "GCP nosuke-net")。macOS 側と同じ "Github" 鍵を明示する。
