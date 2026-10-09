@@ -3,6 +3,7 @@
 local servers = {
   "bashls",
   "biome",
+  "clangd",
   "cssls",
   "denols",
   "efm",
