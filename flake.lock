@@ -3,11 +3,11 @@
     "agent-browser": {
       "flake": false,
       "locked": {
-        "lastModified": 1791569197,
-        "narHash": "sha256-8Og2ruMaY+ObT9WiYqCyoXAcwZ/6t2g6SeU3+wF15ck=",
+        "lastModified": 1791683050,
+        "narHash": "sha256-OZ8nKcn0+OqimKlQcUTZxAqzHAHNOKE1L5Cd495iP3o=",
         "owner": "vercel-labs",
         "repo": "agent-browser",
-        "rev": "44af39842650f0bb9c1afb7354df9a82921d4f09",
+        "rev": "d9570915f4dd6504dee4070379d2c4f79d81dbb2",
         "type": "github"
       },
       "original": {
@@ -217,11 +217,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1791587546,
-        "narHash": "sha256-s/0JhYr2dGKqZWY7lm1avAGJzBLfSf0MTbE39c4gL34=",
+        "lastModified": 1791668524,
+        "narHash": "sha256-DLtkboR2GRhtoRzfFMBJCCv5dQjOAjBhgI7ENqm+OMk=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "77f6f041aa570a0a0883ada4fd44fb1a389bf840",
+        "rev": "1f66efd395d3509dc0704c9647fbfb6bf3c2cae3",
         "type": "github"
       },
       "original": {
@@ -326,11 +326,11 @@
     "orca-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1791598633,
-        "narHash": "sha256-Q+rxL2m1lYbW4DKiHc/55fs6YQMN79QFmdCO6/X5NX4=",
+        "lastModified": 1791682906,
+        "narHash": "sha256-lFmHscZY2WALIAKh3rVZDVO1OtyF36xAK9z+yXd5IUU=",
         "owner": "stablyai",
         "repo": "orca",
-        "rev": "d724de9d4658fae04e6a3c74449f0d42796a8506",
+        "rev": "1dde4c0049dbc52f4569081746218499f8c6a464",
         "type": "github"
       },
       "original": {
