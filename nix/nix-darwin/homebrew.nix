@@ -76,6 +76,7 @@ in
 
       # ウィンドウ・入力
       "dockdoor" # Dock のウィンドウプレビューとウィンドウ単位の切り替え
+      "jordanbaird-ice" # メニューバーのアイコンを整理・非表示にする
       "karabiner-elements"
       "nikitabobko/tap/aerospace" # i3 風タイリングウィンドウマネージャ
       "raycast"
