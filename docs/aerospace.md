@@ -2,6 +2,11 @@
 
 macOS 用の i3 風タイリングウィンドウマネージャ。
 本体は Homebrew cask、設定は `.config/aerospace/aerospace.toml` を Home Manager が symlink する。
+JankyBordersもHome Managerで導入し、AeroSpace起動時に幅3の枠を表示する。
+ウィンドウ間・画面端の余白は3。
+
+Safariの新しいウィンドウはワークスペース1へ自動配置する。
+Ghosttyはワークスペース2で開く運用とし、タブ追加時の配置を保つため自動移動は指定しない。
 
 ## キーバインド
 
@@ -24,6 +29,25 @@ macOS 用の i3 風タイリングウィンドウマネージャ。
 | `Ctrl-Alt-h/j/k/l` | モニタ間のフォーカス移動 |
 | `Ctrl-Alt-Shift-h/j/k/l` | ウィンドウを隣のモニタへ（フォーカスも追従） |
 | `Alt-Shift-;` | service モード |
+| `Ctrl-Alt-w` | Window モード |
+| `Ctrl-Alt-Space` | Layout モード |
+
+### Window / Layout モード
+
+各モードでは修飾キーなしで操作し、`Esc`でmainに戻る。操作後もモードは維持する。
+`Ctrl-Alt-w`と`Ctrl-Alt-Space`でWindow / Layoutを相互に切り替えられる。
+
+| モード | キー | 動作 |
+|---|---|---|
+| Window | `h/j/k/l` | 隣のコンテナと結合 |
+| Window | `m` | 次のモニタへフォーカス移動 |
+| Window | `Shift-m` / `Ctrl-m` | ウィンドウを次 / 前のモニタへ（フォーカスも追従） |
+| Window | `s` / `d` | 縮小 / 拡大 |
+| Layout | `t` / `c` | tiles / accordion |
+| Layout | `f` | フロート / タイル切替 |
+| Layout | `h` / `v` | 横 / 縦配置 |
+| Layout | `b` | ウィンドウサイズを均等化 |
+| Layout | `r` | レイアウトをリセット |
 
 ### service モード
 

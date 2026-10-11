@@ -5,7 +5,7 @@
 
 config-version = 2
 
-after-startup-command = []
+after-startup-command = ['exec-and-forget borders active_color=0xffe1e3e4 inactive_color=0xff494d64 width=3.0']
 
 start-at-login = true
 auto-reload-config = true
@@ -13,7 +13,7 @@ auto-reload-config = true
 enable-normalization-flatten-containers = true
 enable-normalization-opposite-orientation-for-nested-containers = true
 
-accordion-padding = 30
+accordion-padding = 20
 default-root-container-layout = 'tiles'
 default-root-container-orientation = 'auto'
 
@@ -30,18 +30,19 @@ focus-follows-mouse.enabled = false
 
 key-mapping.preset = 'qwerty'
 
-gaps.inner.horizontal = 8
-gaps.inner.vertical = 8
-gaps.outer.left = 8
-gaps.outer.bottom = 8
-gaps.outer.top = 8
-gaps.outer.right = 8
+gaps.inner.horizontal = 3
+gaps.inner.vertical = 3
+gaps.outer.left = 3
+gaps.outer.bottom = 3
+gaps.outer.top = 3
+gaps.outer.right = 3
 
 # 設定アプリやパスワードマネージャはタイルせずフロートさせる。
 # Ghostty は macOS のネイティブタブを使う＝タブが別ウィンドウとして検出されるため、
 # 開いた場所にタイルさせてワークスペースが散らばるのを抑える（Ghostty 公式の回避策）。
 # https://ghostty.org/docs/help/macos-tiling-wms#aerospace
 on-window-detected = [
+    { if = 'test %{app-bundle-id} = com.apple.Safari', run = 'move-node-to-workspace 1' },
     { if = 'test %{app-bundle-id} = com.mitchellh.ghostty', run = 'layout tiling' },
     { if = 'test %{app-bundle-id} = com.apple.systempreferences', run = 'layout floating' },
     { if = 'test %{app-bundle-id} = com.1password.1password', run = 'layout floating' },
@@ -110,6 +111,32 @@ on-window-detected = [
     ctrl-alt-shift-l = 'move-node-to-monitor --wrap-around --focus-follows-window right'
 
     alt-shift-semicolon = 'mode service'
+    ctrl-alt-w = 'mode window'
+    ctrl-alt-space = 'mode layout'
+
+[mode.window.binding]
+    esc = 'mode main'
+    h = 'join-with left'
+    j = 'join-with down'
+    k = 'join-with up'
+    l = 'join-with right'
+    m = 'focus-monitor --wrap-around next'
+    shift-m = 'move-node-to-monitor --wrap-around --focus-follows-window next'
+    ctrl-m = 'move-node-to-monitor --wrap-around --focus-follows-window prev'
+    s = 'resize smart -50'
+    d = 'resize smart +50'
+    ctrl-alt-space = 'mode layout'
+
+[mode.layout.binding]
+    esc = 'mode main'
+    t = 'layout tiles'
+    c = 'layout accordion'
+    f = 'layout floating tiling'
+    h = 'layout horizontal'
+    v = 'layout vertical'
+    b = 'balance-sizes'
+    r = 'flatten-workspace-tree'
+    ctrl-alt-w = 'mode window'
 
 [mode.service.binding]
     esc = ['reload-config', 'mode main']
