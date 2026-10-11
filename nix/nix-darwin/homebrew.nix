@@ -32,9 +32,8 @@ in
 
   homebrew = {
     enable = true;
-    # 宣言外のパッケージが残っていれば消さずに switch を止める。
-    # 棚卸しを終えてから "uninstall" に上げる。
-    onActivation.cleanup = "check";
+    # アプリの設定・データを残しつつ、インストール済みの一覧を宣言に揃える。
+    onActivation.cleanup = "uninstall";
     taps = builtins.attrNames config.nix-homebrew.taps;
 
     brews = [

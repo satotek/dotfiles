@@ -98,7 +98,7 @@ nix run home-manager/master -- \
 既存の`/opt/homebrew`がある場合は、nix-homebrewが初回の適用で引き継ぎます。
 tapは宣言したものだけにするため、`/opt/homebrew/Library/Taps`が残っていると
 適用が止まります。中のtapは宣言から作り直されるので、退避してから再実行してください。
-宣言にないformula・caskが入っている場合も適用は止まります（[Homebrew](#homebrew)）。
+宣言にないformula・caskは適用時にアンインストールされます（[Homebrew](#homebrew)）。
 
 Linux / WSLでは、初回適用後にログインシェルをNixのZshへ一度だけ切り替えます。
 OSのZshのままだと、Nixでビルドしたfzf-tabのモジュールがglibcの違いで読み込めません。
@@ -202,8 +202,9 @@ mpv・IINA・SVPのように連携して使うものは`homebrew-video.nix`に�
 - **brew本体とtap** — nix-homebrewが管理します。brew本体は`flake.nix`の`brew-src`で
   リリースのタグに固定し、サードパーティのtapもflake inputで固定します。
   `brew tap`で宣言にないtapは追加できません。
-- **宣言にないパッケージ** — `onActivation.cleanup = "check"`なので、`brew install`で
-  入れただけのものがあると`darwin-switch`が止まります。先に宣言へ追加してください。
+- **宣言にないパッケージ** — `onActivation.cleanup = "uninstall"`なので、宣言にない
+  formula・caskは`darwin-switch`時にアンインストールします。残したいものは先に宣言へ
+  追加してください。caskの関連設定・データを削除する`zap`は使いません。
 - **Nixとcaskの使い分け** — 版を`flake.lock`で決めたいアプリはNixで入れ、アプリ自身の
   自動更新を切ります（Ghosttyなど）。アプリが自分で更新するものはcaskにします。
 - **更新** — formulaと自動更新のないcaskは`brew upgrade`で上げます。brew本体を上げるときは
