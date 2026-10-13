@@ -50,6 +50,11 @@ else
   _deferred_compinit
 fi
 
+# .zshenv から読むと zsh -c や profile を読む LaunchAgent まで秘密を載せる。
+# 対話シェルだけで読む。export した値はその子プロセスに引き継がれる。
+# 権限は activation が 0600 に揃える。
+[[ -f ${XDG_CONFIG_HOME:-$HOME/.config}/secrets ]] && source "${XDG_CONFIG_HOME:-$HOME/.config}/secrets"
+
 [[ -f $XDG_CONFIG_HOME/zsh.local ]] && source "$XDG_CONFIG_HOME/zsh.local"
 
 _starship_cache="$cache_dir/starship.zsh"

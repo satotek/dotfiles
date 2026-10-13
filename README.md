@@ -253,7 +253,7 @@ gcloud auth application-default set-quota-project nosuke-net
 sops updatekeys secrets/*.yaml
 ```
 
-リポジトリ管理外のシェル用機密情報は`~/.config/secrets`へ置けます。
+リポジトリ管理外のシェル用機密情報は`~/.config/secrets`へ置けます。対話的な zsh だけが読み、`zsh -c` には載せません。ファイルがあれば適用時に権限を 0600 に揃えます。
 
 ## シェルの操作
 

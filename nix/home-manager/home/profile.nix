@@ -1,9 +1,15 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   homeDirectory = config.home.homeDirectory;
   inherit (config.xdg) configHome dataHome;
   pnpmHome = "${dataHome}/pnpm";
   binHome = "${homeDirectory}/.local/bin";
+  secretsFile = "${configHome}/secrets";
 in
 {
   xdg = {
@@ -64,9 +70,14 @@ in
     (lib.mkAfter ''
       export PATH
       unset -f path_prepend path_append
-
-      # Load local secrets (not tracked by git)
-      [ -f "${configHome}/secrets" ] && . "${configHome}/secrets"
     '')
   ];
+
+  home.activation.restrictSecretsFile = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    secrets_file=${lib.escapeShellArg secretsFile}
+    if [ -f "$secrets_file" ]; then
+      run ${pkgs.coreutils}/bin/chmod 0600 "$secrets_file"
+    fi
+  '';
+
 }
