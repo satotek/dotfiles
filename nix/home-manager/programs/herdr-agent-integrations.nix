@@ -8,7 +8,7 @@ let
   homeDirectory = config.home.homeDirectory;
 in
 {
-  # Claude/Codex/Grok/OpenCodeの設定本体はHome Manager側で宣言し、hook scriptと
+  # Claude/Codex/Cursor/Grok/OpenCodeの設定本体はHome Manager側で宣言し、hook scriptと
   # OpenCodeプラグインは現在のHerdrに生成させる。生成物はリポジトリへコピーしない。
   # Herdr更新後も次のnix-switchでintegrationの最新版へ追従する。
   # OpenCodeは XDG_CONFIG_HOME を見ず ~/.config/opencode に書く。cli.json は
@@ -19,11 +19,13 @@ in
     trap '${pkgs.coreutils}/bin/rm -rf "$integration_tmp"' EXIT
 
     ${pkgs.coreutils}/bin/mkdir -p "$integration_tmp/claude" "$integration_tmp/codex"
-    ${pkgs.coreutils}/bin/mkdir -p "${homeDirectory}/.grok" "${homeDirectory}/.config/opencode"
+    ${pkgs.coreutils}/bin/mkdir -p "${homeDirectory}/.grok" "${homeDirectory}/.config/opencode" "${homeDirectory}/.cursor"
     CLAUDE_CONFIG_DIR="$integration_tmp/claude" "$herdr_bin" integration install claude
     CODEX_HOME="$integration_tmp/codex" "$herdr_bin" integration install codex
     GROK_HOME="${homeDirectory}/.grok" "$herdr_bin" integration install grok
     "$herdr_bin" integration install opencode
+    # 既存の hooks.json は残し、sessionStart だけを足す。
+    "$herdr_bin" integration install cursor
 
     ${pkgs.coreutils}/bin/install -Dm755 \
       "$integration_tmp/claude/hooks/herdr-agent-state.sh" \

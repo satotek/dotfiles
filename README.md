@@ -22,7 +22,7 @@ macOSのシステム設定とホーム環境は独立して更新できます。
 - **ターミナル** — Ghostty。macOSではAeroSpace・Karabinerも設定
 - **macOSのアプリ** — Homebrewのformula・caskをnix-homebrewで宣言。Xcodeはxcodesで導入
 - **開発ツール** — Go、Rust、Node.js、Bun、pnpm、Python、uv、各種言語サーバー
-- **AIエージェント** — Claude Code、Codex、OpenCode、Antigravity CLI、Grok、Herdr、Hunk
+- **AIエージェント** — Claude Code、Codex、Cursor CLI、OpenCode、Antigravity CLI、Grok、Herdr、Hunk
 - **共通基盤** — エージェント向けルール・スキル・MCP設定、sopsによる機密情報の管理
 
 導入するツールはホストごとのプリセットで選択します。
@@ -289,7 +289,7 @@ Home Manager適用時に補完キャッシュを無効化するため、新し�
 `nix/home-manager/data/mcp-servers.nix`に置きます。
 
 Herdr本体はNixパッケージとして管理しています。`ai`ロールのホストでは、Home Managerの適用時に
-Claude Code、Codex、Grok、OpenCodeのHerdr連携を生成し、セッション復元に必要なフックを設定します。
+Claude Code、Codex、Cursor、Grok、OpenCodeのHerdr連携を生成し、セッション復元に必要なフックを設定します。
 
 Herdrの新規ペインとscratch terminalはHome ManagerのNix製Zshを起動します。
 OS標準ZshとNix製fzf-tabのバイナリモジュール間でglibcの不一致が起きるのを避けるためです。

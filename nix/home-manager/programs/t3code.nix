@@ -32,6 +32,7 @@ let
       lib.genAttrs
         [
           "antigravity"
+          "cursor"
           "grok"
           "opencode"
         ]
@@ -56,6 +57,8 @@ let
         {
           claudeAgent.config.binaryPath = lib.getExe pkgs.llm-agents.claude-code;
           codex.config.binaryPath = lib.getExe pkgs.llm-agents.codex;
+          # grok の agent と名前が衝突するので、cursor-agent をパスで指定する。
+          cursor.config.binaryPath = lib.getExe pkgs.llm-agents.cursor-agent;
           grok.config.binaryPath = lib.getExe pkgs.llm-agents.grok;
           opencode.config.binaryPath = "${pkgs.llm-agents.opencode2}/bin/opencode2";
           # agy (antigravity-cli) は ACP の実行ファイルではないので使えない。
