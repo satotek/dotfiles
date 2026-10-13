@@ -9,6 +9,7 @@ let
   inherit (config.xdg) configHome dataHome;
   pnpmHome = "${dataHome}/pnpm";
   binHome = "${homeDirectory}/.local/bin";
+  nixDaemon = "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh";
   secretsFile = "${configHome}/secrets";
 in
 {
@@ -40,7 +41,9 @@ in
   # zsh のログインシェルでは .zshenv のこのファイルが .zprofile の
   # hm-session-vars より先に読まれるため、パスは評価時に埋め込んでおく。
   # 並び: 関数定義(500) → OS 固有の前置(800) → 共通の後置(1000)
-  #       → OS 固有の後置(1200) → export(1500)
+  #       → OS 固有の後置(1200) → nix-daemon.sh の前置(Linux のみ)と export(1500)
+  # macOS は nix-darwin の /etc/zshenv が PATH と NIX_PROFILES を組むので読まない。
+  # nix-daemon.sh は default profile を /run/current-system/sw より前へ出してしまう。
   xdg.configFile."profile".text = lib.mkMerge [
     (lib.mkBefore ''
       # Update PATH only when the entry is missing so repeated sourcing stays clean.
@@ -68,6 +71,15 @@ in
     ''
 
     (lib.mkAfter ''
+      ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
+        # The Nix installer only sources this from interactive zshrc. Read it here so
+        # non-interactive zsh and login bash get the profile, SSL certs, and
+        # NIX_PROFILES. The script exports a guard, so a later /etc/zsh/zshrc source
+        # does not prepend the nix profiles again.
+        if [ -r "${nixDaemon}" ]; then
+          . "${nixDaemon}"
+        fi
+      ''}
       export PATH
       unset -f path_prepend path_append
     '')
