@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ pkgs, ... }:
 let
   rustSrcPath = "${pkgs.rustPlatform.rustLibSrc}";
 in
@@ -6,12 +6,6 @@ in
   home.sessionVariables = {
     RUST_SRC_PATH = rustSrcPath;
   };
-
-  home.activation.setRustSrcPathForLaunchd = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
-    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      /bin/launchctl setenv RUST_SRC_PATH ${lib.escapeShellArg rustSrcPath}
-    ''
-  );
 
   home.packages = with pkgs; [
     cargo
