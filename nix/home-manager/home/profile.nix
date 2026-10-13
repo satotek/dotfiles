@@ -11,7 +11,10 @@ let
   binHome = "${homeDirectory}/.local/bin";
   nixDaemon = "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh";
   secretsFile = "${configHome}/secrets";
-  # null は「設定しない」なので、systemd には渡さない。
+  # ラベルは LaunchAgent の既定（org.nix-community.home.<name>）と kickstart で揃える。
+  sessionEnvironmentLabel = "org.nix-community.home.session-environment";
+  sessionVarsFile = "${config.home.sessionVariablesPackage}/etc/profile.d/hm-session-vars.sh";
+  # null は「設定しない」なので、systemd や launchctl には渡さない。
   exportedSessionVariables = lib.mapAttrs (_: value: toString value) (
     lib.filterAttrs (_: value: value != null) config.home.sessionVariables
   );
@@ -35,6 +38,18 @@ let
     "/usr/local/games"
     "/snap/bin"
   ];
+  setenvCalls = lib.concatMapStrings (name: "setenv_if_set ${lib.escapeShellArg name}\n") (
+    [
+      "PATH"
+      "NIX_PROFILES"
+      "NIX_SSL_CERT_FILE"
+      "XDG_DATA_DIRS"
+      "FPATH"
+      "INFOPATH"
+      "MANPATH"
+    ]
+    ++ lib.attrNames exportedSessionVariables
+  );
 in
 {
   xdg = {
@@ -125,6 +140,42 @@ in
     }) exportedSessionVariables
   );
 
+  # launchctl setenv は呼んだドメインにしか残らず、再起動で消える。GUI ドメインの
+  # LaunchAgent がログイン時と、plist が変わった switch 時にセットし直す。
+  launchd.agents.session-environment = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+    enable = true;
+    config = {
+      Label = sessionEnvironmentLabel;
+      RunAtLoad = true;
+      ProgramArguments = [
+        "/bin/sh"
+        "-c"
+        ''
+          # setenv した値は次の起動に引き継がれる。nix-daemon.sh と Homebrew の
+          # FPATH / INFOPATH は重複を避けないので、組み立て直す変数は消してから読む。
+          unset PATH FPATH INFOPATH MANPATH XDG_DATA_DIRS NIX_PROFILES NIX_SSL_CERT_FILE
+          unset __ETC_PROFILE_NIX_SOURCED __HM_SESS_VARS_SOURCED
+          export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
+
+          . ${lib.escapeShellArg sessionVarsFile}
+          if [ -f ${lib.escapeShellArg "${configHome}/profile"} ]; then
+            . ${lib.escapeShellArg "${configHome}/profile"}
+          fi
+
+          setenv_if_set() {
+            # eval の間接展開は /bin/sh では bad substitution になる。printenv なら
+            # 値に空白やクォートがあってもそのまま渡せる。
+            value="$(/usr/bin/printenv "$1" || true)"
+            [ -n "$value" ] || return 0
+            /bin/launchctl setenv "$1" "$value"
+          }
+
+          ${setenvCalls}
+        ''
+      ];
+    };
+  };
+
   home.activation.restrictSecretsFile = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     secrets_file=${lib.escapeShellArg secretsFile}
     if [ -f "$secrets_file" ]; then
@@ -146,5 +197,21 @@ in
         } || true
       fi
     ''
+  );
+
+  home.activation.refreshGuiSessionEnvironment = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
+    lib.hm.dag.entryAfter
+      [
+        "linkGeneration"
+        "setupLaunchAgents"
+      ]
+      ''
+        # linkGeneration より先に RunAtLoad しても、リンク後の profile で GUI ドメインに
+        # もう一度セットする。SSH からの switch でも gui ドメインのエージェントが走る。
+        uid="$(/usr/bin/id -u)"
+        if /bin/launchctl print "gui/$uid" >/dev/null 2>&1; then
+          run /bin/launchctl kickstart -k "gui/$uid/${sessionEnvironmentLabel}" || true
+        fi
+      ''
   );
 }
