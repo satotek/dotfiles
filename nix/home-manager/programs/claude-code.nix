@@ -136,8 +136,8 @@ in
       # モデル自身の既定になり、いまの opus（Opus 5.5）は medium で始まる。
       # ユーザー設定の effortLevel は Opus 5.5 以降には効かない。
       fastMode = false;
-      # ローカルのセッション履歴を ccusage などで長期間集計できるよう保持する。
-      cleanupPeriodDays = 3650;
+      # ローカルのセッション履歴を ccusage などで長期間集計できるよう保持する（100年分）。
+      cleanupPeriodDays = 36500;
       # AskUserQuestion(選択肢プロンプト)の自動タイムアウト。
       # settings キーの askUserQuestionTimeout は 60s/5m/10m/never の固定値のみ（最大10分）なので、
       # 1時間にするには env の CLAUDE_AFK_TIMEOUT_MS（ミリ秒）を使う。要 v2.1.198+。
