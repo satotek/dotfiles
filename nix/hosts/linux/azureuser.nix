@@ -15,11 +15,12 @@
     "ai"
     "secrets"
   ]
-  # T3 Code のサーバーは gem-ai だけ。他の azureuser ホストには置かない。
+  # T3 Code のサーバーと、そこへ届く tailnet の口は gem-ai だけ。他の azureuser ホストには置かない。
   ++ (
     if hostname == "gem-ai" then
       [
         ../../home-manager/programs/t3code.nix
+        ../../home-manager/programs/tailscale.nix
       ]
     else
       [ ]

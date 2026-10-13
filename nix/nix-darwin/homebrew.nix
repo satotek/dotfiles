@@ -90,6 +90,7 @@ in
       "1password-cli" # op コマンド（署名検証やシークレット取得に使用）
       "adguard"
       "surfshark"
+      "tailscale-app"
       "yubico-authenticator"
 
       # ドキュメント・ノート
