@@ -28,8 +28,9 @@ in
       Type = "simple";
       Environment = [
         "LIBGL_ALWAYS_SOFTWARE=1"
-        # profile の bin は Orca が claude や codex を探すため。
-        "PATH=${config.home.profileDirectory}/bin:/usr/local/bin:/usr/bin:/bin"
+        # user manager の PATH を継承しないことがあるので、セッションへ渡す PATH を明示する。
+        # claude / codex に加え、nix と ~/.local/bin も子プロセスから見える。
+        "PATH=${config.systemd.user.sessionVariables.PATH}"
       ];
       ExecStart = "${orca}/bin/orca-ide serve --port ${toString port} --pairing-address ${pairingAddress} --json";
       Restart = "on-failure";

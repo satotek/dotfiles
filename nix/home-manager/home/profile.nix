@@ -11,6 +11,30 @@ let
   binHome = "${homeDirectory}/.local/bin";
   nixDaemon = "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh";
   secretsFile = "${configHome}/secrets";
+  # null は「設定しない」なので、systemd には渡さない。
+  exportedSessionVariables = lib.mapAttrs (_: value: toString value) (
+    lib.filterAttrs (_: value: value != null) config.home.sessionVariables
+  );
+  # user manager はシェルを読まない。シェルは継承した PATH の末尾へ手元の bin を足すので、
+  # 同じ並びにはできない。Nix を先に、手元の bin をシステムの前に置く。
+  # Ubuntu の既定 PATH も残し、snap などを潰さない。
+  servicePath = lib.concatStringsSep ":" [
+    "${config.home.profileDirectory}/bin"
+    "/nix/var/nix/profiles/default/bin"
+    binHome
+    "${homeDirectory}/.cargo/bin"
+    "${homeDirectory}/bin"
+    "${pnpmHome}/bin"
+    "/usr/local/sbin"
+    "/usr/local/bin"
+    "/usr/sbin"
+    "/usr/bin"
+    "/sbin"
+    "/bin"
+    "/usr/games"
+    "/usr/local/games"
+    "/snap/bin"
+  ];
 in
 {
   xdg = {
@@ -85,6 +109,22 @@ in
     '')
   ];
 
+  # XDG_* と LOCALE_ARCHIVE だけが既定で environment.d に入る。残りと PATH も
+  # ユーザーサービスへ渡す。ファイルは user manager の起動時にしか読まれないので、
+  # 起動中のセッションへは下の activation が set-environment する。
+  systemd.user.sessionVariables = lib.mkIf pkgs.stdenv.hostPlatform.isLinux (
+    exportedSessionVariables // { PATH = servicePath; }
+  );
+
+  # environment.d は $VAR を展開するが set-environment はそのまま入れるので、
+  # 参照を含む値は起動直後と switch 後で食い違う。入れる前に評価で止める。
+  assertions = lib.optionals pkgs.stdenv.hostPlatform.isLinux (
+    lib.mapAttrsToList (name: value: {
+      assertion = !lib.hasInfix "$" value;
+      message = "home.sessionVariables.${name} references another variable; systemctl set-environment would store it unexpanded.";
+    }) exportedSessionVariables
+  );
+
   home.activation.restrictSecretsFile = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     secrets_file=${lib.escapeShellArg secretsFile}
     if [ -f "$secrets_file" ]; then
@@ -92,4 +132,19 @@ in
     fi
   '';
 
+  home.activation.applySystemdSessionEnvironment = lib.mkIf pkgs.stdenv.hostPlatform.isLinux (
+    # reloadSystemd が再起動するサービスに新しい環境を渡すため、その前にセットする。
+    lib.hm.dag.entryBetween [ "reloadSystemd" ] [ "linkGeneration" ] ''
+      runtime_dir="''${XDG_RUNTIME_DIR:-/run/user/$(${pkgs.coreutils}/bin/id -u)}"
+      if [ -S "$runtime_dir/systemd/private" ]; then
+        run env XDG_RUNTIME_DIR="$runtime_dir" ${pkgs.systemd}/bin/systemctl --user set-environment ${
+          lib.concatStringsSep " " (
+            lib.mapAttrsToList (name: value: "${name}=${lib.escapeShellArg value}") (
+              exportedSessionVariables // { PATH = servicePath; }
+            )
+          )
+        } || true
+      fi
+    ''
+  );
 }
