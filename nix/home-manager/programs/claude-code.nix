@@ -158,6 +158,8 @@ in
           ];
         }
       ];
+      # auto はユーザー設定でしか有効にならない。プロジェクト側に書くと無視される。
+      permissions.defaultMode = "auto";
       permissions.allow = [
         "Bash(pnpm typecheck)"
         "Bash(pnpm test)"
