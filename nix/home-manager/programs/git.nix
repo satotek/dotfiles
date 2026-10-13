@@ -36,7 +36,7 @@
       color.ui = true;
       init.defaultBranch = "main";
       core = {
-        editor = "vim";
+        editor = "nvim";
         autocrlf = "input";
       };
       merge.conflictstyle = "zdiff3";
