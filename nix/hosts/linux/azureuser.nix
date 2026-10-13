@@ -15,6 +15,13 @@
     "ai"
     "secrets"
   ]
-  # Orca の SSH トンネル待受は gem-ai だけ。他の azureuser ホストには置かない。
-  ++ (if hostname == "gem-ai" then [ ../../home-manager/programs/orca.nix ] else [ ]);
+  # T3 Code のサーバーは gem-ai だけ。他の azureuser ホストには置かない。
+  ++ (
+    if hostname == "gem-ai" then
+      [
+        ../../home-manager/programs/t3code.nix
+      ]
+    else
+      [ ]
+  );
 }

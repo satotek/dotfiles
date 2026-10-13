@@ -51,7 +51,6 @@ in
   home.packages = [
     xcodes
     pkgs.xcodegen
-    pkgs.llm-agents.orca
     # 常駐させず、使うときに ollama serve する。モデルは ~/.ollama に残る。
     pkgs.ollama
   ];

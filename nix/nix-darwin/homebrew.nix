@@ -57,6 +57,7 @@ in
       "claude"
       "grok-bot"
       "handy" # 音声入力（文字起こし）
+      "t3-code" # エージェントの GUI。gem-ai のサーバーへは T3 Connect でつなぐ
 
       # エディタ・IDE
       "android-studio"
