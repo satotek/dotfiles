@@ -323,22 +323,6 @@
         "type": "github"
       }
     },
-    "orca-skills": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1791771680,
-        "narHash": "sha256-Q1s6ud8rQTmd9cX4H32KFRFpQ8tFRl424iaqJm4FU9A=",
-        "owner": "stablyai",
-        "repo": "orca",
-        "rev": "d9a3c84b00112fd8640d7754cce4b07757ce3e5f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "stablyai",
-        "repo": "orca",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "agent-browser": "agent-browser",
@@ -355,7 +339,6 @@
         "nix-homebrew": "nix-homebrew",
         "nix-index-database": "nix-index-database",
         "nixpkgs": "nixpkgs_2",
-        "orca-skills": "orca-skills",
         "vercel-agent-skills": "vercel-agent-skills",
         "vercel-next-skills": "vercel-next-skills",
         "vercel-skills": "vercel-skills"

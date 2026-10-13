@@ -42,7 +42,6 @@ jobs:
             ast-grep-skill \
             codex-plugin-cc \
             herdr-skill \
-            orca-skills \
             vercel-agent-skills \
             vercel-next-skills \
             vercel-skills
