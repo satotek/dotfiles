@@ -25,7 +25,9 @@ in
     BUN_INSTALL_BIN = binHome;
     DENO_INSTALL_ROOT = "${homeDirectory}/.local";
     # OpenCode の /editor は EDITOR が空だと起動せず戻る。
+    # git 以外のツールは VISUAL を EDITOR より先に見るので、両方を nvim にする。
     EDITOR = "nvim";
+    VISUAL = "nvim";
   };
 
   # PATH の順番は sessionPath（常に先頭へ追加）では表せないので、シェルで組む。
