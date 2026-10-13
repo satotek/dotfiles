@@ -132,7 +132,9 @@ in
       # 離席中もスマホから続きを操作できるよう、毎セッション Remote Control に繋ぐ。
       remoteControlAtStartup = true;
       model = "opus";
-      effortLevel = "medium";
+      # modelSettings.effortLevel に既定を表す値は無い。キーを置かないと
+      # モデル自身の既定になり、いまの opus（Opus 5.5）は medium で始まる。
+      # ユーザー設定の effortLevel は Opus 5.5 以降には効かない。
       fastMode = false;
       # ローカルのセッション履歴を ccusage などで長期間集計できるよう保持する。
       cleanupPeriodDays = 3650;
