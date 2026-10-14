@@ -49,7 +49,7 @@
     };
 
     vercel-next-skills = {
-      url = "github:vercel/next.js/v16.3.0";
+      url = "github:vercel/next.js";
       flake = false;
     };
 
