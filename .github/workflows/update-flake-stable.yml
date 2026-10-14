@@ -31,7 +31,15 @@ jobs:
             extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g= satotek.cachix.org-1:/2yz7ZHPnRzW91UqChW6XmRSX2Tq0NrNPjKsIUppRFA=
 
       - name: Update stable inputs
-        run: nix flake update nixpkgs nix-darwin home-manager nix-index-database
+        run: |
+          nix flake update \
+            nixpkgs \
+            nix-darwin \
+            home-manager \
+            nix-index-database \
+            azure-cli-nix \
+            nix-homebrew \
+            homebrew-nikitabobko-tap
 
       # 自動マージの安全弁: 更新後の inputs で Linux home 構成が実際にビルドできるか検証。
       - name: Validate (build linux home config)
@@ -42,10 +50,12 @@ jobs:
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           commit-message: 'chore(nix): update stable inputs'
-          title: 'chore(nix): update stable inputs (nixpkgs/darwin/home-manager/nix-index)'
+          title: 'chore(nix): update stable inputs (base/cloud/homebrew)'
           body: |
             基盤系 flake input の更新（3日おき・ビルド検証済み）:
-            nixpkgs / nix-darwin / home-manager / nix-index-database。
+            nixpkgs / nix-darwin / home-manager / nix-index-database /
+            azure-cli-nix / nix-homebrew / homebrew-nikitabobko-tap。
+            Homebrew 系の macOS 動作は、この Linux ビルドでは検証しません。
 
             _このPRは update-flake-stable ワークフローが自動生成し、自動マージされます。_
           branch: chore/update-flake-stable
