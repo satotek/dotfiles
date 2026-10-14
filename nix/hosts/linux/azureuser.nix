@@ -21,6 +21,7 @@
       [
         ../../home-manager/programs/t3code.nix
         ../../home-manager/programs/tailscale.nix
+        ../../home-manager/programs/zsh-history-check.nix
       ]
     else
       [ ]
