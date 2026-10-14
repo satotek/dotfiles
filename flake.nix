@@ -4,6 +4,9 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
+    # 配布側の nixpkgs pin を維持し、公開済みのバイナリキャッシュと一致させる。
+    azure-cli-nix.url = "github:satotek/azure-cli-nix";
+
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
 

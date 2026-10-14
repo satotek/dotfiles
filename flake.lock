@@ -68,6 +68,24 @@
         "type": "github"
       }
     },
+    "azure-cli-nix": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1791956362,
+        "narHash": "sha256-eQmwj+JYCtnVSfuRXYiwQYsGezumxSLpW6ydJKNBN24=",
+        "owner": "satotek",
+        "repo": "azure-cli-nix",
+        "rev": "4e223278c9502d2548568e02430973f800747b77",
+        "type": "github"
+      },
+      "original": {
+        "owner": "satotek",
+        "repo": "azure-cli-nix",
+        "type": "github"
+      }
+    },
     "brew-src": {
       "flake": false,
       "locked": {
@@ -212,7 +230,7 @@
       "inputs": {
         "bun2nix": "bun2nix",
         "flake-parts": "flake-parts",
-        "nixpkgs": "nixpkgs",
+        "nixpkgs": "nixpkgs_2",
         "systems": "systems",
         "treefmt-nix": "treefmt-nix"
       },
@@ -323,12 +341,29 @@
         "type": "github"
       }
     },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1791487292,
+        "narHash": "sha256-tqM7xDEsaeK1p6VvRygeZ9LkQRpUUkbRT02BHv6hnTM=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "8edc0c72e3a38faf5434e40d1f19431125fe4b30",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "agent-browser": "agent-browser",
         "agent-skills": "agent-skills",
         "anthropic-skills": "anthropic-skills",
         "ast-grep-skill": "ast-grep-skill",
+        "azure-cli-nix": "azure-cli-nix",
         "brew-src": "brew-src",
         "codex-plugin-cc": "codex-plugin-cc",
         "herdr-skill": "herdr-skill",
@@ -338,7 +373,7 @@
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nix-index-database": "nix-index-database",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": "nixpkgs_3",
         "vercel-agent-skills": "vercel-agent-skills",
         "vercel-next-skills": "vercel-next-skills",
         "vercel-skills": "vercel-skills"

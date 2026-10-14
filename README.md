@@ -38,18 +38,32 @@ macOSのシステム設定とホーム環境は独立して更新できます。
 ### 1. Nixをインストール
 
 [Determinate Nix](https://docs.determinate.systems/)を使用します。
-`llm-agents.nix`のバイナリキャッシュも登録し、大きなパッケージのソースビルドを避けます。
+`llm-agents.nix`と個人用の`satotek`バイナリキャッシュも登録し、大きなパッケージのソースビルドを避けます。
 このコマンドはNixをインストールし、現在のユーザーと指定のキャッシュを信頼対象に追加します。
 
 ```bash
 curl -fsSL https://install.determinate.systems/nix | sh -s -- install \
   --extra-conf "trusted-users = root $(id -un)" \
-  --extra-conf "extra-substituters = https://cache.numtide.com" \
-  --extra-conf "extra-trusted-substituters = https://cache.numtide.com" \
-  --extra-conf "extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+  --extra-conf "extra-substituters = https://cache.numtide.com https://satotek.cachix.org" \
+  --extra-conf "extra-trusted-substituters = https://cache.numtide.com https://satotek.cachix.org" \
+  --extra-conf "extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g= satotek.cachix.org-1:/2yz7ZHPnRzW91UqChW6XmRSX2Tq0NrNPjKsIUppRFA="
 ```
 
 シェルを開き直し、`nix --version`でインストールを確認します。
+
+既存の環境では、Nix を再インストールせず、管理者権限でデーモン設定の
+`extra-substituters`・`extra-trusted-substituters` に `https://satotek.cachix.org`、
+`extra-trusted-public-keys` に次の公開鍵を追加してください。
+既存のキャッシュと鍵は残し、各設定の同じ行に追記します。
+Determinate Nix の設定ファイルと include 構成を確認してから編集し、
+変更後は Nix デーモンを再起動してください。
+
+```text
+satotek.cachix.org-1:/2yz7ZHPnRzW91UqChW6XmRSX2Tq0NrNPjKsIUppRFA=
+```
+
+Azure CLI は `github:satotek/azure-cli-nix` の固定済みパッケージを使います。
+配布側の nixpkgs input を上書きしないことで、3環境の公開済みキャッシュと一致させます。
 
 ### 2. クローンして構成を選ぶ
 

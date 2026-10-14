@@ -22,13 +22,13 @@ jobs:
         with:
           persist-credentials: false
 
-      # numtide キャッシュを設定 = AI/各種ツールをビルド済みで DL（ソースコンパイル回避）。
+      # AI ツールと拡張入り Azure CLI は公開キャッシュから取得し、ソースビルドを避ける。
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa # v23
         with:
           extra-conf: |
-            extra-substituters = https://cache.numtide.com
-            extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
+            extra-substituters = https://cache.numtide.com https://satotek.cachix.org
+            extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g= satotek.cachix.org-1:/2yz7ZHPnRzW91UqChW6XmRSX2Tq0NrNPjKsIUppRFA=
 
       - name: Update stable inputs
         run: nix flake update nixpkgs nix-darwin home-manager nix-index-database
