@@ -18,11 +18,31 @@
     self.overlays.default
   ];
 
-  # Determinate Nix manages the daemon and Nix installation itself, so
-  # nix-darwin must not try to manage `nix.*` as well. Trusted binary caches
-  # (cache.numtide.com for codex etc.) are injected once at install time via
-  # the Determinate installer's --extra-conf; see README.
-  nix.enable = false;
+  # Nix 本体とデーモン設定はシステム層で管理する。GC は既存の nh ジョブに集約する。
+  nix = {
+    enable = true;
+    package = pkgs.nix;
+    gc.automatic = false;
+    optimise.automatic = false;
+    settings = {
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      extra-substituters = [
+        "https://cache.numtide.com"
+        "https://satotek.cachix.org"
+      ];
+      extra-trusted-substituters = [
+        "https://cache.numtide.com"
+        "https://satotek.cachix.org"
+      ];
+      extra-trusted-public-keys = [
+        "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+        "satotek.cachix.org-1:/2yz7ZHPnRzW91UqChW6XmRSX2Tq0NrNPjKsIUppRFA="
+      ];
+    };
+  };
 
   environment.systemPackages = with pkgs; [
     git

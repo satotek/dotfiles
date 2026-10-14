@@ -37,30 +37,30 @@ macOSのシステム設定とホーム環境は独立して更新できます。
 
 ### 1. Nixをインストール
 
-[Determinate Nix](https://docs.determinate.systems/)を使用します。
-`llm-agents.nix`と個人用の`satotek`バイナリキャッシュも登録し、大きなパッケージのソースビルドを避けます。
-このコマンドはNixをインストールし、現在のユーザーと指定のキャッシュを信頼対象に追加します。
+[通常の Nix](https://nixos.org/download/) のマルチユーザー構成を使用します。
+以下は **Nix が未導入の環境**向けです。既存の環境では再インストールせず、
+[Determinate Nix からの移行](docs/migrate-from-determinate-nix.md)を確認してください。
 
 ```bash
-curl -fsSL https://install.determinate.systems/nix | sh -s -- install \
-  --extra-conf "trusted-users = root $(id -un)" \
-  --extra-conf "extra-substituters = https://cache.numtide.com https://satotek.cachix.org" \
-  --extra-conf "extra-trusted-substituters = https://cache.numtide.com https://satotek.cachix.org" \
-  --extra-conf "extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g= satotek.cachix.org-1:/2yz7ZHPnRzW91UqChW6XmRSX2Tq0NrNPjKsIUppRFA="
+sh <(curl --proto '=https' --tlsv1.2 -fsSL https://nixos.org/nix/install) --daemon
 ```
 
 シェルを開き直し、`nix --version`でインストールを確認します。
 
-既存の環境では、Nix を再インストールせず、管理者権限でデーモン設定の
-`extra-substituters`・`extra-trusted-substituters` に `https://satotek.cachix.org`、
-`extra-trusted-public-keys` に次の公開鍵を追加してください。
-既存のキャッシュと鍵は残し、各設定の同じ行に追記します。
-Determinate Nix の設定ファイルと include 構成を確認してから編集し、
-変更後は Nix デーモンを再起動してください。
+numtide と satotek のキャッシュを登録して、ソースビルドを避けます。
+macOS は初回の nix-darwin 適用後にシステム設定として管理します。
+初回ビルド前、および Linux/WSL では管理者権限で `/etc/nix/nix.conf` に
+次の設定を追加してください。既存の取得先・公開鍵は残し、同じ設定行に統合します。
 
 ```text
-satotek.cachix.org-1:/2yz7ZHPnRzW91UqChW6XmRSX2Tq0NrNPjKsIUppRFA=
+experimental-features = nix-command flakes
+extra-substituters = https://cache.numtide.com https://satotek.cachix.org
+extra-trusted-substituters = https://cache.numtide.com https://satotek.cachix.org
+extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g= satotek.cachix.org-1:/2yz7ZHPnRzW91UqChW6XmRSX2Tq0NrNPjKsIUppRFA=
 ```
+
+Linux/WSL では変更後に `sudo systemctl restart nix-daemon.service` を実行します。
+自分を `trusted-users` に追加しなくても、システム側で登録したキャッシュは使えます。
 
 Azure CLI は `github:satotek/azure-cli-nix` の固定済みパッケージを使います。
 配布側の nixpkgs input を上書きしないことで、3環境の公開済みキャッシュと一致させます。
@@ -183,8 +183,10 @@ home-manager switch --flake 'path:/home/azureuser/dotfiles#azureuser@linux-x86_6
              sudo必須                      sudo不要
 ```
 
-Determinate NixがNixデーモンとストアのGCを担当します。nix-darwinでは
-`nix.enable = false`とし、同じNix環境を二重管理しません。
+macOS の Nix 本体・デーモン・キャッシュ設定は nix-darwin が管理します。
+GC は既存の `nh clean` に集約し、ユーザーの古い世代は Home Manager の定期ジョブ、
+macOS の system 世代・store は root の定期ジョブで整理します。
+Linux/WSL の Nix デーモン設定は管理者が管理します。
 
 ## 設定を変更する
 
