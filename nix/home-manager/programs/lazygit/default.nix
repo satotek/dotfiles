@@ -69,7 +69,7 @@ in
           key = "<c-c>";
           context = "files";
           description = "commit files with format";
-          loadingText = "Commiting...";
+          loadingText = "Committing...";
           prompts = [
             {
               type = "menu";
@@ -84,8 +84,17 @@ in
                 (mkOption "test" "テストの追加や改善")
                 (mkOption "perf" "パフォーマンスの改善")
                 (mkOption "chore" "ビルドプロセスの変更や改善")
+                (mkOption "ci" "CI設定の変更")
+                (mkOption "build" "ビルドシステムや依存関係の変更")
+                (mkOption "revert" "以前の変更の取り消し")
                 (mkOption "wip" "作業中")
               ];
+            }
+            {
+              type = "input";
+              title = "Scope (optional)";
+              key = "Scope";
+              initialValue = "";
             }
             {
               type = "input";
@@ -94,44 +103,13 @@ in
               initialValue = "";
             }
             {
-              type = "menu";
-              title = "Choose the emoji";
-              key = "Emoji";
-              options = [
-                {
-                  name = "(empty)";
-                  description = "";
-                  # The schema requires a non-empty value. A single space keeps
-                  # the confirmation display empty and is normalized below.
-                  value = " ";
-                }
-                (mkOption ":ambulance:" "(fix)🚑致命的なバグ修正")
-                (mkOption ":bug:" "(fix)🐛バグ修正")
-                (mkOption ":+1:" "(fix)👍機能改善や機能修正")
-                (mkOption ":cop:" "(fix)👮セキュリティ関連の修正")
-                (mkOption ":tada:" "(feat)🎉大きな機能追加")
-                (mkOption ":sparkles:" "(feat)✨部分的な機能追加")
-                (mkOption ":up:" "(feat)🆙依存パッケージ等のアップデート")
-                (mkOption ":memo:" "(docs)📝ドキュメントの追加や修正")
-                (mkOption ":bulb:" "(docs)💡ソースコードへのコメント追加や修正")
-                (mkOption ":art:" "(style)🎨レイアウト関連の修正")
-                (mkOption ":lipstick:" "(style)💄Lintエラーの修正やコードスタイルの修正")
-                (mkOption ":recycle:" "(refactor)♻️ リファクタリング")
-                (mkOption ":fire:" "(refactor)🔥コードやファイルの削除")
-                (mkOption ":green_heart:" "(test)💚テストやCIの修正")
-                (mkOption ":rocket:" "(perf)🚀パフォーマンス改善")
-                (mkOption ":wrench:" "(chore)🔧設定ファイルの修正")
-                (mkOption ":building_construction:" "(chore)🏗️アーキテクチャの修正")
-                (mkOption ":construction:" "(wip)🚧作業中")
-              ];
-            }
-            {
               type = "confirm";
               title = "Commit";
-              body = "Commit with the message '{{.Form.Type}}: {{.Form.Message}}{{.Form.Emoji}}'. Is this okay?";
+              body = "Commit with the message '{{.Form.Type}}{{if .Form.Scope}}({{.Form.Scope}}){{end}}: {{.Form.Message}}'. Is this okay?";
             }
           ];
-          command = "sh -c 'type=\"{{.Form.Type}}\"; message=\"{{.Form.Message}}\"; emoji=\"{{.Form.Emoji}}\"; [ \"$emoji\" = \" \" ] && emoji=\"\"; if [ -n \"$emoji\" ]; then commit_message=\"$type: $message $emoji\"; else commit_message=\"$type: $message\"; fi; git commit -m \"$commit_message\"'";
+          # Quote the complete message once so user input cannot become shell syntax.
+          command = ''{{$scope := ""}}{{if .Form.Scope}}{{$scope = printf "(%s)" .Form.Scope}}{{end}}git commit -m {{printf "%s%s: %s" .Form.Type $scope .Form.Message | quote}}'';
         }
       ];
     };
