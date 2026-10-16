@@ -169,8 +169,6 @@ in
         # MCP サーバーを合成プラグインとして包むときの名前
         # (modules/programs/claude-code/default.nix の generatedPluginName)。
         # 以前は "claude-code-home-manager" だった＝上流が変えたら追従が要る。
-        "mcp__plugin_hm_playwright__browser_take_screenshot"
-        "mcp__plugin_hm_playwright__browser_snapshot"
         "mcp__plugin_hm_context7__query-docs"
         "mcp__plugin_hm_context7__resolve-library-id"
         # chrome-devtools: 読み取り・検査系のみ許可（遷移/クリック/JS実行など副作用系は都度確認）

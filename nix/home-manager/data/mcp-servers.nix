@@ -32,14 +32,6 @@
     ];
   };
 
-  playwright = {
-    command = "bunx";
-    args = [
-      "-y"
-      "@playwright/mcp@latest"
-    ];
-  };
-
   chrome-devtools = {
     command = "bunx";
     args = [
