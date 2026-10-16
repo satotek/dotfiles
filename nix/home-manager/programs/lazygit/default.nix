@@ -30,7 +30,7 @@ in
     settings = {
       gui = {
         language = "ja";
-        showIcons = true;
+        nerdFontsVersion = "3";
       };
 
       git = {
