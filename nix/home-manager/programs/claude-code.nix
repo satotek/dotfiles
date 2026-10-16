@@ -143,6 +143,10 @@ in
       # 1時間にするには env の CLAUDE_AFK_TIMEOUT_MS（ミリ秒）を使う。要 v2.1.198+。
       env = {
         CLAUDE_AFK_TIMEOUT_MS = "3600000";
+        # サブエージェントのモデルはここだけを正にする。変数だけだと
+        # 定義の model や起動時の指定が勝ち、Explore と Plan は親のままになる。
+        CLAUDE_CODE_SUBAGENT_MODEL = "haiku";
+        CLAUDE_CODE_SUBAGENT_MODEL_FORCE = "1";
       };
       # HerdrへClaude Codeのネイティブsession IDを通知し、Herdr server再起動後の
       # `claude --resume <id>` による会話復元を可能にする。
