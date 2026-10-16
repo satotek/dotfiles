@@ -54,6 +54,18 @@ in
 
       customCommands = [
         {
+          key = "G";
+          context = "localBranches";
+          description = "選択したブランチのPRをブラウザーで開く";
+          command = "${lib.getExe pkgs.gh} pr view --web -- {{.SelectedLocalBranch.Name | quote}}";
+        }
+        {
+          key = "G";
+          context = "commits";
+          description = "現在のブランチのPRをブラウザーで開く";
+          command = "${lib.getExe pkgs.gh} pr view --web";
+        }
+        {
           key = "<c-c>";
           context = "files";
           description = "commit files with format";
