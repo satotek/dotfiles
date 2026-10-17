@@ -15,6 +15,16 @@ for _vi_keymap in viins vicmd; do
 done
 unset _vi_keymap
 
+# 履歴を前方一致で遡る。既定の ↑↓ は条件なしで 1 件ずつ遡るだけなので差し替える。
+# 端末は ^[[A と ^[OA のどちらも送るため、両方を両モードへ登録する。
+zle -N history-prefix-up _history_prefix_up_widget
+zle -N history-prefix-down _history_prefix_down_widget
+for _vi_keymap in viins vicmd; do
+  bindkey -M "$_vi_keymap" '^[[A' history-prefix-up '^[OA' history-prefix-up
+  bindkey -M "$_vi_keymap" '^[[B' history-prefix-down '^[OB' history-prefix-down
+done
+unset _vi_keymap
+
 autoload -Uz edit-command-line
 zle -N edit-command-line
 bindkey -M vicmd 'v' edit-command-line
