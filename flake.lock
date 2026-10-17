@@ -235,11 +235,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1792123574,
-        "narHash": "sha256-Nfg3uuj6SrYd95vB2acYHLvQfjs9L2WZwMgkaKsQyOs=",
+        "lastModified": 1792194852,
+        "narHash": "sha256-fzFLPvOwep6CJfyCTne7h+N3hwr3t51/hBpmjJdiiBs=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "64f24d6169b8e5996e0c3a3ae696bdf11806b34e",
+        "rev": "24335005eb2edb1c155163d7f08fca310f34e3c6",
         "type": "github"
       },
       "original": {
@@ -434,11 +434,11 @@
     "vercel-next-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1792106440,
-        "narHash": "sha256-5ndpHQu3Q+2Rv6TF58beUnvqbS+yoTErCo+bF5pouOc=",
+        "lastModified": 1792194654,
+        "narHash": "sha256-Lgttxvf4Nq3mtAcj/ZzLoblRuJ9xO8orBL8OYopuXCQ=",
         "owner": "vercel",
         "repo": "next.js",
-        "rev": "a6d4c15991fd2f69c14eea4e8b655b596bc162bf",
+        "rev": "e2e7393c1f8449759aa1ae502b64fd7e946fbf37",
         "type": "github"
       },
       "original": {
