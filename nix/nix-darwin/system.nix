@@ -61,6 +61,8 @@
   # 無効にする。次回ログインから効く。
   system.activationScripts.postActivation.text = ''
     /bin/launchctl disable "gui/$(/usr/bin/id -u -- ${username})/com.apple.rcd"
+    # 外出先から接続できるよう、電源接続中だけ自動スリープを防ぐ。
+    /usr/bin/pmset -c sleep 0
   '';
 
   programs.zsh.enable = true;
