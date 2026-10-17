@@ -44,7 +44,6 @@ let
       "NIX_PROFILES"
       "NIX_SSL_CERT_FILE"
       "XDG_DATA_DIRS"
-      "FPATH"
       "INFOPATH"
       "MANPATH"
     ]
@@ -152,9 +151,11 @@ in
         "-c"
         ''
           # setenv した値は次の起動に引き継がれる。nix-daemon.sh と Homebrew の
-          # FPATH / INFOPATH は重複を避けないので、組み立て直す変数は消してから読む。
+          # INFOPATH は重複を避けないので、組み立て直す変数は消してから読む。
+          # FPATH は出さない。Homebrew だけの値だと zsh が組み込み関数を読み込まない。
           unset PATH FPATH INFOPATH MANPATH XDG_DATA_DIRS NIX_PROFILES NIX_SSL_CERT_FILE
           unset __ETC_PROFILE_NIX_SOURCED __HM_SESS_VARS_SOURCED
+          /bin/launchctl unsetenv FPATH
           export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
 
           . ${lib.escapeShellArg sessionVarsFile}

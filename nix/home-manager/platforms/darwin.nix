@@ -72,10 +72,13 @@ in
 
         if [ -n "''${ZSH_VERSION:-}" ]; then
           fpath=("${homebrewPrefix}/share/zsh/site-functions" $fpath)
+          # FPATH が最初から入っていると zsh は組み込みの関数ディレクトリを足さない。
+          # /bin/zsh の is-at-least や add-zsh-hook はここにある。
+          if [ -d "/usr/share/zsh/''${ZSH_VERSION}/functions" ]; then
+            fpath=($fpath "/usr/share/zsh/''${ZSH_VERSION}/functions")
+          fi
           typeset -U fpath
           export FPATH
-        else
-          export FPATH="${homebrewPrefix}/share/zsh/site-functions''${FPATH:+:$FPATH}"
         fi
 
         [ -z "''${MANPATH-}" ] || export MANPATH=":''${MANPATH#:}"
