@@ -8,6 +8,7 @@
 let
   homeDir = config.home.homeDirectory;
   sharedMcpServers = import ../data/mcp-servers.nix {
+    inherit pkgs;
     isLinux = pkgs.stdenv.hostPlatform.isLinux;
   };
   # ccstatusline の行構成。1行目=モデル/コンテキスト/effort、2行目=git/圧縮内訳、

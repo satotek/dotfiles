@@ -1,21 +1,20 @@
 {
-  # 呼び出し側から pkgs.stdenv.hostPlatform.isLinux を渡す。
+  # 呼び出し側から pkgs と pkgs.stdenv.hostPlatform.isLinux を渡す。
   # Linux ホスト（WSL 含む）はいずれもヘッドレス運用で、接続先になる
   # デスクトップ Chrome が存在しないため一部サーバーを出し分ける。
+  pkgs,
   isLinux ? false,
 }:
 
-# 共有 MCP サーバー定義（純データ）。
+# 共有 MCP サーバー定義。command は Nix で固定した store パスを使う。
 # Claude Code (settings.json の mcpServers)、Codex (config.toml の [mcp_servers])、
 # OpenCode (opencode.jsonc の mcp.servers) からこの 1 ファイルを import して使う。
 # ここには起動方法（command / args）だけを書き、エージェント固有の項目
 # （Claude の type = "stdio"、OpenCode の type = "local" など）は各 import 側で付与する。
 {
   chrome-devtools = {
-    command = "bunx";
+    command = "${pkgs.chrome-devtools-mcp}/bin/chrome-devtools-mcp";
     args = [
-      "-y"
-      "chrome-devtools-mcp@latest"
       # ヘッドレスサーバ（X server なし）で動かすため headless 必須。
       "--headless=true"
       # セッション毎に使い捨てプロファイルを使い、共有プロファイルの
@@ -23,6 +22,8 @@
       "--isolated=true"
       # 既定で Google に利用統計が送られるため無効化する。
       "--no-usage-statistics"
+      # Performance ツールが trace URL を Google CrUX へ送らないようにする。
+      "--no-performance-crux"
     ];
   };
 }
@@ -44,14 +45,14 @@
       #
       # Linux では接続先のデスクトップ Chrome がいないので生成しない。
       chrome-devtools-live = {
-        command = "bunx";
+        command = "${pkgs.chrome-devtools-mcp}/bin/chrome-devtools-mcp";
         args = [
-          "-y"
-          "chrome-devtools-mcp@latest"
           "--autoConnect"
           "--categoryExperimentalWebmcp"
           # 既定で Google に利用統計が送られるため無効化する。
           "--no-usage-statistics"
+          # Performance ツールが trace URL を Google CrUX へ送らないようにする。
+          "--no-performance-crux"
         ];
       };
     }

@@ -8,6 +8,7 @@ let
   homeDirectory = config.home.homeDirectory;
   dotfilesDir = "${homeDirectory}/dotfiles";
   sharedMcpServers = import ../data/mcp-servers.nix {
+    inherit pkgs;
     isLinux = pkgs.stdenv.hostPlatform.isLinux;
   };
   opencode2 = pkgs.llm-agents.opencode2;

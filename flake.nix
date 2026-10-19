@@ -131,6 +131,9 @@
       llmAgentsOverlay = final: _prev: {
         llm-agents = inputs.llm-agents.packages.${final.stdenv.hostPlatform.system};
       };
+      dotfilesPackagesOverlay = final: _prev: {
+        chrome-devtools-mcp = final.callPackage ./nix/packages/chrome-devtools-mcp.nix { };
+      };
       mkPkgs =
         system:
         import nixpkgs {
@@ -138,6 +141,7 @@
           config.allowUnfree = true;
           overlays = [
             llmAgentsOverlay
+            dotfilesPackagesOverlay
           ];
         };
       mkHomeConfiguration =
@@ -169,7 +173,10 @@
         };
     in
     {
-      overlays.default = llmAgentsOverlay;
+      overlays.default = nixpkgs.lib.composeManyExtensions [
+        llmAgentsOverlay
+        dotfilesPackagesOverlay
+      ];
 
       formatter = nixpkgs.lib.genAttrs formatterSystems (system: (mkPkgs system).nixfmt-tree);
 

@@ -7,6 +7,7 @@
 let
   homeDir = config.home.homeDirectory;
   sharedMcpServers = import ../data/mcp-servers.nix {
+    inherit pkgs;
     isLinux = pkgs.stdenv.hostPlatform.isLinux;
   };
   trustedProjectRoots = [
