@@ -22,6 +22,10 @@
         ../../home-manager/programs/t3code.nix
         ../../home-manager/programs/tailscale.nix
         ../../home-manager/programs/zsh-history-check.nix
+        {
+          # Tailscale Serve を有効に戻すときは publicUrl も設定する。
+          dotfiles.dsh.web.trustedHosts = [ "gem-ai.tailf27668.ts.net" ];
+        }
       ]
     else
       [ ]
