@@ -201,6 +201,11 @@ in
       # モデル自身の既定になり、いまの opus（Opus 5.5）は medium で始まる。
       # ユーザー設定の effortLevel は Opus 5.5 以降には効かない。
       fastMode = false;
+      # 1M 窓（Opus 4.7 以降、いまの opus）は既定だと約 967K まで待ってから圧縮する。
+      # 50 万トークンで要約し、長いセッションが窓の後半まで膨らまないようにする。
+      # 環境変数 CLAUDE_CODE_AUTO_COMPACT_WINDOW を置くと、こちらのキーも
+      # /autocompact も上書きされる。
+      autoCompactWindow = 500000;
       # ローカルのセッション履歴を ccusage などで長期間集計できるよう保持する（100年分）。
       cleanupPeriodDays = 36500;
       # AskUserQuestion(選択肢プロンプト)の自動タイムアウト。
