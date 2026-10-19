@@ -167,6 +167,13 @@ in
       commit = {
         from = "local";
       };
+
+      web-fetch = {
+        from = "local";
+        packages = [ pkgs.llm-agents.ax ];
+        # The skill calls ./ax; keep the command as written.
+        rewriteCommands = false;
+      };
     };
 
     targets.agents = {
