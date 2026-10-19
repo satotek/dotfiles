@@ -10,17 +10,8 @@ let
   sharedMcpServers = import ../data/mcp-servers.nix {
     isLinux = pkgs.stdenv.hostPlatform.isLinux;
   };
-  claudeStatuslineLine3 = pkgs.writeShellApplication {
-    name = "claude-statusline-line3";
-    runtimeInputs = [ pkgs.jq ];
-    text = ''
-      jq -r 'def bar(pct):(pct*10/100|floor) as $f|(10-$f) as $e|([range($f)]|map("█")|join(""))+([range($e)]|map("░")|join("")); (.rate_limits.five_hour.resets_at // 0) as $resets | (if ($resets > 0) and (($resets - now) > 0) then ($resets - now | floor) as $d | " (+" + ($d/3600|floor|tostring) + "h" + ($d%3600/60|floor|tostring) + "m)" else "" end) as $rt | "5h " + bar(.rate_limits.five_hour.used_percentage // 0) + " " + (.rate_limits.five_hour.used_percentage // 0 | floor | tostring) + "%" + $rt + " | 7d " + bar(.rate_limits.seven_day.used_percentage // 0) + " " + (.rate_limits.seven_day.used_percentage // 0 | floor | tostring) + "% | $" + (.cost.total_cost_usd // 0 | . * 100 | round | . / 100 | tostring)'
-    '';
-  };
-
-  # ccstatusline の行構成。1行目=モデル/コンテキスト/git、3行目=レート上限バー+コスト。
-  # commandPath は nix store の絶対パスにして全ホスト(azureuser 含む)で有効にする。
-  # 空の 2 行目は ccstatusline が畳むため、実表示は 2 行になる。
+  # ccstatusline の行構成。1行目=モデル/コンテキスト/effort、2行目=git/圧縮内訳、
+  # 3行目=ネイティブの5時間/週次使用量+リセット時刻+セッションコスト。
   ccstatuslineSettings = {
     # ccstatusline の設定スキーマ版。パッケージ側の CURRENT_VERSION と揃える。
     # 古いままだと ccstatusline が移行後の書き戻しを試み、nix store 上の
@@ -32,7 +23,7 @@ let
         {
           id = "1";
           type = "model";
-          color = "cyan";
+          color = "hex:89DCEB";
         }
         {
           id = "2";
@@ -41,16 +32,34 @@ let
         {
           id = "3";
           type = "context-length";
-          color = "brightBlack";
+          color = "hex:89B4FA";
         }
         {
           id = "4";
           type = "separator";
         }
         {
+          id = "18";
+          type = "context-percentage";
+          rawValue = true;
+          color = "hex:89B4FA";
+        }
+        {
+          id = "19";
+          type = "separator";
+        }
+        {
+          id = "9";
+          type = "thinking-effort";
+          color = "hex:F5C2E7";
+        }
+      ]
+      [
+        {
           id = "5";
           type = "git-branch";
-          color = "magenta";
+          maxWidth = 28;
+          color = "hex:CBA6F7";
         }
         {
           id = "6";
@@ -59,16 +68,79 @@ let
         {
           id = "7";
           type = "git-changes";
-          color = "yellow";
+          color = "hex:F9E2AF";
+        }
+        {
+          id = "10";
+          type = "separator";
+        }
+        {
+          id = "11";
+          type = "compaction-counter";
+          color = "hex:FAB387";
+          metadata = {
+            hide = "zero";
+            showTriggers = "true";
+          };
         }
       ]
-      [ ]
       [
         {
           id = "8";
-          type = "custom-command";
-          commandPath = "${claudeStatuslineLine3}/bin/claude-statusline-line3";
-          preserveColors = true;
+          type = "session-usage";
+          color = "hex:94E2D5";
+          numberFormat = {
+            style = "whole";
+          };
+          metadata = {
+            display = "slider";
+            hide = "no-data";
+            label = "5h ";
+          };
+        }
+        {
+          id = "12";
+          type = "separator";
+        }
+        {
+          id = "13";
+          type = "reset-timer";
+          color = "hex:A6ADC8";
+          metadata = {
+            compact = "true";
+            hide = "no-data";
+            label = "Reset: ";
+          };
+        }
+        {
+          id = "14";
+          type = "separator";
+        }
+        {
+          id = "15";
+          type = "weekly-usage";
+          color = "hex:89B4FA";
+          numberFormat = {
+            style = "whole";
+          };
+          metadata = {
+            display = "slider";
+            hide = "no-data";
+            label = "7d ";
+          };
+        }
+        {
+          id = "16";
+          type = "separator";
+        }
+        {
+          id = "17";
+          type = "session-cost";
+          rawValue = true;
+          color = "hex:A6E3A1";
+          metadata = {
+            hide = "zero";
+          };
         }
       ]
     ];
@@ -91,12 +163,7 @@ let
   };
 in
 {
-  home.file.".local/bin/claude-statusline-line3" = {
-    source = "${claudeStatuslineLine3}/bin/claude-statusline-line3";
-    executable = true;
-  };
-
-  # ccstatusline 設定を home-manager 管理下に（スクリプトと配線をセットで再現可能にする）。
+  # ccstatusline 設定を Home Manager 管理下に置く。
   home.file.".config/ccstatusline/settings.json".text = builtins.toJSON ccstatuslineSettings;
 
   # statusLine.command は nix store の絶対パス参照なので PATH には入らない。
