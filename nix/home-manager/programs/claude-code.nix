@@ -179,6 +179,11 @@ in
     enable = true;
     package = pkgs.llm-agents.claude-code;
 
+    # Claude Code は /permissions や /config で settings.json を書き戻す。
+    # Nix store への symlink のままだと書き込みが失敗するため、宣言した値だけを
+    # activation でマージし、アプリが書いた未宣言のキーは残す。
+    mutableSettings = true;
+
     settings = {
       theme = "dark";
       autoUpdates = false;
@@ -235,25 +240,6 @@ in
       ];
       # auto はユーザー設定でしか有効にならない。プロジェクト側に書くと無視される。
       permissions.defaultMode = "auto";
-      permissions.allow = [
-        "Bash(pnpm typecheck)"
-        "Bash(pnpm test)"
-        "Bash(pnpm lint)"
-        "Bash(pnpm test:storybook)"
-        # プレフィックスの "hm" は home-manager の claude-code モジュールが
-        # MCP サーバーを合成プラグインとして包むときの名前
-        # (modules/programs/claude-code/default.nix の generatedPluginName)。
-        # 以前は "claude-code-home-manager" だった＝上流が変えたら追従が要る。
-        # chrome-devtools: 読み取り・検査系のみ許可（遷移/クリック/JS実行など副作用系は都度確認）
-        "mcp__plugin_hm_chrome-devtools__take_snapshot"
-        "mcp__plugin_hm_chrome-devtools__take_screenshot"
-        "mcp__plugin_hm_chrome-devtools__list_pages"
-        "mcp__plugin_hm_chrome-devtools__list_console_messages"
-        "mcp__plugin_hm_chrome-devtools__get_console_message"
-        "mcp__plugin_hm_chrome-devtools__list_network_requests"
-        "mcp__plugin_hm_chrome-devtools__get_network_request"
-        "mcp__plugin_hm_chrome-devtools__performance_analyze_insight"
-      ];
       autoMode = import ../data/claude-auto-mode.nix;
       enabledPlugins = {
         "rust-analyzer-lsp@claude-plugins-official" = true;
@@ -279,5 +265,49 @@ in
     plugins.codex = "${inputs.codex-plugin-cc}/plugins/codex";
 
   };
+
+  # mutableSettings は Nix store を指す symlink を拒否する。以前の世代が作った
+  # symlink を実ファイルへ移行してから、モジュールのマージを走らせる。
+  # 併せて、以前の設定が書き戻した allow リストを削除する。宣言を消すだけでは
+  # マージが既存の allow を保持してしまうため。
+  home.activation.migrateClaudeSettings = lib.mkIf config.programs.claude-code.mutableSettings (
+    lib.hm.dag.entryBetween [ "claudeCodeSettings" ] [ "linkGeneration" ] ''
+      settings="$HOME/.claude/settings.json"
+      if [[ -L "$settings" ]]; then
+        target="$(${pkgs.coreutils}/bin/readlink -f -- "$settings")"
+        case "$target" in
+          ${builtins.storeDir}/*)
+            run ${pkgs.coreutils}/bin/rm -f "$settings"
+            run ${pkgs.coreutils}/bin/install -m 600 "$target" "$settings"
+            ;;
+        esac
+      fi
+
+      if [[ -f "$settings" ]]; then
+        tmp="$(${pkgs.coreutils}/bin/mktemp)"
+        if ${pkgs.jq}/bin/jq 'del(.permissions.allow) | del(.autoMode.allow)' "$settings" > "$tmp"; then
+          run ${pkgs.coreutils}/bin/install -m 600 "$tmp" "$settings"
+        else
+          warnEcho "Could not remove allow lists from $settings"
+        fi
+        rm -f "$tmp"
+      fi
+    ''
+  );
+
+  # 上流のスキーマに追従できているかを確認する。スキーマ取得に失敗しても
+  # switch は止めない。--no-cache は Last-Modified のないスキーマで古い定義を
+  # 掴み続けるのを避けるため。
+  home.activation.validateClaudeSettings = lib.hm.dag.entryAfter [ "claudeCodeSettings" ] ''
+    settings="$HOME/.claude/settings.json"
+    if [[ -f "$settings" ]]; then
+      schema="$(${pkgs.jq}/bin/jq -r '.["$schema"] // empty' "$settings")"
+      if [[ -n "$schema" ]]; then
+        if ! ${pkgs.check-jsonschema}/bin/check-jsonschema --no-cache --schemafile "$schema" "$settings" >/dev/null 2>&1; then
+          warnEcho "Claude Code settings.json did not validate against $schema"
+        fi
+      fi
+    fi
+  '';
 
 }
