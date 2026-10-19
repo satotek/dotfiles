@@ -14,7 +14,30 @@ let
     target = "${config.home.homeDirectory}/.config/cloudflare/cloudflare-infra.env";
   };
 
-  secrets = lib.optional pkgs.stdenv.hostPlatform.isDarwin cloudflareSecret;
+  # OAuth のログインはエージェントがトークンを更新して書き戻すので、端末ごとに
+  # ログインする。ここで配るのは静的な API キーだけ。
+  agentsSopsFile = "${secretsDir}/agents.yaml";
+  agentSecrets = [
+    {
+      key = "opencode_deepseek_api_key";
+      sopsFile = agentsSopsFile;
+      target = "${config.home.homeDirectory}/.config/opencode/secrets/deepseek.key";
+    }
+    {
+      key = "opencode_google_api_key";
+      sopsFile = agentsSopsFile;
+      target = "${config.home.homeDirectory}/.config/opencode/secrets/google.key";
+    }
+    # dsh は .credentials.yaml、プロセス環境、$DSH_HOME/.env の順に探す。.env なら
+    # T3 から起動しても端末から起動しても読まれる。
+    {
+      key = "dsh_env";
+      sopsFile = agentsSopsFile;
+      target = "${config.home.homeDirectory}/.dsh/.env";
+    }
+  ];
+
+  secrets = lib.optional pkgs.stdenv.hostPlatform.isDarwin cloudflareSecret ++ agentSecrets;
 
   installSecret = secret: ''
     decrypt_secret \

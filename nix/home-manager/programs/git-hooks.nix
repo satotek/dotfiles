@@ -41,6 +41,14 @@ let
         echo "pre-commit: formatted $path" >&2
       done < <(git diff --cached --name-only --diff-filter=ACMR -z -- '*.nix')
 
+      # 平文の値をコミットしないよう、secrets の YAML は sops の暗号文だけを通す。
+      while IFS= read -r -d "" path; do
+        if [[ "$(git cat-file blob ":$path")" != *'ENC['* ]]; then
+          echo "pre-commit: $path is not sops-encrypted" >&2
+          status=1
+        fi
+      done < <(git diff --cached --name-only --diff-filter=ACMR -z -- 'secrets/*.yaml')
+
       exit "$status"
     '';
   };

@@ -259,7 +259,24 @@ gcloud auth application-default set-quota-project nosuke-net
 
 | 暗号化ファイル | 復号先 | 対象 |
 |---|---|---|
+| `secrets/agents.yaml` | `~/.config/opencode/secrets/deepseek.key` | 全環境 |
+| `secrets/agents.yaml` | `~/.config/opencode/secrets/google.key` | 全環境 |
+| `secrets/agents.yaml` | `~/.dsh/.env` | 全環境 |
 | `secrets/cloudflare.yaml` | `~/.config/cloudflare/cloudflare-infra.env` | macOSのみ |
+
+OpenCode は `{file:...}` で復号済みファイルを読むため、キーは環境変数に載りません。
+同じ provider で `opencode auth login` すると credential が優先され、sops のキーは
+使われません。DeepSeek と Google は logout したままにします。
+
+値を更新するときは sops でファイルを開いて編集し、`nix-switch` で配り直します。
+
+```bash
+sops secrets/agents.yaml
+nix-switch
+```
+
+漏洩した場合は、先にプロバイダ側でキーを失効・再発行し、そのあと sops の値を
+更新します。
 
 既存ファイルの暗号化先にKMSキーを追加した場合は、復号可能なマシンで
 暗号化し直します。
@@ -267,6 +284,9 @@ gcloud auth application-default set-quota-project nosuke-net
 ```bash
 sops updatekeys secrets/*.yaml
 ```
+
+平文の YAML をコミットしないよう、pre-commit が `secrets/*.yaml` に
+`ENC[` を要求します。
 
 リポジトリ管理外のシェル用機密情報は`~/.config/secrets`へ置けます。対話的な zsh だけが読み、`zsh -c` には載せません。ファイルがあれば適用時に権限を 0600 に揃えます。
 
