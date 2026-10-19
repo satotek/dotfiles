@@ -40,6 +40,29 @@
         autocrlf = "input";
       };
       merge.conflictstyle = "zdiff3";
+      # リモート追従と競合解決を日常操作で楽にするための既定値。
+      push.autoSetupRemote = true;
+      fetch = {
+        prune = true;
+        writeCommitGraph = true;
+      };
+      rebase = {
+        autoStash = true;
+        autoSquash = true;
+      };
+      rerere = {
+        enabled = true;
+        autoupdate = true;
+      };
+      diff = {
+        algorithm = "histogram";
+        colorMoved = "plain";
+        renames = true;
+        mnemonicPrefix = true;
+      };
+      column.ui = "auto";
+      branch.sort = "-committerdate";
+      help.autocorrect = "prompt";
       alias = {
         st = "status";
         ss = "status -s";
