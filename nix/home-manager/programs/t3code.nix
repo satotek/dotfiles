@@ -64,7 +64,25 @@ let
           # agy (antigravity-cli) は ACP の実行ファイルではないので使えない。
           # ランタイムは T3 Code の設定画面から入れ、Google でサインインする。
           antigravity = { };
+        }
+      // {
+        # dsh は ACP の local コマンドとして登録する。キーは T3 Code の
+        # 設定画面が生成する acpRegistry の ID に合わせる。
+        acpRegistry_local_acp = {
+          driver = "acpRegistry";
+          displayName = "Deepseek Harness";
+          accentColor = "#4d6bfe";
+          enabled = true;
+          config = {
+            source = "local";
+            commandPath = "${pkgs.llm-agents.dsh}/bin/dsh";
+            commandArgs = [
+              "--profile"
+              "acp"
+            ];
+          };
         };
+      };
   };
   settingsFile = pkgs.writeText "t3code-settings.json" (builtins.toJSON settings);
 in
@@ -76,6 +94,7 @@ in
   # 上のキーだけを上書きする。サーバーは設定ディレクトリを監視しているので、
   # 再起動しなくても読み直す。
   home.activation.configureT3codeSettings = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    umask 077
     settings_dir=${lib.escapeShellArg settingsDir}
     settings_file="$settings_dir/settings.json"
     run mkdir -p "$settings_dir"
@@ -86,7 +105,7 @@ in
         rm -f "$tmp"
         exit 1
       fi
-      chmod 644 "$tmp"
+      chmod 600 "$tmp"
       run mv "$tmp" "$settings_file"
     else
       run ${lib.getExe pkgs.jq} . ${settingsFile} > "$settings_file"
