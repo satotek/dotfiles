@@ -7,8 +7,6 @@
 let
   secretsDir = ../../../secrets;
   cloudflareSopsFile = "${secretsDir}/cloudflare.yaml";
-  context7SopsFile = "${secretsDir}/context7.yaml";
-  hasContext7SopsFile = builtins.pathExists context7SopsFile;
 
   cloudflareSecret = {
     key = "cloudflare_infra_env";
@@ -16,15 +14,7 @@ let
     target = "${config.home.homeDirectory}/.config/cloudflare/cloudflare-infra.env";
   };
 
-  context7Secret = {
-    key = "context7_api_key";
-    sopsFile = context7SopsFile;
-    target = "${config.home.homeDirectory}/.config/context7/api-key";
-  };
-
-  secrets =
-    lib.optional pkgs.stdenv.hostPlatform.isDarwin cloudflareSecret
-    ++ lib.optional hasContext7SopsFile context7Secret;
+  secrets = lib.optional pkgs.stdenv.hostPlatform.isDarwin cloudflareSecret;
 
   installSecret = secret: ''
     decrypt_secret \

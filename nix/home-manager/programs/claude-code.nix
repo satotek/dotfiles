@@ -7,9 +7,7 @@
 }:
 let
   homeDir = config.home.homeDirectory;
-  context7ApiKeyFile = "${homeDir}/.config/context7/api-key";
   sharedMcpServers = import ../data/mcp-servers.nix {
-    inherit context7ApiKeyFile;
     isLinux = pkgs.stdenv.hostPlatform.isLinux;
   };
   claudeStatuslineLine3 = pkgs.writeShellApplication {
@@ -173,8 +171,6 @@ in
         # MCP サーバーを合成プラグインとして包むときの名前
         # (modules/programs/claude-code/default.nix の generatedPluginName)。
         # 以前は "claude-code-home-manager" だった＝上流が変えたら追従が要る。
-        "mcp__plugin_hm_context7__query-docs"
-        "mcp__plugin_hm_context7__resolve-library-id"
         # chrome-devtools: 読み取り・検査系のみ許可（遷移/クリック/JS実行など副作用系は都度確認）
         "mcp__plugin_hm_chrome-devtools__take_snapshot"
         "mcp__plugin_hm_chrome-devtools__take_screenshot"

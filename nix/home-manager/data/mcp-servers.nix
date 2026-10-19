@@ -1,5 +1,4 @@
 {
-  context7ApiKeyFile ? null,
   # 呼び出し側から pkgs.stdenv.hostPlatform.isLinux を渡す。
   # Linux ホスト（WSL 含む）はいずれもヘッドレス運用で、接続先になる
   # デスクトップ Chrome が存在しないため一部サーバーを出し分ける。
@@ -12,26 +11,6 @@
 # ここには起動方法（command / args）だけを書き、エージェント固有の項目
 # （Claude の type = "stdio"、OpenCode の type = "local" など）は各 import 側で付与する。
 {
-  context7 = {
-    command = "sh";
-    args = [
-      "-c"
-      ''
-        api_key_file="$1"
-        if [ -n "$api_key_file" ] && [ -r "$api_key_file" ]; then
-          api_key="$(cat "$api_key_file")"
-          if [ -n "$api_key" ]; then
-            export CONTEXT7_API_KEY="$api_key"
-          fi
-        fi
-
-        exec bunx -y @upstash/context7-mcp
-      ''
-      "context7-mcp"
-      (if context7ApiKeyFile == null then "" else context7ApiKeyFile)
-    ];
-  };
-
   chrome-devtools = {
     command = "bunx";
     args = [

@@ -260,7 +260,6 @@ gcloud auth application-default set-quota-project nosuke-net
 | 暗号化ファイル | 復号先 | 対象 |
 |---|---|---|
 | `secrets/cloudflare.yaml` | `~/.config/cloudflare/cloudflare-infra.env` | macOSのみ |
-| `secrets/context7.yaml` | `~/.config/context7/api-key` | `secrets`プリセットを使うホスト |
 
 既存ファイルの暗号化先にKMSキーを追加した場合は、復号可能なマシンで
 暗号化し直します。

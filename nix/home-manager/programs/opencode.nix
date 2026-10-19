@@ -7,9 +7,7 @@
 let
   homeDirectory = config.home.homeDirectory;
   dotfilesDir = "${homeDirectory}/dotfiles";
-  context7ApiKeyFile = "${homeDirectory}/.config/context7/api-key";
   sharedMcpServers = import ../data/mcp-servers.nix {
-    inherit context7ApiKeyFile;
     isLinux = pkgs.stdenv.hostPlatform.isLinux;
   };
   opencode2 = pkgs.llm-agents.opencode2;
