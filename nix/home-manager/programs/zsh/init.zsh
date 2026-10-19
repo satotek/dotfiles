@@ -41,6 +41,10 @@ _deferred_compinit() {
 
   ensure_zcompiled "$_comp_dump"
   unset _comp_dump
+
+  # comma 付属の _, は自身のオプションしか補完せず、後続コマンドの引数補完を潰す。
+  compdef _precommand ,
+
   _load_zsh_interactive_plugins
 }
 
