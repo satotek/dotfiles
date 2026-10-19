@@ -13,7 +13,7 @@ let
   grokConfig = {
     cli.auto_update = false;
 
-    models.default = "grok-4.6";
+    # モデルと reasoning effort は固定せず、Grok の既定に任せる。
 
     features = {
       telemetry = false;
@@ -29,7 +29,6 @@ let
 
     ui = {
       max_thoughts_width = 120;
-      fork_secondary_model = "grok-4.6";
       yolo = false;
       compact_mode = false;
       permission_mode = "auto";
@@ -48,34 +47,40 @@ in
   # Grok Build CLI。llm-agents.nix が提供する公式バイナリのパッケージを使う。
   home.packages = [ pkgs.llm-agents.grok ];
 
-  # Grok は /theme や /settings で config.toml を書き換えるため、store symlink
-  # にはしない。宣言した設定を通常ファイルとして書き、ランタイム節は残す。
-  home.activation.generateGrokConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    grok_dir="${homeDir}/.grok"
-    output="$grok_dir/config.toml"
-    runtime_file="$(mktemp)"
-
-    mkdir -p "$grok_dir"
-    if [ -L "$output" ]; then
-      rm -f "$output"
+  # Grok は /theme や /settings で config.toml を書き換える。Nix store への
+  # symlink は使わず、宣言した値だけを実ファイルへマージしてランタイム節を残す。
+  # 以前の設定が書き戻したモデル固定もここで削除し、Grok の既定に戻す。
+  home.activation.migrateGrokConfig = lib.hm.dag.entryBetween [ "grokConfig" ] [ "writeBoundary" ] ''
+    output="${homeDir}/.grok/config.toml"
+    if [[ -L "$output" ]]; then
+      target="$(${pkgs.coreutils}/bin/readlink -f -- "$output")"
+      if [[ -f "$target" ]]; then
+        run ${pkgs.coreutils}/bin/rm -f "$output"
+        run ${pkgs.coreutils}/bin/install -m 600 "$target" "$output"
+      fi
     fi
 
-    if [ -f "$output" ]; then
-      ${pkgs.gawk}/bin/awk '
-        /^\[/ {
-          keep = ($0 ~ /^\[\[?marketplace/ || $0 ~ /^\[privacy/ || $0 ~ /^\[hints/)
-        }
-        keep { print }
-      ' "$output" > "$runtime_file"
+    if [[ -f "$output" ]]; then
+      tmp="$(${pkgs.coreutils}/bin/mktemp)"
+      if ${pkgs.jaq}/bin/jaq --from toml --to toml \
+        'del(.models.default) | del(.ui.fork_secondary_model)' "$output" > "$tmp"; then
+        run ${pkgs.coreutils}/bin/install -m 600 "$tmp" "$output"
+      else
+        warnEcho "Could not remove model pins from $output"
+      fi
+      rm -f "$tmp"
     fi
-
-    cp -f ${lib.escapeShellArg baseConfigFile} "$output"
-    chmod 644 "$output"
-
-    if [ -s "$runtime_file" ]; then
-      printf '\n' >> "$output"
-      cat "$runtime_file" >> "$output"
-    fi
-    rm -f "$runtime_file"
   '';
+
+  home.activation.grokConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] (
+    lib.hm.generators.mkImpureConfigMerger {
+      inherit pkgs;
+      format = "toml";
+      empty = "{}";
+      jqOperation = "$dynamic * $static";
+      path = "${homeDir}/.grok/config.toml";
+      staticSettings = baseConfigFile;
+      mode = "600";
+    }
+  );
 }
