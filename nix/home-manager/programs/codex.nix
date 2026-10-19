@@ -17,7 +17,6 @@ let
   extraTrustedProjects = [
     "${homeDir}/dotfiles"
   ];
-  tomlFormat = pkgs.formats.toml { };
   codexConfig = {
     personality = "friendly";
     web_search = "live";
@@ -138,7 +137,6 @@ let
       "google-drive@openai-curated".enabled = true;
     };
   };
-  baseConfigFile = tomlFormat.generate "codex-config-base.toml" codexConfig;
   trustedProjectRootsScript = lib.concatMapStringsSep " " (
     root: lib.escapeShellArg root
   ) trustedProjectRoots;
@@ -152,37 +150,17 @@ in
     # llm-agents の libexec/codex が codex-package.json を含む完全パッケージ。
     # daemon はその store パスを current として参照する。
     package = pkgs.llm-agents.codex;
+
+    # Codex は config.toml に [projects] や [hooks.state] を書き戻す。
+    # 宣言した値だけを activation でマージし、実行時の状態は残す。
+    mutableSettings = true;
+    settings = codexConfig;
   };
 
   home.file.".codex/rules/default.rules".force = true;
 
   home.file.".codex/rules/default.rules".text = ''
-    # Allow low-risk inspection commands outside the sandbox without prompting.
-    prefix_rule(pattern = ["git", "diff"], decision = "allow")
-    prefix_rule(pattern = ["git", "status"], decision = "allow")
-    prefix_rule(pattern = ["git", "log"], decision = "allow")
-    prefix_rule(pattern = ["git", "show"], decision = "allow")
-    prefix_rule(pattern = ["git", "branch"], decision = "allow")
-    prefix_rule(pattern = ["git", "rev-parse"], decision = "allow")
-    prefix_rule(pattern = ["git", "remote", "-v"], decision = "allow")
-    prefix_rule(pattern = ["git", "ls-files"], decision = "allow")
-    prefix_rule(pattern = ["git", "for-each-ref"], decision = "allow")
-    prefix_rule(pattern = ["git", "cherry", "-v"], decision = "allow")
-    prefix_rule(pattern = ["git", "add"], decision = "allow")
-
-    prefix_rule(pattern = ["rg"], decision = "allow")
-    prefix_rule(pattern = ["sed", "-n"], decision = "allow")
-    prefix_rule(pattern = ["ls"], decision = "allow")
-    prefix_rule(pattern = ["pwd"], decision = "allow")
-    prefix_rule(pattern = ["wc"], decision = "allow")
-    prefix_rule(pattern = ["head"], decision = "allow")
-    prefix_rule(pattern = ["tail"], decision = "allow")
-    prefix_rule(pattern = ["sort"], decision = "allow")
-    prefix_rule(pattern = ["readlink", "-f"], decision = "allow")
-    prefix_rule(pattern = ["which"], decision = "allow")
-    prefix_rule(pattern = ["date"], decision = "allow")
-    prefix_rule(pattern = ["nix-instantiate", "--parse"], decision = "allow")
-
+    # コマンド個別の allow は置かない。承認は auto_review に任せる。
     # Keep operations that publish, rewrite history, or discard work interactive.
     prefix_rule(pattern = ["git", "commit"], decision = "prompt")
     prefix_rule(pattern = ["git", "push"], decision = "prompt")
@@ -212,86 +190,72 @@ in
     ];
   };
 
-  home.activation.generateCodexConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    codex_dir="${homeDir}/.codex"
-    output="$codex_dir/config.toml"
-    hooks_state_file="$(mktemp)"
-
-    mkdir -p "$codex_dir"
-    if [ -L "$output" ]; then
-      rm -f "$output"
-    fi
-
-    if [ -f "$output" ]; then
-      ${pkgs.gawk}/bin/awk '
-        /^\[hooks\.state\]/ { keep = 1 }
-        keep { print }
-      ' "$output" > "$hooks_state_file"
-    fi
-
-    cp -f ${lib.escapeShellArg baseConfigFile} "$output"
-    chmod 644 "$output"
-
-    append_trusted_project() {
-      project="$1"
-      [ -d "$project" ] || return 0
-
-      case "$project" in
-        *\"*|*\\*)
-          echo "WARNING: skipping project path unsafe for TOML quoted keys: $project" >&2
-          return 0
-          ;;
-      esac
-
-      printf '\n[projects."%s"]\ntrust_level = "trusted"\n' "''${project%/}" >> "$output"
-    }
-
-    for root in ${trustedProjectRootsScript}; do
-      [ -d "$root" ] || continue
-
-      ${pkgs.fd}/bin/fd --type d --hidden --no-ignore "^\\.git$" "$root" --max-depth 5 2>/dev/null \
-        | sort \
-        | while IFS= read -r gitdir; do
-            append_trusted_project "$(dirname "$gitdir")"
-          done
-    done
-
-    for project in ${extraTrustedProjectsScript}; do
-      append_trusted_project "$project"
-    done
-
-    if [ -s "$hooks_state_file" ]; then
-      # Codexは実行時に [projects."..."] などを config.toml の末尾（= [hooks.state] より
-      # 後ろ）へ書き足すため、保存した尻尾をそのまま復元すると上で生成済みのテーブルと
-      # 衝突し、TOMLのduplicate keyでconfig全体が読めなくなる。既に出力済みの見出しと、
-      # 尻尾の中で重複する見出しを落としてから復元する（宣言側の定義を優先）。
-      filtered_state_file="$(mktemp)"
-      ${pkgs.gawk}/bin/awk '
-        NR == FNR {
-          if ($0 ~ /^\[/) seen[$0] = 1
-          next
-        }
-        /^\[/ {
-          skip = ($0 in seen)
-          seen[$0] = 1
-        }
-        !skip
-      ' "$output" "$hooks_state_file" > "$filtered_state_file"
-
-      if [ -s "$filtered_state_file" ]; then
-        printf '\n' >> "$output"
-        cat "$filtered_state_file" >> "$output"
+  # mutableSettings は Nix store を指す symlink を拒否する。以前の世代が作った
+  # symlink を実ファイルへ移行してから、モジュールのマージを走らせる。
+  home.activation.migrateCodexConfig = lib.mkIf config.programs.codex.mutableSettings (
+    lib.hm.dag.entryBetween [ "codexMutableSettings" ] [ "linkGeneration" ] ''
+      config="${homeDir}/.codex/config.toml"
+      if [[ -L "$config" ]]; then
+        target="$(${pkgs.coreutils}/bin/readlink -f -- "$config")"
+        case "$target" in
+          ${builtins.storeDir}/*)
+            run ${pkgs.coreutils}/bin/rm -f "$config"
+            run ${pkgs.coreutils}/bin/install -m 600 "$target" "$config"
+            ;;
+        esac
       fi
-      rm -f "$filtered_state_file"
-    fi
-    rm -f "$hooks_state_file"
-  '';
+    ''
+  );
+
+  # mutableSettings は実行時の [projects] を保持する。新しく見つけたリポジトリ
+  # だけを追記し、既存の trust 状態は上書きしない。
+  home.activation.addCodexTrustedProjects = lib.mkIf config.programs.codex.mutableSettings (
+    lib.hm.dag.entryAfter [ "codexMutableSettings" ] ''
+      (
+        output="${homeDir}/.codex/config.toml"
+        [ -f "$output" ] || exit 0
+
+        append_trusted_project() {
+          project="$1"
+          [ -d "$project" ] || return 0
+
+          case "$project" in
+            *\"*|*\\*)
+              echo "WARNING: skipping project path unsafe for TOML quoted keys: $project" >&2
+              return 0
+              ;;
+          esac
+
+          project="''${project%/}"
+          if ${pkgs.gnugrep}/bin/grep -Fq "[projects.\"$project\"]" "$output"; then
+            return 0
+          fi
+
+          printf '\n[projects."%s"]\ntrust_level = "trusted"\n' "$project" >> "$output"
+        }
+
+        for root in ${trustedProjectRootsScript}; do
+          [ -d "$root" ] || continue
+
+          ${pkgs.fd}/bin/fd --type d --hidden --no-ignore "^\\.git$" "$root" --max-depth 5 2>/dev/null \
+            | sort \
+            | while IFS= read -r gitdir; do
+                append_trusted_project "$(dirname "$gitdir")"
+              done
+        done
+
+        for project in ${extraTrustedProjectsScript}; do
+          append_trusted_project "$project"
+        done
+      )
+    ''
+  );
 
   # ChatGPTデスクトップアプリのペット表示は config.toml ではなく、
   # Codex のグローバル状態ファイルに保存される。アップデートで表示状態が
   # 戻っても、Home Manager の切り替え時に非表示を再適用する。
   home.activation.disableCodexPet = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
-    lib.hm.dag.entryAfter [ "generateCodexConfig" ] ''
+    lib.hm.dag.entryAfter [ "addCodexTrustedProjects" ] ''
       codex_global_state="${homeDir}/.codex/.codex-global-state.json"
 
       if [ -f "$codex_global_state" ] && ! ${pkgs.jq}/bin/jq -e \
