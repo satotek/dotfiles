@@ -22,6 +22,9 @@ let
   opencodeConfig = {
     "$schema" = "https://opencode.ai/config.json";
     update = "disable";
+    # nixd / gopls / rust-analyzer / clangd / bash-language-server は Nix 側で
+    # 入れてあるので、組み込み LSP を有効にしても追加取得は起きない。
+    lsp = true;
     # キーは sops.nix が復号して置く。auth login で保存した credential があると
     # そちらが優先され、ここは黙って無視されるので、該当 provider は logout しておく。
     providers = lib.genAttrs [ "deepseek" "google" ] (name: {
@@ -40,6 +43,10 @@ in
   # TUI プラグインは opencode.jsonc の plugins ではなく plugins/ 配下の探索で読まれる。
   xdg.configFile."opencode/plugins/usage-tui/tui.tsx".source =
     ../../../.config/opencode/plugins/usage-tui/tui.tsx;
+
+  # astro / vue / yaml-ls などは実行時に GitHub からサーバーを落とす。Nix 管理外の
+  # バイナリを増やさないよう止める。サーバーは起動元の環境を継承する。
+  home.sessionVariables.OPENCODE_DISABLE_LSP_DOWNLOAD = "true";
 
   home.packages = [
     opencode2
