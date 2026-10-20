@@ -37,6 +37,10 @@ let
   opencodeConfigFile = pkgs.writers.writeJSON "opencode.jsonc" opencodeConfig;
 in
 {
+  # TUI プラグインは opencode.jsonc の plugins ではなく plugins/ 配下の探索で読まれる。
+  xdg.configFile."opencode/plugins/usage-tui/tui.tsx".source =
+    ../../../.config/opencode/plugins/usage-tui/tui.tsx;
+
   home.packages = [
     opencode2
     opencode
