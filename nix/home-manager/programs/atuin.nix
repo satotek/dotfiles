@@ -17,16 +17,6 @@ in
   # Ctrl-R の履歴検索だけ atuin に任せ、Ctrl-T / Alt-C / Tab は fzf のまま。
   programs.atuin = {
     enable = true;
-    # 18.23.0 の e2e テストは非サンドボックスの darwin ビルドで落ちる（#574509 で修正済み）。
-    # チャンネルがその修正を拾うまでテストを無効化する。Linux まで override すると
-    # derivation がキャッシュから外れ、CI が毎回ソースビルドするので darwin に限定する。
-    package =
-      if pkgs.stdenv.hostPlatform.isDarwin then
-        pkgs.atuin.overrideAttrs (_: {
-          doCheck = false;
-        })
-      else
-        pkgs.atuin;
     enableZshIntegration = false;
     flags = [ "--disable-up-arrow" ];
     settings = {
