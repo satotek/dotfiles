@@ -28,6 +28,11 @@ let
       sopsFile = agentsSopsFile;
       target = "${config.home.homeDirectory}/.config/opencode/secrets/google.key";
     }
+    {
+      key = "opencode_go_api_key";
+      sopsFile = agentsSopsFile;
+      target = "${config.home.homeDirectory}/.config/opencode/secrets/opencode-go.key";
+    }
     # dsh は .credentials.yaml、プロセス環境、$DSH_HOME/.env の順に探す。.env なら
     # T3 から起動しても端末から起動しても読まれる。
     {

@@ -27,7 +27,7 @@ let
     lsp = true;
     # キーは sops.nix が復号して置く。auth login で保存した credential があると
     # そちらが優先され、ここは黙って無視されるので、該当 provider は logout しておく。
-    providers = lib.genAttrs [ "deepseek" "google" ] (name: {
+    providers = lib.genAttrs [ "deepseek" "google" "opencode-go" ] (name: {
       settings.apiKey = "{file:~/.config/opencode/secrets/${name}.key}";
     });
     mcp.servers = lib.mapAttrs (_name: server: {
