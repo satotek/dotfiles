@@ -1,6 +1,7 @@
 {
   config,
   inputs,
+  lib,
   pkgs,
   ...
 }:
@@ -9,6 +10,14 @@ let
 
   astGrepBin = "${pkgs.ast-grep}/bin/ast-grep";
   agentBrowserBin = "${pkgs.llm-agents.agent-browser}/bin/agent-browser";
+
+  localSkillsDir = ../../../agents/skills;
+
+  # agents/skills 配下のディレクトリをそのまま配布対象にする。
+  # スキルを追加するたびにこのファイルの列挙を直し忘れるのを防ぐ。
+  localSkillNames = lib.mapAttrsToList (name: _: name) (
+    lib.filterAttrs (_: type: type == "directory") (builtins.readDir localSkillsDir)
+  );
 
 in
 {
@@ -35,11 +44,6 @@ in
         subdir = "skills";
       };
 
-      vercel-next-skills = {
-        input = "vercel-next-skills";
-        subdir = "skills";
-      };
-
       anthropic-skills = {
         input = "anthropic-skills";
         subdir = "skills";
@@ -62,119 +66,117 @@ in
 
       # このリポジトリで書いた自作スキル (agents/skills)。
       local = {
-        path = ../../../agents/skills;
+        path = localSkillsDir;
       };
     };
 
-    skills.explicit = {
-      find-skills = {
-        from = "vercel-skills";
-      };
-
-      frontend-design = {
-        from = "anthropic-skills";
-      };
-
-      vercel-react-best-practices = {
-        from = "vercel-agent-skills";
-        path = "react-best-practices";
-      };
-
-      vercel-composition-patterns = {
-        from = "vercel-agent-skills";
-        path = "composition-patterns";
-      };
-
-      web-design-guidelines = {
-        from = "vercel-agent-skills";
-      };
-
-      next-dev-loop = {
-        from = "vercel-next-skills";
-      };
-
-      agent-browser = {
-        from = "agent-browser";
-        packages = [ pkgs.llm-agents.agent-browser ];
-        # rewriteCommands を切って transform で絶対パスへ書き換える。
-        # 自動 rewrite は SKILL.md 全体を無差別に置換するため frontmatter の
-        # name: まで "./agent-browser" に化ける。ここでは実際のコマンド行と
-        # allowed-tools だけを差し替え、npm 導線は削除する。
-        rewriteCommands = false;
-        transform =
-          { original, dependencies }:
-          let
-            patched =
-              builtins.replaceStrings
-                [
-                  "Bash(agent-browser:*), Bash(npx agent-browser:*)"
-                  "Install: `npm i -g agent-browser && agent-browser install`\n\n"
-                  "agent-browser skills "
-                  "`agent-browser`"
-                ]
-                [
-                  "Bash(${agentBrowserBin}:*)"
-                  ""
-                  "${agentBrowserBin} skills "
-                  "`${agentBrowserBin}`"
-                ]
-                original;
-          in
-          ''
-            ${patched}
-
-            ${dependencies}
-          '';
-      };
-
-      ast-grep = {
-        from = "ast-grep";
-        path = "ast-grep";
-        packages = [ pkgs.ast-grep ];
-        # rewriteCommands を切って transform で絶対パスへ書き換える。
-        # 自動 rewrite は "ast-grep" という文字列を SKILL.md 全体で "./ast-grep"
-        # に置換するため、frontmatter の name/description や散文まで壊れる。
-        # ここでは実際に CLI を起動する行だけを Nix store の絶対パスに差し替える。
-        rewriteCommands = false;
-        transform =
-          { original, dependencies }:
-          let
-            patched =
-              builtins.replaceStrings
-                [
-                  "| ast-grep "
-                  "ast-grep scan "
-                  "ast-grep run "
-                ]
-                [
-                  "| ${astGrepBin} "
-                  "${astGrepBin} scan "
-                  "${astGrepBin} run "
-                ]
-                original;
-          in
-          ''
-            ${patched}
-
-            ${dependencies}
-          '';
-      };
-
-      herdr = {
-        from = "herdr";
-      };
-
-      commit = {
+    # ローカルスキルは agents/skills のディレクトリを自動で列挙する。
+    # web-fetch だけは ax の同梱とコマンド書き換えの抑制が要るため上書きする。
+    skills.explicit =
+      lib.genAttrs localSkillNames (name: {
         from = "local";
-      };
+      })
+      // {
+        find-skills = {
+          from = "vercel-skills";
+        };
 
-      web-fetch = {
-        from = "local";
-        packages = [ pkgs.llm-agents.ax ];
-        # The skill calls ./ax; keep the command as written.
-        rewriteCommands = false;
+        frontend-design = {
+          from = "anthropic-skills";
+        };
+
+        vercel-react-best-practices = {
+          from = "vercel-agent-skills";
+          path = "react-best-practices";
+        };
+
+        vercel-composition-patterns = {
+          from = "vercel-agent-skills";
+          path = "composition-patterns";
+        };
+
+        web-design-guidelines = {
+          from = "vercel-agent-skills";
+        };
+
+        agent-browser = {
+          from = "agent-browser";
+          packages = [ pkgs.llm-agents.agent-browser ];
+          # rewriteCommands を切って transform で絶対パスへ書き換える。
+          # 自動 rewrite は SKILL.md 全体を無差別に置換するため frontmatter の
+          # name: まで "./agent-browser" に化ける。ここでは実際のコマンド行と
+          # allowed-tools だけを差し替え、npm 導線は削除する。
+          rewriteCommands = false;
+          transform =
+            { original, dependencies }:
+            let
+              patched =
+                builtins.replaceStrings
+                  [
+                    "Bash(agent-browser:*), Bash(npx agent-browser:*)"
+                    "Install: `npm i -g agent-browser && agent-browser install`\n\n"
+                    "agent-browser skills "
+                    "`agent-browser`"
+                  ]
+                  [
+                    "Bash(${agentBrowserBin}:*)"
+                    ""
+                    "${agentBrowserBin} skills "
+                    "`${agentBrowserBin}`"
+                  ]
+                  original;
+            in
+            ''
+              ${patched}
+
+              ${dependencies}
+            '';
+        };
+
+        ast-grep = {
+          from = "ast-grep";
+          path = "ast-grep";
+          packages = [ pkgs.ast-grep ];
+          # rewriteCommands を切って transform で絶対パスへ書き換える。
+          # 自動 rewrite は "ast-grep" という文字列を SKILL.md 全体で "./ast-grep"
+          # に置換するため、frontmatter の name/description や散文まで壊れる。
+          # ここでは実際に CLI を起動する行だけを Nix store の絶対パスに差し替える。
+          rewriteCommands = false;
+          transform =
+            { original, dependencies }:
+            let
+              patched =
+                builtins.replaceStrings
+                  [
+                    "| ast-grep "
+                    "ast-grep scan "
+                    "ast-grep run "
+                  ]
+                  [
+                    "| ${astGrepBin} "
+                    "${astGrepBin} scan "
+                    "${astGrepBin} run "
+                  ]
+                  original;
+            in
+            ''
+              ${patched}
+
+              ${dependencies}
+            '';
+        };
+
+        herdr = {
+          from = "herdr";
+        };
+
+        web-fetch = {
+          from = "local";
+          packages = [ pkgs.llm-agents.ax ];
+          # The skill calls ./ax; keep the command as written.
+          rewriteCommands = false;
+        };
       };
-    };
 
     targets.agents = {
       enable = true;

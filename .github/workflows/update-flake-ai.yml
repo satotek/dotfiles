@@ -50,7 +50,6 @@ jobs:
             codex-plugin-cc \
             herdr-skill \
             vercel-agent-skills \
-            vercel-next-skills \
             vercel-skills
 
       # 自動マージの安全弁: 更新後の inputs で Linux home 構成が実際にビルドできるか検証。

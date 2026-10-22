@@ -48,11 +48,6 @@
       flake = false;
     };
 
-    vercel-next-skills = {
-      url = "github:vercel/next.js";
-      flake = false;
-    };
-
     anthropic-skills = {
       url = "github:anthropics/skills";
       flake = false;
