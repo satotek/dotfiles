@@ -82,6 +82,8 @@ let
 
     # model setting
     model = "gpt-6-luna";
+    # レビュー専用モデル。未設定なら model が使われる。
+    review_model = "gpt-6.1-sol";
     model_reasoning_effort = "xhigh";
     model_reasoning_summary = "auto";
     model_verbosity = "medium";
