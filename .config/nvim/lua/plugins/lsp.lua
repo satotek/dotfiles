@@ -11,7 +11,7 @@ local servers = {
   "gopls",
   "jsonls",
   "lua_ls",
-  "marksman",
+  "markdown_oxide",
   "nixd",
   "oxfmt",
   "oxlint",

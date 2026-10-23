@@ -6,7 +6,7 @@
     clang-tools
     efm-langserver
     lua-language-server
-    marksman
+    markdown-oxide
     nixd
     nixfmt
     shellcheck
