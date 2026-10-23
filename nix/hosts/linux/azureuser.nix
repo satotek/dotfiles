@@ -12,6 +12,7 @@
   ++ (import ../../home-manager/roles.nix).select [
     "base"
     "dev"
+    "rust"
     "ai"
     "secrets"
   ]
