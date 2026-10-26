@@ -27,6 +27,7 @@ in
     mutableTaps = false;
     taps = {
       "nikitabobko/homebrew-tap" = inputs.homebrew-nikitabobko-tap;
+      "whitewater-png/homebrew-meltype-for-mac" = inputs.homebrew-meltype-for-mac;
     };
   };
 
@@ -78,6 +79,7 @@ in
       "dockdoor" # Dock のウィンドウプレビューとウィンドウ単位の切り替え
       "jordanbaird-ice" # メニューバーのアイコンを整理・非表示にする
       "karabiner-elements"
+      "whitewater-png/meltype-for-mac/meltype-for-mac" # 英数キーなしで日英を切り替える IME（Mac 版フォーク）
       "nikitabobko/tap/aerospace" # i3 風タイリングウィンドウマネージャ
       "raycast"
 

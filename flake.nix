@@ -29,6 +29,13 @@
       flake = false;
     };
 
+    # Meltype for Mac の配布元。本家 Meltype とは別の Mac 版フォークで、
+    # cask の正本はそのリポジトリの mac/homebrew/Casks にある。
+    homebrew-meltype-for-mac = {
+      url = "github:whitewater-png/homebrew-meltype-for-mac";
+      flake = false;
+    };
+
     llm-agents.url = "github:numtide/llm-agents.nix";
 
     # comma と command-not-found 用の nix-index データベース（毎週ビルド済みを配布）。
