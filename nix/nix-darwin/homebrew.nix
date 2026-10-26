@@ -103,6 +103,7 @@ in
 
       # メディア・クリエイティブ
       "affinity"
+      "drawio" # 図解・ダイアグラム作成（draw.io Desktop）
       "foobar2000"
       "musicbrainz-picard"
       "obs"
