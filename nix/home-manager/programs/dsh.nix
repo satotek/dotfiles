@@ -7,9 +7,6 @@
 let
   dsh = pkgs.llm-agents.dsh;
   port = 3080;
-  web = config.dotfiles.dsh.web;
-  # Tailscale Serve など HTTP のリバースプロキシ越しに使うときは、
-  # ホスト設定から publicUrl と trustedHosts を渡す。
   webArgs = [
     "--profile"
     "web"
@@ -18,30 +15,9 @@ let
     "127.0.0.1"
     "--port"
     (toString port)
-  ]
-  ++ lib.optionals (web.publicUrl != null) [
-    "--public-url"
-    web.publicUrl
-  ]
-  ++ lib.concatMap (host: [
-    "--trusted-host"
-    host
-  ]) web.trustedHosts;
+  ];
 in
 {
-  options.dotfiles.dsh.web = {
-    publicUrl = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-      description = "dsh web がリバースプロキシ越しに広告する URL。";
-    };
-    trustedHosts = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ];
-      description = "dsh web の browser-trust fence が追加で受け入れる authority。";
-    };
-  };
-
   config = {
     # DeepSeek Harness。upstream はリリース成果物を出さないので、
     # llm-agents.nix がソースからビルドしたパッケージを使う。
