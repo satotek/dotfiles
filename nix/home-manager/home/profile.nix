@@ -73,6 +73,9 @@ in
     # git 以外のツールは VISUAL を EDITOR より先に見るので、両方を nvim にする。
     EDITOR = "nvim";
     VISUAL = "nvim";
+    # CommandCode の CLI と pi 拡張は ZDR（保持・学習なし）をこの変数で要求する。
+    # ZDR 対応 upstream がないモデルは 422 で失敗する。
+    CMD_ZDR = "1";
   };
 
   # PATH の順番は sessionPath（常に先頭へ追加）では表せないので、シェルで組む。

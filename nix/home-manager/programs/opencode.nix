@@ -27,9 +27,15 @@ let
     lsp = true;
     # キーは sops.nix が復号して置く。auth login で保存した credential があると
     # そちらが優先され、ここは黙って無視されるので、該当 provider は logout しておく。
-    providers = lib.genAttrs [ "deepseek" "google" "opencode-go" ] (name: {
-      settings.apiKey = "{file:~/.config/opencode/secrets/${name}.key}";
-    });
+    providers =
+      lib.genAttrs [ "deepseek" "google" "opencode-go" "commandcode" ] (name: {
+        settings.apiKey = "{file:~/.config/opencode/secrets/${name}.key}";
+      })
+      // {
+        # ZDR（保持・学習なし）を全リクエストで要求する。ZDR 対応 upstream が
+        # ないモデルは 422 (cmd_zdr_no_providers) で失敗する。
+        commandcode.headers."x-cmd-zdr" = "1";
+      };
     mcp.servers = lib.mapAttrs (_name: server: {
       type = "local";
       command = [ server.command ] ++ (server.args or [ ]);
