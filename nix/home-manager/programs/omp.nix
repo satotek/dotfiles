@@ -113,6 +113,18 @@ in
       modelsConfig;
   home.file.".omp/agent/mcp.json".source = pkgs.writers.writeJSON "omp-mcp.json" mcpConfig;
 
+  # ccusage は omp を自動検出しない。pi と同じ形式なので、名前付きの pi ストアとして
+  # 足すと unified レポートに omp という別エージェントで出る。
+  home.file.".claude/ccusage.json".source = pkgs.writers.writeJSON "ccusage.json" {
+    "$schema" = "https://ccusage.com/config-schema.json";
+    pi.stores = [
+      {
+        name = "omp";
+        path = "~/.omp/agent/sessions";
+      }
+    ];
+  };
+
   # config.yml は /settings やモデルピッカーが書き戻すので symlink にしない。
   # 宣言した値だけをマージし、テーマなど omp が書いたキーは残す。ピッカーで
   # 変えた既定モデルは次の switch で戻る。
