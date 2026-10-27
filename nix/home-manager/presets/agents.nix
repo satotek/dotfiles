@@ -10,6 +10,7 @@
     ../programs/dsh.nix
     ../programs/grok.nix
     ../programs/herdr-agent-integrations.nix
+    ../programs/omp.nix
     ../programs/opencode.nix
     ../programs/rtk.nix
   ];

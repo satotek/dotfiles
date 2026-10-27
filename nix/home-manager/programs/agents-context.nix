@@ -18,7 +18,9 @@ in
   # home-manager にモジュールが無いエージェントは、グローバルの指示ファイルを直接置く。
   # OpenCode は設定ディレクトリの AGENTS.md、grok は ~/.grok/AGENTS.md、
   # Antigravity CLI は ~/.gemini/{GEMINI,AGENTS}.md をグローバルルールとして読む。
+  # omp は ~/.omp/agent/AGENTS.md を読む。他ツールのユーザー単位ファイルは既定で読まない。
   xdg.configFile."opencode/AGENTS.md".text = context;
   home.file.".grok/AGENTS.md".text = context;
   home.file.".gemini/AGENTS.md".text = context;
+  home.file.".omp/agent/AGENTS.md".text = context;
 }

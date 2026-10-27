@@ -268,12 +268,13 @@ gcloud auth application-default set-quota-project nosuke-net
 dsh の `.env` には `dsh_env` の内容に加えて、CommandCode のキーが `CMD_API_KEY`
 として追記されます。dsh の provider 設定では `apiKeyEnv: CMD_API_KEY` を指定します。
 
-OpenCode は `{file:...}` で復号済みファイルを読むため、キーは環境変数に載りません。
+OpenCode は `{file:...}`、omp は `models.yml` の `apiKey: "!tr ... < <file>"` で
+復号済みファイルを読むため、キーは環境変数に載りません。
 同じ provider で `opencode auth login` すると credential が優先され、sops のキーは
 使われません。DeepSeek、Google、CommandCode は logout したままにします。
 
 CommandCode へは ZDR（保持・学習なし）を要求しています。OpenCode は provider の
-`x-cmd-zdr: 1` ヘッダー、CLI と pi 拡張は `CMD_ZDR=1` を使います。ZDR 対応の
+`x-cmd-zdr: 1` ヘッダー（omp も同じ）、CLI と pi 拡張は `CMD_ZDR=1` を使います。ZDR 対応の
 upstream がないモデルは 422 (`cmd_zdr_no_providers`) で失敗し、一部のモデルは
 ZDR 対応 upstream に回るぶん通常より高い料金になります。
 
