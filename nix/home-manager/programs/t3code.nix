@@ -82,6 +82,18 @@ let
             ];
           };
         };
+        # omp も ACP サーバーを内蔵している。ID は設定画面と同じく
+        # acpRegistry_<表示名の slug> の形にする。
+        acpRegistry_omp = {
+          driver = "acpRegistry";
+          displayName = "omp";
+          enabled = true;
+          config = {
+            source = "local";
+            commandPath = lib.getExe' pkgs.llm-agents.omp "omp";
+            commandArgs = [ "acp" ];
+          };
+        };
       };
   };
   settingsFile = pkgs.writeText "t3code-settings.json" (builtins.toJSON settings);
