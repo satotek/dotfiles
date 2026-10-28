@@ -35,6 +35,16 @@ in
     )
   );
 
+  # omp は rtk 同梱の extension がそのまま使える。書き換え規則は `rtk rewrite` 側にあり、
+  # extension は薄い委譲層なので、写さずに rtk 自身に生成させて rtk の更新に追従させる。
+  # OpenCode と同じく PATH に依存しないよう store パスを焼き込む。
+  home.file.".omp/agent/extensions/rtk.ts".source = pkgs.runCommand "rtk-omp-extension.ts" { } ''
+    cd "$(mktemp -d)"
+    HOME="$PWD" ${rtk}/bin/rtk init --agent omp > /dev/null
+    substitute .omp/extensions/rtk.ts "$out" \
+      --replace-fail 'pi.exec("rtk",' 'pi.exec("${rtk}/bin/rtk",'
+  '';
+
   # Bash の出力を圧縮して読ませ、コンテキストを節約する。
   # rtk は permissionDecision を返さないので、書き換え後のコマンドにも通常の権限判定が掛かる。
   programs.claude-code.settings.hooks.PreToolUse = [
