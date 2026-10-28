@@ -108,6 +108,11 @@ in
       "musicbrainz-picard"
       "obs"
 
+      # フォント
+      # nixpkgs に単体パッケージが無いため cask で入れる。fonts.nix 側と同じ
+      # ファミリーを二重に入れないこと。
+      "font-line-seed-jp" # UI 用の日本語フォント
+
       # ユーティリティ
       "appcleaner" # Homebrew 以外で入れたアプリを残りのファイルごと消す
       "daisydisk"
