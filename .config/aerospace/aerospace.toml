@@ -5,7 +5,7 @@
 
 config-version = 2
 
-after-startup-command = ['exec-and-forget borders active_color=0xffe1e3e4 inactive_color=0xff494d64 width=3.0']
+after-startup-command = ['exec-and-forget borders style=round order=above width=1.5 hidpi=on active_color=0xffcba6f7 inactive_color=0x33494d64']
 
 start-at-login = true
 auto-reload-config = true
@@ -21,8 +21,10 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 
 automatically-unhide-macos-hidden-apps = false
 
-# よく使う 1-9 だけ残す。文字ワークスペースは必要になったら足す。
-persistent-workspaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+# 役割で分ける。W=ブラウザ, T=ターミナル, C=コミュニケーション, D=開発,
+# A=AI, M=メディア, 3=その他（catch-all）。1 と 2 は一時置き場。
+# 空でも消えないよう固定する。
+persistent-workspaces = ['W', 'T', 'C', 'D', 'A', 'M', '1', '2', '3']
 
 on-mode-changed = []
 
@@ -37,17 +39,32 @@ gaps.outer.bottom = 3
 gaps.outer.top = 3
 gaps.outer.right = 3
 
-# 設定アプリやパスワードマネージャはタイルせずフロートさせる。
-# Ghostty は macOS のネイティブタブを使う＝タブが別ウィンドウとして検出されるため、
-# 開いた場所にタイルさせてワークスペースが散らばるのを抑える（Ghostty 公式の回避策）。
-# https://ghostty.org/docs/help/macos-tiling-wms#aerospace
+# アプリは役割ごとのワークスペースに固定する。AeroSpace は配置を記憶しないので、
+# 起動・検出のたびにここで寄せ直す。ルールを書き換えた後は
+# `aerospace run-callback --for-every-window on-window-detected` で既存ウィンドウにも適用できる。
+# 最初にマッチしたルールだけが動くため、catch-all は必ず末尾に置く。
 on-window-detected = [
-    { if = 'test %{app-bundle-id} = com.apple.Safari', run = 'move-node-to-workspace 1' },
-    { if = 'test %{app-bundle-id} = com.mitchellh.ghostty', run = 'layout tiling' },
+    # W: ブラウザ
+    { if = 'test %{app-bundle-id} = com.apple.Safari || test %{app-bundle-id} = com.google.Chrome', run = 'move-node-to-workspace W' },
+    # T: ターミナル。Ghostty はネイティブタブが別ウィンドウとして検出されるので tiling を明示する。
+    { if = 'test %{app-bundle-id} = com.mitchellh.ghostty', run = ['layout tiling', 'move-node-to-workspace T'] },
+    # C: コミュニケーション
+    { if = 'test %{app-bundle-id} = com.hnc.Discord || test %{app-bundle-id} = jp.naver.line.mac || test %{app-bundle-id} = com.apple.mail', run = 'move-node-to-workspace C' },
+    # D: 開発
+    { if = 'test %{app-bundle-id} = com.google.android.studio || test %{app-bundle-id} = com.t3tools.t3code || test %{app-bundle-id} = dev.zed.Zed || test %{app-bundle-id} = com.microsoft.VSCodeInsiders', run = 'move-node-to-workspace D' },
+    # A: AI
+    { if = 'test %{app-bundle-id} = com.openai.codex || test %{app-bundle-id} = com.anthropic.claudefordesktop || test %{app-bundle-id} = com.meta.endo || test %{app-bundle-id} = com.anysphere.sand', run = 'move-node-to-workspace A' },
+    # M: メディア
+    { if = 'test %{app-bundle-id} = com.apple.Music', run = 'move-node-to-workspace M' },
+    # 設定アプリやパスワードマネージャはタイルせずフロート。catch-all より前に置き、3 へ流さない。
     { if = 'test %{app-bundle-id} = com.apple.systempreferences', run = 'layout floating' },
     { if = 'test %{app-bundle-id} = com.1password.1password', run = 'layout floating' },
     { if = 'test %{app-bundle-id} = org.pqrs.Karabiner-Elements.Settings', run = 'layout floating' },
     { if = 'test %{app-bundle-id} = org.pqrs.Karabiner-EventViewer', run = 'layout floating' },
+    # Finder はファイル操作の補助なので、タイルに混ぜず開いた場所にフロートさせる。
+    { if = 'test %{app-bundle-id} = com.apple.finder', run = 'layout floating' },
+    # 3: その他（catch-all）
+    { if = 'true', run = 'move-node-to-workspace 3' },
 ]
 
 [mode.main.binding]
@@ -74,26 +91,26 @@ on-window-detected = [
     # 最大化（AeroSpace 独自。macOS ネイティブ全画面ではない）
     alt-f = 'fullscreen'
 
-    # ワークスペース
+    # ワークスペース（役割名）
+    alt-w = 'workspace W'
+    alt-t = 'workspace T'
+    alt-c = 'workspace C'
+    alt-d = 'workspace D'
+    alt-a = 'workspace A'
+    alt-m = 'workspace M'
     alt-1 = 'workspace 1'
     alt-2 = 'workspace 2'
     alt-3 = 'workspace 3'
-    alt-4 = 'workspace 4'
-    alt-5 = 'workspace 5'
-    alt-6 = 'workspace 6'
-    alt-7 = 'workspace 7'
-    alt-8 = 'workspace 8'
-    alt-9 = 'workspace 9'
 
+    alt-shift-w = 'move-node-to-workspace W'
+    alt-shift-t = 'move-node-to-workspace T'
+    alt-shift-c = 'move-node-to-workspace C'
+    alt-shift-d = 'move-node-to-workspace D'
+    alt-shift-a = 'move-node-to-workspace A'
+    alt-shift-m = 'move-node-to-workspace M'
     alt-shift-1 = 'move-node-to-workspace 1'
     alt-shift-2 = 'move-node-to-workspace 2'
     alt-shift-3 = 'move-node-to-workspace 3'
-    alt-shift-4 = 'move-node-to-workspace 4'
-    alt-shift-5 = 'move-node-to-workspace 5'
-    alt-shift-6 = 'move-node-to-workspace 6'
-    alt-shift-7 = 'move-node-to-workspace 7'
-    alt-shift-8 = 'move-node-to-workspace 8'
-    alt-shift-9 = 'move-node-to-workspace 9'
 
     alt-tab = 'workspace-back-and-forth'
     alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
@@ -148,3 +165,9 @@ on-window-detected = [
     alt-shift-j = ['join-with down', 'mode main']
     alt-shift-k = ['join-with up', 'mode main']
     alt-shift-l = ['join-with right', 'mode main']
+
+# GUI 起動の AeroSpace は Homebrew と /usr/bin しか PATH を持たないため、
+# exec-* から Nix のバイナリ（borders など）を引けるようにする。
+# exec セクションを書くと既定の Homebrew PATH が消えるので、自分で先頭に戻す。
+[exec.env-vars]
+PATH = '/opt/homebrew/bin:/opt/homebrew/sbin:${HOME}/.nix-profile/bin:${PATH}'
