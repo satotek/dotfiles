@@ -7,12 +7,13 @@ let
 
     "cursor-style" = "bar";
     "mouse-scroll-multiplier" = 1;
+    # 1.4 から macOS の既定は none。選択した時点でシステムクリップボードへコピーする。
+    "copy-on-select" = "clipboard";
 
     "background-opacity" = 0.97;
     "background-blur" = 16;
     "unfocused-split-opacity" = 0.9;
 
-    "scrollback-limit" = 10000000;
     "window-padding-balance" = true;
     "quit-after-last-window-closed" = true;
 
