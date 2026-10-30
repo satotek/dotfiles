@@ -18,6 +18,13 @@ let
     mkdir -p $out/Casks
     cp -L ${./homebrew-herdr/Casks/herdr-app.rb} $out/Casks/herdr-app.rb
   '';
+
+  # Meltype も公式 cask が無い。mac 版フォークの tap を追うのをやめ、上流の
+  # リリースをそのまま指す cask を自前 tap として持つ（版の更新は手で追う）。
+  meltypeTap = pkgs.runCommandLocal "homebrew-meltype" { } ''
+    mkdir -p $out/Casks
+    cp -L ${./homebrew-meltype/Casks/meltype-for-mac.rb} $out/Casks/meltype-for-mac.rb
+  '';
 in
 {
   imports = [ ./homebrew-video.nix ];
@@ -35,8 +42,8 @@ in
     mutableTaps = false;
     taps = {
       "nikitabobko/homebrew-tap" = inputs.homebrew-nikitabobko-tap;
-      "whitewater-png/homebrew-meltype-for-mac" = inputs.homebrew-meltype-for-mac;
       "nosuke/homebrew-herdr" = herdrTap;
+      "nosuke/homebrew-meltype" = meltypeTap;
     };
   };
 
@@ -89,7 +96,7 @@ in
       "dockdoor" # Dock のウィンドウプレビューとウィンドウ単位の切り替え
       "jordanbaird-ice" # メニューバーのアイコンを整理・非表示にする
       "karabiner-elements"
-      "whitewater-png/meltype-for-mac/meltype-for-mac" # 英数キーなしで日英を切り替える IME（Mac 版フォーク）
+      "nosuke/meltype/meltype-for-mac" # 英数キーなしで日英を切り替える IME（上流ビルド）
       "nikitabobko/tap/aerospace" # i3 風タイリングウィンドウマネージャ
       "raycast"
 

@@ -210,22 +210,6 @@
         "type": "github"
       }
     },
-    "homebrew-meltype-for-mac": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1792320362,
-        "narHash": "sha256-jMrlrUzyRafQJj31EtX0qQvXTlsggAAb6m8U8f6B4+U=",
-        "owner": "whitewater-png",
-        "repo": "homebrew-meltype-for-mac",
-        "rev": "1db0479864284490acbcbc08e1c7bbbd81a6429b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "whitewater-png",
-        "repo": "homebrew-meltype-for-mac",
-        "type": "github"
-      }
-    },
     "homebrew-nikitabobko-tap": {
       "flake": false,
       "locked": {
@@ -384,7 +368,6 @@
         "codex-plugin-cc": "codex-plugin-cc",
         "herdr-skill": "herdr-skill",
         "home-manager": "home-manager",
-        "homebrew-meltype-for-mac": "homebrew-meltype-for-mac",
         "homebrew-nikitabobko-tap": "homebrew-nikitabobko-tap",
         "llm-agents": "llm-agents",
         "nix-darwin": "nix-darwin",
