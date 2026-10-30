@@ -1,6 +1,7 @@
 {
   config,
   inputs,
+  pkgs,
   self,
   username,
   ...
@@ -10,6 +11,13 @@ let
   # 差し替えたときはこちらの flake.lock から取り直す。
   brewVersion =
     (builtins.fromJSON (builtins.readFile (self + "/flake.lock"))).nodes.brew-src.original.ref;
+
+  # herdr-app は公式 cask を配布していない（配布物は署名済み .app のみ）。
+  # dotfiles 内に置いた cask を Nix 管理の tap として渡し、名前で参照できるようにする。
+  herdrTap = pkgs.runCommandLocal "homebrew-herdr" { } ''
+    mkdir -p $out/Casks
+    cp -L ${./homebrew-herdr/Casks/herdr-app.rb} $out/Casks/herdr-app.rb
+  '';
 in
 {
   imports = [ ./homebrew-video.nix ];
@@ -28,6 +36,7 @@ in
     taps = {
       "nikitabobko/homebrew-tap" = inputs.homebrew-nikitabobko-tap;
       "whitewater-png/homebrew-meltype-for-mac" = inputs.homebrew-meltype-for-mac;
+      "nosuke/homebrew-herdr" = herdrTap;
     };
   };
 
@@ -58,6 +67,7 @@ in
       "claude"
       "grok-bot"
       "handy" # 音声入力（文字起こし）
+      "nosuke/herdr/herdr-app" # Herdr の GUI（herdr-core を操作するクライアント）
       "t3-code" # エージェントの GUI。gem-ai のサーバーへは T3 Connect でつなぐ
 
       # エディタ・IDE

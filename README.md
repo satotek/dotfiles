@@ -344,6 +344,11 @@ Herdrのサーバ側にあたる`herdr-core`（`hc`コマンド）も`cli`プリ
 上流はビルド済みバイナリのみを配布するため、`nix/packages/herdr-core.nix`でリリースを固定しています。
 `hc update`はNix管理外の自己更新なので使わず、更新は同ファイルの`version`と`hash`を上げます。
 
+macOS（Apple Silicon）ではGUIクライアントのherdr-appもcaskで導入します。上流は公式caskを配布していないため、
+`nix/nix-darwin/homebrew-herdr`に最小のtapを置き、nix-homebrewのNix管理tapとして参照します。
+更新はcaskの`version`と`sha256`を`https://releases.herdr.dev/app/latest.json`に合わせて上げます。
+Intel Macのビルドは配布されていないので、必要ならソースビルドになります。
+
 Herdrのリモート運用とSSHポート転送は
 [VMリモート作業手順](docs/vm-remote-workflow.md)を参照してください。
 
