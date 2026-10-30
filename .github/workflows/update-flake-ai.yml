@@ -49,6 +49,7 @@ jobs:
             ast-grep-skill \
             codex-plugin-cc \
             herdr-skill \
+            yomiyasu-skill \
             vercel-agent-skills \
             vercel-skills
 

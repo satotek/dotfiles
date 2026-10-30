@@ -392,7 +392,8 @@
         "nix-index-database": "nix-index-database",
         "nixpkgs": "nixpkgs_3",
         "vercel-agent-skills": "vercel-agent-skills",
-        "vercel-skills": "vercel-skills"
+        "vercel-skills": "vercel-skills",
+        "yomiyasu-skill": "yomiyasu-skill"
       }
     },
     "systems": {
@@ -460,6 +461,22 @@
       "original": {
         "owner": "vercel-labs",
         "repo": "skills",
+        "type": "github"
+      }
+    },
+    "yomiyasu-skill": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793326902,
+        "narHash": "sha256-9cGUSvLgc1+996i3lWQuQm1aTWOxSY6fbS9+vn5aElw=",
+        "owner": "nanaism",
+        "repo": "yomiyasu",
+        "rev": "29d67ccb05e370b5958d72920a9cd1aa829dee80",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nanaism",
+        "repo": "yomiyasu",
         "type": "github"
       }
     }

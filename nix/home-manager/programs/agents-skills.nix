@@ -64,6 +64,11 @@ in
         subdir = "skills";
       };
 
+      yomiyasu = {
+        input = "yomiyasu-skill";
+        subdir = "skills";
+      };
+
       # このリポジトリで書いた自作スキル (agents/skills)。
       local = {
         path = localSkillsDir;
@@ -168,6 +173,10 @@ in
 
         herdr = {
           from = "herdr";
+        };
+
+        yomiyasu = {
+          from = "yomiyasu";
         };
 
         web-fetch = {

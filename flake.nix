@@ -78,6 +78,13 @@
       flake = false;
     };
 
+    # AI が書いた日本語を読みやすく推敲する Agent Skill。
+    # 配布用スキルは skills/yomiyasu にあり、検査スクリプトも同梱されている。
+    yomiyasu-skill = {
+      url = "github:nanaism/yomiyasu";
+      flake = false;
+    };
+
     # OpenAI 公式の Claude Code 用 Codex プラグイン。
     codex-plugin-cc = {
       url = "github:openai/codex-plugin-cc";
