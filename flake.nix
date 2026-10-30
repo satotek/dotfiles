@@ -135,6 +135,7 @@
       };
       dotfilesPackagesOverlay = final: _prev: {
         chrome-devtools-mcp = final.callPackage ./nix/packages/chrome-devtools-mcp.nix { };
+        herdr-core = final.callPackage ./nix/packages/herdr-core.nix { };
       };
       mkPkgs =
         system:

@@ -340,6 +340,10 @@ Claude Code、Codex、Cursor、Grok、OpenCodeのHerdr連携を生成し、セ�
 Herdrの新規ペインとscratch terminalはHome ManagerのNix製Zshを起動します。
 OS標準ZshとNix製fzf-tabのバイナリモジュール間でglibcの不一致が起きるのを避けるためです。
 
+Herdrのサーバ側にあたる`herdr-core`（`hc`コマンド）も`cli`プリセットで導入します。
+上流はビルド済みバイナリのみを配布するため、`nix/packages/herdr-core.nix`でリリースを固定しています。
+`hc update`はNix管理外の自己更新なので使わず、更新は同ファイルの`version`と`hash`を上げます。
+
 Herdrのリモート運用とSSHポート転送は
 [VMリモート作業手順](docs/vm-remote-workflow.md)を参照してください。
 
@@ -351,7 +355,7 @@ Home Managerのパッケージは用途別のプリセットに分け、プリ�
 | プリセット | 用途 |
 |---|---|
 | `shell` | Zsh（nixpkgsプラグイン・fzf-tab）、Starship、direnv、zoxide、nix-index（comma） |
-| `cli` | atuin、bat、eza、fd、ripgrep、yazi、btop、gh、xh、nix-your-shell、Herdr、hunk などの常用CLI |
+| `cli` | atuin、bat、eza、fd、ripgrep、yazi、btop、gh、xh、nix-your-shell、Herdr、herdr-core（hc）、hunk などの常用CLI |
 | `git` | Git、delta、lazygit |
 | `editor` | Neovim、rumdl |
 | `terminal` | Ghostty。macOS だけで読む（`platforms/darwin.nix`） |

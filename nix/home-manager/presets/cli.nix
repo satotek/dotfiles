@@ -44,6 +44,7 @@ in
     dotbench
     fd
     ghq
+    herdr-core
     roots
     xh
   ];
