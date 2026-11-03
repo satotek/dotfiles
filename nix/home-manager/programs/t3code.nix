@@ -6,9 +6,6 @@
 }:
 let
   t3code = pkgs.llm-agents.t3code;
-  # 既定の番号にしておくと、デスクトップアプリの SSH 接続や手元のトンネルが
-  # 同じ番号を前提にできる。手元でサーバーを動かすときは転送元の番号をずらす。
-  port = 3773;
   settingsDir = "${config.home.homeDirectory}/.t3/userdata";
 
   settings = {
@@ -27,23 +24,13 @@ let
     # エージェントのバージョンは llm-agents で揃えるので、更新の通知は要らない。
     enableProviderUpdateChecks = false;
 
-    # Claude と Codex 以外は既定で無効。
-    providers =
-      lib.genAttrs
-        [
-          "antigravity"
-          "cursor"
-          "grok"
-          "opencode"
-        ]
-        (_: {
-          enabled = true;
-        });
-
     # t3 のラッパーは同梱のエージェントを PATH の先頭に置くので、名前で探させると
     # OpenCode は同梱の v1 になり、v2 が変換したデータベースを読めずに失敗する。
     # dotfiles で入れたものを実行ファイルのパスで指定する。driver が欠けた
     # インスタンスがあると settings.json 全体が読み込まれないので、必ず書く。
+    #
+    # displayName も省かない。解決済みのバイナリパスがラベルとして保存され、
+    # UI に /nix/store/... が出たままマージで残る。
     providerInstances =
       lib.mapAttrs
         (
@@ -55,15 +42,32 @@ let
           // instance
         )
         {
-          claudeAgent.config.binaryPath = lib.getExe pkgs.llm-agents.claude-code;
-          codex.config.binaryPath = lib.getExe pkgs.llm-agents.codex;
+          claudeAgent = {
+            displayName = "Claude";
+            config.binaryPath = lib.getExe pkgs.llm-agents.claude-code;
+          };
+          codex = {
+            displayName = "Codex";
+            config.binaryPath = lib.getExe pkgs.llm-agents.codex;
+          };
           # grok の agent と名前が衝突するので、cursor-agent をパスで指定する。
-          cursor.config.binaryPath = lib.getExe pkgs.llm-agents.cursor-agent;
-          grok.config.binaryPath = lib.getExe pkgs.llm-agents.grok;
-          opencode.config.binaryPath = "${pkgs.llm-agents.opencode2}/bin/opencode2";
+          cursor = {
+            displayName = "Cursor";
+            config.binaryPath = lib.getExe pkgs.llm-agents.cursor-agent;
+          };
+          grok = {
+            displayName = "Grok";
+            config.binaryPath = lib.getExe pkgs.llm-agents.grok;
+          };
+          opencode = {
+            displayName = "OpenCode";
+            config.binaryPath = "${pkgs.llm-agents.opencode2}/bin/opencode2";
+          };
           # agy (antigravity-cli) は ACP の実行ファイルではないので使えない。
           # ランタイムは T3 Code の設定画面から入れ、Google でサインインする。
-          antigravity = { };
+          antigravity = {
+            displayName = "Antigravity";
+          };
         }
       // {
         # dsh は ACP の local コマンドとして登録する。キーは T3 Code の
@@ -82,29 +86,21 @@ let
             ];
           };
         };
-        # omp も ACP サーバーを内蔵している。ID は設定画面と同じく
-        # acpRegistry_<表示名の slug> の形にする。
-        acpRegistry_omp = {
-          driver = "acpRegistry";
-          displayName = "omp";
-          enabled = true;
-          config = {
-            source = "local";
-            commandPath = lib.getExe' pkgs.llm-agents.omp "omp";
-            commandArgs = [ "acp" ];
-          };
-        };
       };
   };
   settingsFile = pkgs.writeText "t3code-settings.json" (builtins.toJSON settings);
 in
 {
   # t3 connect / t3 pair をシェルから使うため、CLI も入れる。
+  # デスクトップアプリは別 output なので、これで GUI が二重に入ることはない。
   home.packages = [ t3code ];
 
   # T3 Code は設定画面から settings.json を丸ごと書き換えるので、リンクにせず
   # 上のキーだけを上書きする。サーバーは設定ディレクトリを監視しているので、
-  # 再起動しなくても読み直す。
+  # 再起動しなくても読み直す。デスクトップアプリも同じ場所を読む。
+  #
+  # マージは上書きと追加だけで、宣言から消したキーは既存ファイルに残る。
+  # プロバイダーを廃止したときは、各環境の settings.json から手で消すこと。
   home.activation.configureT3codeSettings = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
     umask 077
     settings_dir=${lib.escapeShellArg settingsDir}
@@ -123,29 +119,4 @@ in
       run ${lib.getExe pkgs.jq} . ${settingsFile} > "$settings_file"
     fi
   '';
-
-  # T3 Connect のトンネルはループバックの origin しか公開しないので、外向きには
-  # 待ち受けない。初回だけ `t3 connect` でサインインすると、以後は起動時に
-  # リンクを張り直す。社内 NW からは T3 Connect か SSH 転送でつなぐ。
-  systemd.user.services.t3code = {
-    Unit = {
-      Description = "T3 Code server";
-      After = [ "network-online.target" ];
-      Wants = [ "network-online.target" ];
-    };
-
-    Service = {
-      Type = "simple";
-      # user manager の PATH を継承しないことがあるので、セッションへ渡す PATH を明示する。
-      Environment = [ "PATH=${config.systemd.user.sessionVariables.PATH}" ];
-      # PR の状態は az repos で引く。DevOps の組織は az login と別テナントなので、
-      # PAT を渡す。リポジトリ管理外のファイルで、無ければ渡さない。
-      EnvironmentFile = "-%h/.config/azure-devops/env";
-      ExecStart = "${t3code}/bin/t3 serve --host 127.0.0.1 --port ${toString port} --no-browser ${config.home.homeDirectory}";
-      Restart = "on-failure";
-      RestartSec = 5;
-    };
-
-    Install.WantedBy = [ "default.target" ];
-  };
 }
