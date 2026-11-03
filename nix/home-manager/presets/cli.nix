@@ -44,7 +44,7 @@ in
     dotbench
     fd
     ghq
-    herdr-core
+    llm-agents.herdr-core
     roots
     xh
   ];
