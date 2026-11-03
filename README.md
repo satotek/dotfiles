@@ -348,10 +348,17 @@ Herdrのサーバ側にあたる`herdr-core`（`hc`コマンド）も`cli`プリ
 上流はビルド済みバイナリのみを配布するため、`nix/packages/herdr-core.nix`でリリースを固定しています。
 `hc update`はNix管理外の自己更新なので使わず、更新は同ファイルの`version`と`hash`を上げます。
 
-macOS（Apple Silicon）ではGUIクライアントのherdr-appもcaskで導入します。上流は公式caskを配布していないため、
-`nix/nix-darwin/homebrew-herdr`に最小のtapを置き、nix-homebrewのNix管理tapとして参照します。
-更新はcaskの`version`と`sha256`を`https://releases.herdr.dev/app/latest.json`に合わせて上げます。
-Intel Macのビルドは配布されていないので、必要ならソースビルドになります。
+macOS（Apple Silicon）ではGUIクライアントのherdr-appもcaskで導入します。caskは上流の公式`herdr-app`を
+そのまま使い、更新はHomebrew側で追従します。Intel Macのビルドは配布されていないので、必要ならソースビルドになります。
+
+GUIのキーバインドは`~/.config/herdr-app/keys.json`にあります。tmux風のprefix操作は
+`nix/home-manager/programs/herdr-app.nix`が[tmux-prefix](https://herdr.dev/mods/herdrdev/tmux-prefix/)を
+Ctrl+Q向けに移植して配置し、`keys.json`の`ctrl-q`関連だけをactivationでマージします。
+アプリが同じファイルとmodフォルダの`.d.ts`を書き換えるため、丸ごとsymlinkにはしません。
+
+`herdr-app --skill` が出力するagent skillはfrontmatterを持たないので、同じactivationで
+`~/.agents/skills/herdr-app`と`~/.claude/skills/herdr-app`に生成します。本文には生成時の
+バージョンを残し、アプリが自己更新してずれた場合は`herdr-app --skill`を読み直すよう書いています。
 
 Herdrのリモート運用とSSHポート転送は
 [VMリモート作業手順](docs/vm-remote-workflow.md)を参照してください。
