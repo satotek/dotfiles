@@ -67,8 +67,9 @@ free of CLI calls.
    - `role: "review"`, `interactionMode: "plan"`, `mode: "wait"`, and
      `isolation: "shared"` — the working tree lives in the parent checkout, so a
      worktree child would start from the last commit and miss uncommitted edits.
-   - `target.providerInstanceId` and `target.model` always set, plus the options
-     from the catalogue.
+   - `target.providerInstanceId` and `target.model` always set. Omit
+     `target.options` so the provider's default effort applies; pass an option
+     only when the user names one.
    - A fresh `clientRequestId` for each round.
    - A self-contained brief: the diff or `git diff HEAD`, the untracked paths,
      the repository review rules, what to check, and the answer shape.
@@ -86,6 +87,9 @@ free of CLI calls.
 Inside T3 Code the capabilities catalogue is authoritative; use its model ids.
 The aliases below apply outside T3 Code. Use the reviewer's configured default
 unless the user names a model. Do not pin version numbers; use family aliases.
+
+Effort and other options stay at the provider default. Raise them only when the
+user asks; a large or security-sensitive diff is not enough on its own.
 
 - Codex: `review_model` in `~/.codex/config.toml` (currently `gpt-6.1-sol`);
   when it is unset, the session `model` is used. Pass `-m <model>` only when the
