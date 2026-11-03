@@ -12,13 +12,6 @@ let
   brewVersion =
     (builtins.fromJSON (builtins.readFile (self + "/flake.lock"))).nodes.brew-src.original.ref;
 
-  # herdr-app は公式 cask を配布していない（配布物は署名済み .app のみ）。
-  # dotfiles 内に置いた cask を Nix 管理の tap として渡し、名前で参照できるようにする。
-  herdrTap = pkgs.runCommandLocal "homebrew-herdr" { } ''
-    mkdir -p $out/Casks
-    cp -L ${./homebrew-herdr/Casks/herdr-app.rb} $out/Casks/herdr-app.rb
-  '';
-
   # Meltype も公式 cask が無い。mac 版フォークの tap を追うのをやめ、上流の
   # リリースをそのまま指す cask を自前 tap として持つ（版の更新は手で追う）。
   meltypeTap = pkgs.runCommandLocal "homebrew-meltype" { } ''
@@ -42,7 +35,6 @@ in
     mutableTaps = false;
     taps = {
       "nikitabobko/homebrew-tap" = inputs.homebrew-nikitabobko-tap;
-      "nosuke/homebrew-herdr" = herdrTap;
       "nosuke/homebrew-meltype" = meltypeTap;
     };
   };
@@ -74,7 +66,7 @@ in
       "claude"
       "grok-bot"
       "handy" # 音声入力（文字起こし）
-      "nosuke/herdr/herdr-app" # Herdr の GUI（herdr-core を操作するクライアント）
+      "herdr-app" # Herdr の GUI（herdr-core を操作するクライアント）
       "t3-code" # エージェントの GUI。gem-ai のサーバーへは T3 Connect でつなぐ
 
       # エディタ・IDE
