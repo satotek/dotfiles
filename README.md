@@ -261,12 +261,16 @@ gcloud auth application-default set-quota-project nosuke-net
 |---|---|---|
 | `secrets/agents.yaml` | `~/.config/opencode/secrets/deepseek.key` | 全環境 |
 | `secrets/agents.yaml` | `~/.config/opencode/secrets/google.key` | 全環境 |
+| `secrets/agents.yaml` | `~/.config/opencode/secrets/opencode-go.key` | 全環境 |
 | `secrets/agents.yaml` | `~/.config/opencode/secrets/commandcode.key` | 全環境 |
 | `secrets/agents.yaml` | `~/.dsh/.env` | 全環境 |
 | `secrets/cloudflare.yaml` | `~/.config/cloudflare/cloudflare-infra.env` | macOSのみ |
 
-dsh の `.env` には `dsh_env` の内容に加えて、CommandCode のキーが `CMD_API_KEY`
-として追記されます。dsh の provider 設定では `apiKeyEnv: CMD_API_KEY` を指定します。
+dsh の `.env` には、OpenCode Go のキーが `OPENCODE_GO_API_KEY`、CommandCode の
+キーが `CMD_API_KEY` として追記されます。前者は
+`~/.config/opencode/secrets/opencode-go.key` と同じ sops キーから作るので、
+ローテートは `opencode_go_api_key` の1か所だけです。dsh の provider 設定では
+`apiKeyEnv: CMD_API_KEY` を指定します。
 
 OpenCode は `{file:...}`、omp は `models.yml` の `apiKey: "!tr ... < <file>"` で
 復号済みファイルを読むため、キーは環境変数に載りません。

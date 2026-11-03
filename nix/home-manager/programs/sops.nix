@@ -39,13 +39,15 @@ let
       target = "${config.home.homeDirectory}/.config/opencode/secrets/commandcode.key";
     }
     # dsh は .credentials.yaml、プロセス環境、$DSH_HOME/.env の順に探す。.env なら
-    # T3 から起動しても端末から起動しても読まれる。
+    # T3 から起動しても端末から起動しても読まれる。キーは opencode と共有し、
+    # ローテート先を増やさないよう sops の同じキーから env 変数として追記する。
     {
-      key = "dsh_env";
+      key = "opencode_go_api_key";
+      envVar = "OPENCODE_GO_API_KEY";
       sopsFile = agentsSopsFile;
       target = "${config.home.homeDirectory}/.dsh/.env";
     }
-    # dsh_env の内容を保ったまま、他のツールと共有するキーを env 変数として追記する。
+    # 他のツールと共有するキーを env 変数として追記する。
     # 変数名は models.dev が CommandCode に割り当てているものに合わせる。
     {
       key = "commandcode_goat_api_key";
@@ -122,11 +124,19 @@ in
           "$sops_file")" || return 1
 
         ${pkgs.coreutils}/bin/install -d -m 0700 "$target_dir"
-        # 既存ファイルが改行で終わっていないと追記した変数が前の行に繋がる。
-        if [ -s "$target" ] && [ -n "$(${pkgs.coreutils}/bin/tail -c 1 "$target")" ]; then
-          printf '\n' >> "$target"
+        # 追記し続けると switch のたびに同じ変数が増えるので、既存の代入は
+        # 落としてから書き直す。他の変数と手書きの行はそのまま残す。
+        tmp="$(${pkgs.coreutils}/bin/mktemp "$target_dir/.sops.XXXXXX")"
+        if [ -f "$target" ]; then
+          ${pkgs.gnugrep}/bin/grep -v "^$env_var=" "$target" > "$tmp" || true
         fi
-        printf '%s=%s\n' "$env_var" "$value" >> "$target"
+        # 既存ファイルが改行で終わっていないと追記した変数が前の行に繋がる。
+        if [ -s "$tmp" ] && [ -n "$(${pkgs.coreutils}/bin/tail -c 1 "$tmp")" ]; then
+          printf '\n' >> "$tmp"
+        fi
+        printf '%s=%s\n' "$env_var" "$value" >> "$tmp"
+        ${pkgs.coreutils}/bin/chmod 0600 "$tmp"
+        ${pkgs.coreutils}/bin/mv -f "$tmp" "$target"
       }
 
       umask 077
