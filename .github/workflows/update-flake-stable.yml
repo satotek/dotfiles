@@ -21,13 +21,26 @@ concurrency:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    # ubuntu-latest は 2026-11 中に 24.04 から 26.04 へ切り替わる。途中で容量や
+    # ツール構成が変わると検証が落ちるので、イメージを明示して固定する。
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      # 検証で展開する closure は 12 GiB 超。26.04 のイメージは空きが大きい (約 88 GiB)
+      # が、24.04 (約 14 GiB) では溢れたので、同梱の大きいツール群を先に消しておく。
+      - name: Free disk space
+        run: |
+          sudo rm -rf \
+            /usr/local/lib/android \
+            /usr/share/dotnet \
+            /opt/ghc \
+            /opt/hostedtoolcache/CodeQL
+          docker image prune --all --force || true
 
       # AI ツールと拡張入り Azure CLI は公開キャッシュから取得し、ソースビルドを避ける。
       - name: Install Nix
