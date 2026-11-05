@@ -9,6 +9,7 @@ let
     inherit pkgs;
     isLinux = pkgs.stdenv.hostPlatform.isLinux;
   };
+  mergeConfig = import ../lib/merge-config.nix { inherit pkgs lib; };
   opencode2 = pkgs.llm-agents.opencode2;
 
   # llm-agents は v1 の opencode と共存させるため実行ファイル名を opencode2 にする。
@@ -46,8 +47,6 @@ let
     }) sharedMcpServers;
   };
   cliConfig = builtins.fromJSON (builtins.readFile ../../../.config/opencode/cli.json);
-  cliConfigFile = pkgs.writers.writeJSON "opencode-cli.json" cliConfig;
-  opencodeConfigFile = pkgs.writers.writeJSON "opencode.jsonc" opencodeConfig;
 in
 {
   # TUI プラグインは opencode.jsonc の plugins ではなく plugins/ 配下の探索で読まれる。
@@ -98,17 +97,11 @@ in
         "linkGeneration"
         "installHerdrAgentIntegrations"
       ]
-      (
-        lib.hm.generators.mkImpureConfigMerger {
-          inherit pkgs;
-          format = "json";
-          empty = "{}";
-          jqOperation = "$dynamic * $static";
-          path = "${config.xdg.configHome}/opencode/cli.json";
-          staticSettings = cliConfigFile;
-          mode = "600";
-        }
-      );
+      (mergeConfig {
+        name = "opencode-cli.json";
+        path = "${config.xdg.configHome}/opencode/cli.json";
+        settings = cliConfig;
+      });
 
   # 自動更新と共有 MCP。providers や MCP の宣言だけを上書きする。
   home.activation.configureOpenCodeConfig =
@@ -117,17 +110,11 @@ in
         "linkGeneration"
         "installHerdrAgentIntegrations"
       ]
-      (
-        lib.hm.generators.mkImpureConfigMerger {
-          inherit pkgs;
-          format = "json";
-          empty = "{}";
-          jqOperation = "$dynamic * $static";
-          path = "${config.xdg.configHome}/opencode/opencode.jsonc";
-          staticSettings = opencodeConfigFile;
-          mode = "600";
-        }
-      );
+      (mergeConfig {
+        name = "opencode.jsonc";
+        path = "${config.xdg.configHome}/opencode/opencode.jsonc";
+        settings = opencodeConfig;
+      });
 
   # 上流のスキーマに追従できているかを確認する。取得に失敗しても switch は止めない。
   home.activation.validateOpenCodeConfig =

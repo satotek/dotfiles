@@ -12,6 +12,8 @@ let
     isLinux = pkgs.stdenv.hostPlatform.isLinux;
   };
 
+  mergeConfig = import ../lib/merge-config.nix { inherit pkgs lib; };
+
   # 組み込み provider に apiKey だけを足す。"!" 始まりはリクエスト時にシェルで
   # 実行され、stdout が鍵になる。環境変数に載せないので子プロセスへ漏れない。
   # models.yml の鍵は /login で保存した鍵より優先される。
@@ -39,7 +41,7 @@ let
   };
 
   # modelRoles は models.yml ではなく config.yml に置く。
-  settingsFile = pkgs.writers.writeJSON "omp-config.json" {
+  settings = {
     modelRoles.default = "opencode-go/deepseek-v4.1-flash";
     # 同梱の reviewer サブエージェントは @slow を使い、advisor も未指定なら slow に従う。
     # smol などは裏で頻繁に動くので default と同じ安いモデルのまま。
@@ -128,15 +130,10 @@ in
   # config.yml は /settings やモデルピッカーが書き戻すので symlink にしない。
   # 宣言した値だけをマージし、テーマなど omp が書いたキーは残す。ピッカーで
   # 変えた既定モデルは次の switch で戻る。
-  home.activation.configureOmpConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] (
-    lib.hm.generators.mkImpureConfigMerger {
-      inherit pkgs;
-      format = "yaml";
-      empty = "{}";
-      jqOperation = "$dynamic * $static";
-      path = "${config.home.homeDirectory}/.omp/agent/config.yml";
-      staticSettings = settingsFile;
-      mode = "600";
-    }
-  );
+  home.activation.configureOmpConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] (mergeConfig {
+    name = "omp-config.yml";
+    path = "${config.home.homeDirectory}/.omp/agent/config.yml";
+    settings = settings;
+    format = "yaml";
+  });
 }

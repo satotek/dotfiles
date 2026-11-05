@@ -6,7 +6,7 @@
 }:
 let
   homeDir = config.home.homeDirectory;
-  tomlFormat = pkgs.formats.toml { };
+  mergeConfig = import ../lib/merge-config.nix { inherit pkgs lib; };
 
   # TUI が ~/.grok/config.toml へ書き戻すユーザー設定。
   # marketplace / privacy / hints はランタイム状態なので宣言しない。
@@ -41,7 +41,6 @@ let
       contextual_hints.undo = true;
     };
   };
-  baseConfigFile = tomlFormat.generate "grok-config-base.toml" grokConfig;
 in
 {
   # Grok Build CLI。llm-agents.nix が提供する公式バイナリのパッケージを使う。
@@ -72,15 +71,10 @@ in
     fi
   '';
 
-  home.activation.grokConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] (
-    lib.hm.generators.mkImpureConfigMerger {
-      inherit pkgs;
-      format = "toml";
-      empty = "{}";
-      jqOperation = "$dynamic * $static";
-      path = "${homeDir}/.grok/config.toml";
-      staticSettings = baseConfigFile;
-      mode = "600";
-    }
-  );
+  home.activation.grokConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] (mergeConfig {
+    name = "grok-config-base.toml";
+    path = "${homeDir}/.grok/config.toml";
+    settings = grokConfig;
+    format = "toml";
+  });
 }
