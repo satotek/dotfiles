@@ -203,12 +203,12 @@ Nixストアの絶対パスで参照します。
 
 ### リポジトリで管理する設定
 
-頻繁に直接編集したい設定には、Home Managerがリポジトリを参照する
-シンボリックリンクを作ります。対象は`.config/nvim`、
-Hunk・AeroSpace・Karabiner・OpenCode・Nix（`nix.conf`）の設定です。
+設定の配置方法は用途やアプリケーションの特性に応じて使い分けています。
 
-これらには、編集直後にアプリケーションから読めるものと、再起動・再読み込み・
-`nix-switch`が必要なものがあります。各モジュールの管理方法を確認してください。
+- **シンボリックリンク（out-of-store symlink）** — リポジトリのファイルを直接参照し、編集を即時反映させます。対象は `.config/nvim`、Hunk（`hunk/config.toml`）、Karabiner（`karabiner/karabiner.json`）、Nix（`nix.conf`）です。
+- **Nix ストアへの生成** — AeroSpace の設定は `.config/aerospace/aerospace.toml` から `programs.aerospace.settings` として生成します。ライブ symlink ではないため、TOML の変更後は `nix-switch` が必要です（適用時に `aerospace reload-config` が自動実行されます）。
+- **アプリ所有ファイルへのマージ** — アプリが実行時に設定を書き戻すものは、宣言した値だけを実ファイルへマージします。OpenCode（`opencode.jsonc` / `cli.json`）や omp、Grok は共通ヘルパー（`nix/home-manager/lib/merge-config.nix`）を使って activation でマージします。なお、`programs.opencode` は本リポジトリの session variable の配り方と衝突するため使用していません。
+- **Home Manager モジュールによる可変設定** — T3 Code（`programs.t3code`）や Antigravity CLI（`programs.antigravity-cli`）はモジュールの可変設定オプション（`mutableUserSettings` / `mutableSettings`）を使い、アプリ側の実行時状態（trustedWorkspaces 等）を保持しながらマージします。
 
 ### Homebrew
 
@@ -275,13 +275,15 @@ dsh の `.env` には、OpenCode Go のキーが `OPENCODE_GO_API_KEY`、Command
 OpenCode は `{file:...}`、omp は `models.yml` の `apiKey: "!tr ... < <file>"` で
 復号済みファイルを読むため、キーは環境変数に載りません。
 同じ provider で `opencode auth login` すると credential が優先され、sops のキーは
-使われません。Google と CommandCode は logout したままにします。DeepSeek 公式のキーは
-omp だけが使い、OpenCode の providers には含めていません。
+使われません。Google と CommandCode は logout したままにします。OpenCode の公式 DeepSeek
+provider は削除したため、復号された `deepseek.key` は omp のみが参照します。
 
 CommandCode へは ZDR（保持・学習なし）を要求しています。OpenCode は provider の
 `x-cmd-zdr: 1` ヘッダー（omp も同じ）、CLI と pi 拡張は `CMD_ZDR=1` を使います。ZDR 対応の
 upstream がないモデルは 422 (`cmd_zdr_no_providers`) で失敗し、一部のモデルは
 ZDR 対応 upstream に回るぶん通常より高い料金になります。
+
+復号処理は stamp ファイル（`.sops-*.stamp`）で sops ファイルの store パスとキーを記録しており、両方が変わっていなければ `nix-switch` 時に GCP Cloud KMS を叩き直さずに前回の出力を再利用します。復号先ファイルを削除した場合やシークレットを編集した場合は自動で再復号されます。
 
 値を更新するときは sops でファイルを開いて編集し、`nix-switch` で配り直します。
 
@@ -336,8 +338,17 @@ Home Manager適用時に補完キャッシュを無効化するため、新し�
 ## AIエージェントの設定
 
 エージェントのパッケージは主に`llm-agents.nix`オーバーレイから導入します。
-設定はHome Managerで生成し、共通のMCP定義は
+設定はHome Managerで生成・マージし、共通のMCP定義は
 `nix/home-manager/data/mcp-servers.nix`に置きます。
+
+### 各エージェントの設定管理
+
+- **T3 Code** — 設定と headless server は Home Manager の `programs.t3code` / `programs.t3code.server` で管理します（自前の jq activation や手書き systemd unit は廃止）。パッケージは `pkgs.llm-agents.t3code` を `providerPackages = []` で使用し、エージェント CLI の同梱を外して各 provider は `llm-agents` の絶対パス `binaryPath` で指定します（同梱の OpenCode v1 による DB 不整合などを回避するため）。Antigravity provider は 337 MB の公式ランタイム取得を避けるため、`agy acp` を包んだ軽量ラッパー（`antigravityAcp`）を `binaryPath` に指定しています。サーバーは systemd 管理で、サーバーを有効にしたホスト（gem-ai）で稼働します。サービス停止中に T3 クライアントが自前の managed runtime を起動すると、ポート競合により `ServerAlreadyRunningError` で systemd 側が起動できなくなるため、その場合はクライアントのランタイムを停止するか再起動で解消します。
+- **Antigravity CLI** — `programs.antigravity-cli` モジュールの `mutableSettings = true` で管理し、`trustedWorkspaces` などの実行時状態を残したままマージします。ツール実行の自動承認のため `settings.toolPermission = "always-proceed"` を指定しています。CLI バイナリは `pkgs.llm-agents.antigravity-cli` です。
+- **OpenCode** — 公式 DeepSeek provider は削除済みです（sops のキーは omp 用に残存）。設定は app-owned な `~/.config/opencode/opencode.jsonc` と `cli.json` に activation で宣言値のみをマージします。`programs.opencode` は本リポジトリの session variable の配り方と衝突するため使用していません。
+- **設定マージの共通化** — OpenCode、omp、Grok などの書き戻しが発生する設定ファイルは、共通ヘルパー（`nix/home-manager/lib/merge-config.nix`）を用いて宣言値を安全にマージしています。
+
+### Herdr
 
 Herdr本体はNixパッケージとして管理しています。`ai`ロールのホストでは、Home Managerの適用時に
 Claude Code、Codex、Cursor、Grok、OpenCodeのHerdr連携を生成し、セッション復元に必要なフックを設定します。

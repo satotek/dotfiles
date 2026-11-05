@@ -106,10 +106,9 @@ aerospace run-callback --for-every-window on-window-detected
 
 ## 初回セットアップ
 
-1. `nix-switch` でアプリと設定を入れる
-2. AeroSpace.app を起動する（以後は launchd がログイン時に起動する）
-3. システム設定 → プライバシーとセキュリティ → アクセシビリティ で AeroSpace を許可する
+1. `nix-switch` でアプリ（`pkgs.aerospace`）と設定を入れる
+2. AeroSpace.app を起動する（以後は launchd がログイン時に自動起動する）
+3. システム設定 → プライバシーとセキュリティ → アクセシビリティ で AeroSpace を許可する（Homebrew cask から移行した場合はアプリのパスが変わるため、アクセシビリティ許可の再設定が必要になる可能性がある）
 4. マルチモニタなら、各モニタの右下または左下に空きが出るよう配置する
 
-設定変更は `nix-switch` で反映する。`auto-reload-config` は有効なままなので、
-ストアのファイルが差し替わったあとはモジュールの `reload-config` で読み直される。
+設定変更は `nix-switch` で反映する。`.config/aerospace/aerospace.toml` から Nix ストアに設定を生成するため、TOML を編集したら `nix-switch` が必要（ライブ symlink ではない）。`auto-reload-config` は有効なままなので、ストアのファイルが差し替わったあとはモジュールの `reload-config` で読み直される。
