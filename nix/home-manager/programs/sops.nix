@@ -94,6 +94,15 @@ in
         key="$2"
         target="$3"
         target_dir="$(${pkgs.coreutils}/bin/dirname "$target")"
+        stamp="$target_dir/.sops-$(${pkgs.coreutils}/bin/basename "$target").stamp"
+
+        # sops の復号は KMS を叩くので、同じ store パスと同じキーなら前回の
+        # 結果をそのまま使う。ファイルを消したときは stamp が残っていても
+        # target が無いので復号し直す。
+        if [ -f "$target" ] && [ -f "$stamp" ] \
+          && [ "$(${pkgs.coreutils}/bin/cat "$stamp")" = "$sops_file:$key" ]; then
+          return 0
+        fi
 
         ${pkgs.coreutils}/bin/install -d -m 0700 "$target_dir"
         tmp="$(${pkgs.coreutils}/bin/mktemp "$target_dir/.sops.XXXXXX")"
@@ -109,6 +118,8 @@ in
 
         ${pkgs.coreutils}/bin/chmod 0600 "$tmp"
         ${pkgs.coreutils}/bin/mv -f "$tmp" "$target"
+        printf '%s' "$sops_file:$key" > "$stamp"
+        ${pkgs.coreutils}/bin/chmod 0600 "$stamp"
       }
 
       append_env_secret() {
@@ -117,6 +128,13 @@ in
         env_var="$3"
         target="$4"
         target_dir="$(${pkgs.coreutils}/bin/dirname "$target")"
+        stamp="$target_dir/.sops-''${env_var}.stamp"
+
+        if [ -f "$target" ] && [ -f "$stamp" ] \
+          && [ "$(${pkgs.coreutils}/bin/cat "$stamp")" = "$sops_file:$key" ] \
+          && ${pkgs.gnugrep}/bin/grep -q "^$env_var=" "$target"; then
+          return 0
+        fi
 
         value="$(${pkgs.sops}/bin/sops \
           --decrypt \
@@ -137,6 +155,8 @@ in
         printf '%s=%s\n' "$env_var" "$value" >> "$tmp"
         ${pkgs.coreutils}/bin/chmod 0600 "$tmp"
         ${pkgs.coreutils}/bin/mv -f "$tmp" "$target"
+        printf '%s' "$sops_file:$key" > "$stamp"
+        ${pkgs.coreutils}/bin/chmod 0600 "$stamp"
       }
 
       umask 077
