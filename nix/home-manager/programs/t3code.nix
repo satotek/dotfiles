@@ -9,18 +9,6 @@ let
   # 実行ファイルは下の binaryPath で明示するため、同梱は丸ごと外す。
   t3code = pkgs.llm-agents.t3code.override { providerPackages = [ ]; };
 
-  # T3 の Antigravity プロバイダは公式の ACP ランタイム（agy_acp_server.par と
-  # 同じディレクトリの localharness_external）を期待する。agy CLI は 1.4 以降
-  # `agy acp` を持つので、337 MB のランタイムを別途入れずにそれを包む。
-  # T3 は Linux で --uid= を渡すため、引数は捨てる。
-  antigravityAcp = pkgs.runCommand "antigravity-acp" { } ''
-    mkdir -p $out/bin
-    printf '%s\n' '#!/bin/sh' 'exec ${pkgs.llm-agents.antigravity-cli}/bin/agy acp' > $out/bin/agy_acp_server.par
-    chmod +x $out/bin/agy_acp_server.par
-    printf '#!/bin/sh\nexit 0\n' > $out/bin/localharness_external
-    chmod +x $out/bin/localharness_external
-  '';
-
   settings = {
     defaultModelSelection = {
       instanceId = "claudeAgent";
@@ -72,11 +60,11 @@ let
             displayName = "OpenCode";
             config.binaryPath = "${pkgs.llm-agents.opencode2}/bin/opencode2";
           };
-          # T3 の Antigravity は公式 ACP ランタイムを要求する。agy CLI の acp を
-          # 包んだ実行ファイルを指定し、337 MB のランタイム取得を避ける。
+          # 公式の ACP ランタイムは T3 が ~/.t3/tools/... に管理する。
+          # binaryPath を空にして自動検出に任せる（旧設定の wrapper パスを上書きする）。
           antigravity = {
             displayName = "Antigravity";
-            config.binaryPath = "${antigravityAcp}/bin/agy_acp_server.par";
+            config.binaryPath = "";
           };
         }
       // {
