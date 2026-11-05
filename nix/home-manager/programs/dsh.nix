@@ -16,12 +16,33 @@ let
     "--port"
     (toString port)
   ];
+
+  # $DSH_HOME/cordis.patch.yml は全プロファイルに適用されるホームレイヤー。
+  # provider の宣言をここへ集約し、web / acp / dsh-tui で API キーの配線を共有する。
+  # キー本体は sops が ~/.dsh/.env に置く。
+  homePatch = pkgs.writeText "dsh-home-patch.yml" ''
+    # Home layer applied to every dsh profile. Providers live here so web, acp,
+    # and dsh-tui share the same API key wiring.
+    - id: llm-pi-ai
+      name: "@deepseek-ai/dsh-llm-pi-ai"
+      config:
+        providers:
+          opencode-go:
+            apiKeyEnv: OPENCODE_GO_API_KEY
+  '';
 in
 {
   config = {
     # DeepSeek Harness。upstream はリリース成果物を出さないので、
     # llm-agents.nix がソースからビルドしたパッケージを使う。
     home.packages = [ dsh ];
+
+    # dsh のホームレイヤーを宣言する。プロファイル側の patch は dsh が
+    # 書き戻すので触らず、全プロファイル共通の provider 設定だけを置く。
+    home.activation.configureDshHomePatch = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      run ${pkgs.coreutils}/bin/install -d -m 0700 ${lib.escapeShellArg "${config.home.homeDirectory}/.dsh"}
+      run ${pkgs.coreutils}/bin/install -m 0600 ${homePatch} ${lib.escapeShellArg "${config.home.homeDirectory}/.dsh/cordis.patch.yml"}
+    '';
 
     # ブラウザ UI は前景プロセスなので、ログイン時に常駐させる。
     # URL は起動ログに出る。Linux は journalctl、macOS は ~/Library/Logs を見る。
