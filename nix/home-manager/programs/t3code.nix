@@ -1,12 +1,13 @@
 {
-  config,
   lib,
   pkgs,
   ...
 }:
 let
-  t3code = pkgs.llm-agents.t3code;
-  settingsDir = "${config.home.homeDirectory}/.t3/userdata";
+  # 同梱 provider は llm-agents の別バージョンで、特に OpenCode は v1 なので、
+  # PATH 経由で起動すると v2 が変換したデータベースを読めずに失敗する。
+  # 実行ファイルは下の binaryPath で明示するため、同梱は丸ごと外す。
+  t3code = pkgs.llm-agents.t3code.override { providerPackages = [ ]; };
 
   settings = {
     defaultModelSelection = {
@@ -24,13 +25,9 @@ let
     # エージェントのバージョンは llm-agents で揃えるので、更新の通知は要らない。
     enableProviderUpdateChecks = false;
 
-    # t3 のラッパーは同梱のエージェントを PATH の先頭に置くので、名前で探させると
-    # OpenCode は同梱の v1 になり、v2 が変換したデータベースを読めずに失敗する。
-    # dotfiles で入れたものを実行ファイルのパスで指定する。driver が欠けた
-    # インスタンスがあると settings.json 全体が読み込まれないので、必ず書く。
-    #
-    # displayName も省かない。解決済みのバイナリパスがラベルとして保存され、
-    # UI に /nix/store/... が出たままマージで残る。
+    # driver が欠けたインスタンスがあると settings.json 全体が読み込まれないので、
+    # 必ず書く。displayName も省かない。解決済みのバイナリパスがラベルとして
+    # 保存され、UI に /nix/store/... が出たままマージで残る。
     providerInstances =
       lib.mapAttrs
         (
@@ -88,35 +85,14 @@ let
         };
       };
   };
-  settingsFile = pkgs.writeText "t3code-settings.json" (builtins.toJSON settings);
 in
 {
-  # t3 connect / t3 pair をシェルから使うため、CLI も入れる。
-  # デスクトップアプリは別 output なので、これで GUI が二重に入ることはない。
-  home.packages = [ t3code ];
-
-  # T3 Code は設定画面から settings.json を丸ごと書き換えるので、リンクにせず
-  # 上のキーだけを上書きする。サーバーは設定ディレクトリを監視しているので、
-  # 再起動しなくても読み直す。デスクトップアプリも同じ場所を読む。
-  #
-  # マージは上書きと追加だけで、宣言から消したキーは既存ファイルに残る。
-  # プロバイダーを廃止したときは、各環境の settings.json から手で消すこと。
-  home.activation.configureT3codeSettings = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-    umask 077
-    settings_dir=${lib.escapeShellArg settingsDir}
-    settings_file="$settings_dir/settings.json"
-    run mkdir -p "$settings_dir"
-
-    if [ -f "$settings_file" ]; then
-      tmp="$(${pkgs.coreutils}/bin/mktemp "$settings_dir/.settings.json.XXXXXX")"
-      if ! ${lib.getExe pkgs.jq} -s '.[0] * .[1]' "$settings_file" ${settingsFile} > "$tmp"; then
-        rm -f "$tmp"
-        exit 1
-      fi
-      chmod 600 "$tmp"
-      run mv "$tmp" "$settings_file"
-    else
-      run ${lib.getExe pkgs.jq} . ${settingsFile} > "$settings_file"
-    fi
-  '';
+  # 設定は Home Manager のモジュールが、アプリが書き戻したキーを残したまま
+  # マージする。CLI の t3 もモジュールが入れる。
+  programs.t3code = {
+    enable = true;
+    package = t3code;
+    mutableUserSettings = true;
+    userSettings = settings;
+  };
 }
