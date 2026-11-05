@@ -1,213 +1,156 @@
-# VM リモート作業ワークフロー (herdr + SSH 動的フォワード / SOCKS)
+# VM リモート作業ワークフロー (Herdr + SSH 動的フォワード / SOCKS)
 
-azureuser の VM (`vm` = `172.207.57.61`) に対する日常のリモート作業まわりのメモ。
-herdr の導入、SSH 接続共有、ポートフォワード(必要な時だけ張る方式)をまとめる。
+Azure 上の VM (`vm` = `172.207.57.61`) や `gem-ai` に対する日常のリモート作業ワークフローをまとめる。
+Herdr の運用、SSH 接続共有 (ControlMaster)、および必要な時だけポートを開通する動的フォワード／SOCKS プロキシの仕組みを扱う。
 
-- **ローカル / ホスト** = 手元の Mac(ブラウザがある側)
-- **リモート** = azureuser の VM(コード・開発サーバが動く側)
+- **ローカル / ホスト**: 手元の Mac（ブラウザや GUI クライアントがある側）
+- **リモート**: Azure VM（コード編集・開発サーバー・T3 Code サーバーが稼働する側）
 
 ---
 
-## 1. herdr
+## 1. Herdr
 
-tmux ライクな「AIエージェント特化ターミナルマルチプレクサ」。既存ターミナル(Ghostty 等)の
-中で動き、各ペインのエージェント状態(working/idle/blocked)を表示する。
+AI エージェント特化のターミナルマルチプレクサ。各ペインのエージェント状態（working / idle / blocked）を可視化し、セッション復元やエージェント連携フックを提供する。
 
-### 導入(mac のみ)
+### パッケージと設定管理
 
-`nix/nix-darwin/homebrew.nix` の `brews` に宣言済み。反映は system レイヤーなので `darwin-switch`。
+- **CLI 本体 (`herdr`) / サーバー (`herdr-core` / `hc`)**:
+  - Home Manager の `cli` プリセット（`programs.herdr` / `pkgs.llm-agents.herdr` および `pkgs.llm-agents.herdr-core`）として管理。
+  - macOS・Linux（VM 側含む）の両方に導入される。
+  - プレフィックスキーは Neovim や Zsh と競合しにくい `Ctrl-Q` に設定。
+  - 起動シェルは Nix 製の Zsh（`/bin/zsh`）を指定し、OS 標準 Zsh と Nix 製 `fzf-tab` バイナリモジュール間の glibc 不一致を防止している。
+- **macOS GUI クライアント (`herdr-app`)**:
+  - `nix/nix-darwin/homebrew.nix` の Cask（`casks = [ "herdr-app" ]`）で導入。
+  - キーバインドや mod 設定は `nix/home-manager/programs/herdr-app.nix` で `~/.config/herdr-app/keys.json` に activation でマージ。
+- **Herdr 公式スキル**:
+  - `flake.nix` の `herdr-skill` input から抽出し、`~/.claude/skills/herdr/` および `~/.agents/skills/herdr/` に配置。
+  - `HERDR_ENV=1` ガードがあるため、Herdr パネル外では無害。
 
-```nix
-brews = [ "herdr" ];
-```
-
-> VM 側には入れていない。`herdr --remote vm` 実行時に、herdr が VM へ**ビルド済みバイナリを
-> 自動DL**(`~/.local/bin/herdr`)してくれるため。
-
-### remote 連携
+### リモート連携
 
 ```console
-herdr --remote vm            # ローカルを薄いクライアントにして VM の herdr サーバへ接続
+herdr --remote vm            # ローカルクライアントから VM 上の Herdr サーバーへ接続
 ```
 
-- ローカルクライアントが残るので、**画像のクリップボード貼り付けが VM のエージェントにも通る**
-  (素の `ssh + tmux` では壊れる部分)。
-- **注意**: `herdr --remote vm` のペイン内シェルは **VM 側のシェル**。後述の `vmfwd`/`vmproxy` は
-  Mac 側のコマンドなので、herdr ペイン内(=VM)では動かない。別途 Mac のローカル端末で打つこと。
-
-### herdr 公式 skill
-
-`~/.claude/skills/herdr/` と `~/.agents/skills/herdr/` に配置(home レイヤー、全ホスト共通)。
-
-- `flake.nix` … `herdr-skill` input(`flake = false`)
-- `nix/home-manager/programs/agents-skills.nix` … SKILL.md を抽出する derivation + source + explicit
-
-> upstream の SKILL.md はリポジトリ直下にあり、root の `CLAUDE.md` がファイル symlink のため、
-> リポジトリを直接 discovery source にすると scanner が落ちる。SKILL.md だけをクリーンな
-> `herdr/` ツリーへ `cp` して回避している。
-> skill には `HERDR_ENV=1` ガードがあり、herdr パネル外では何もしない(全ホストに配っても無害)。
+- クライアント側でターミナルが動くため、**画像のクリップボード貼り付けがリモートのエージェントにもそのまま通る**（素の `ssh + tmux` ではクリップボードが途切れる問題を解消）。
+- **注意**: `herdr --remote vm` ペイン内のシェルは **VM 側のシェル**。Mac 側で定義された後述の `vmfwd` や `vmproxy` は VM 内では実行できないため、手元のローカルターミナルで実行すること。
 
 ---
 
 ## 2. SSH 接続共有 (ControlMaster)
 
-`~/.ssh/config` の `Host vm` に設定(**このファイルは git 管理外**なので手動で入れる)。
+`~/.ssh/config` の `Host vm` に多重化設定を記述する（このファイルは手動管理）。
 
 ```sshconfig
 Host vm
   HostName 172.207.57.61
   User azureuser
   Port 22
-  # 接続を1本のマスターに集約。フォワードは vmfwd/vmproxy で動的に張る。
-  # 静的な LocalForward は書かない(VM側サービス未起動時の "channel open failed" 回避)。
+  # 接続を1本のマスターソケットに集約。フォワードは vmfwd / vmproxy で動的に追加・解除する。
+  # 常時の静的 LocalForward は記述しない（VM側サービス未起動時の channel open failed 回避）。
   ControlMaster auto
   ControlPath  ~/.ssh/cm/%r@%h:%p
   ControlPersist 10m
 ```
 
-初回だけ制御ソケット用ディレクトリを作る:
+初回のみソケット用ディレクトリを作成する:
 
 ```console
 mkdir -p ~/.ssh/cm && chmod 700 ~/.ssh/cm
 ```
 
 効果:
+- 2本目以降の SSH 接続が認証不要で即時に確立される（Herdr の再接続も高速化）。
+- 稼働中のマスターソケットに対して、ポートフォワードを後から動的に追加・削除できる。
 
-- `vm` への2本目以降の SSH が**再認証なしで即接続**(herdr の再接続も速くなる)。
-- 稼働中のマスターに対して、フォワードを**動的に足す/外す**ことができる(下記)。
-
-確認:
+接続の確認:
 
 ```console
-ssh -G vm | grep -i controlmaster   # controlmaster auto と出れば反映済み
-ssh -O check vm                     # "Master running (pid=...)" ならマスター生存
+ssh -G vm | grep -i controlmaster   # "controlmaster auto" と出れば有効
+ssh -O check vm                     # "Master running (pid=...)" ならマスター接続中
 ```
 
 ---
 
 ## 3. 動的ポートフォワード (`vmfwd`)
 
-特定ポートだけを Mac ↔ VM で転送したい時。zsh 関数は `nix/home-manager/programs/zsh.nix` に定義。
+特定のポートだけを Mac ↔ VM 間で転送したい場合に使用する。Zsh 関数は `nix/home-manager/programs/zsh/vm.zsh` に定義されている。
 
 ```console
-ssh vm                 # まずマスター接続を1本張る(herdr --remote vm でも可)
-vmfwd 8090             # localhost:8090(Mac) -> vm:8090 を動的に追加
-vmunfwd 8090           # 外す
+vmfwd 8090             # localhost:8090 (Mac) -> vm:8090 を動的に追加
+vmunfwd 8090           # フォワードを解除
 vmfwls                 # マスター接続の生存確認 (ssh -O check vm)
 ```
 
 - 実体は `ssh -O forward -L <l>:localhost:<r> vm` / `ssh -O cancel ...`。
-- **稼働中のマスター接続が前提**。無い状態で撃つと `ssh -O forward` は失敗する。
-- **VS Code の Ports パネルで足す/消すのに相当**。config に静的 `LocalForward` を書かずに済む。
+- ポート番号を省略すると、ローカルとリモートで同じポート番号が使われる。
+- 稼働中のマスター接続に対してポートを追加するため、静的な `LocalForward` を config に並べる必要がない。
 
 ---
 
 ## 4. SOCKS プロキシ (`vmproxy` / `vmbrowse`)
 
-ポートごとの `-L` 転送すら不要にしたい時。SOCKS を1本張れば、以後 VM 側で好きなポートに
-サーバを立てるだけで Mac から `localhost:<port>` で届く(VS Code の「勝手に見える」に近い体感)。
+ポートごとの個別転送を行わず、VM 側で立ち上げた任意のポート・サービスへ透過的にアクセスしたい場合に使用する。
 
 ```console
-vmproxy                       # SOCKS を localhost:1080 に張る(ssh -O forward -D)
-vmbrowse                      # SOCKS 経由の隔離 Chrome で http://localhost:8090 を開く
-vmbrowse http://localhost:3000
-vmunproxy                     # 外す
+vmproxy                # SOCKS プロキシを localhost:1080 に起動
+vmbrowse               # SOCKS 経由の専用 Chrome プロファイルを開く
+vmunproxy              # SOCKS プロキシを解除
 ```
 
-### 仕組みと注意
+### 仕組みと特徴
 
-- `ssh -D 1080 vm` で張った SOCKS を通る接続は **VM 側から発信**される。だからブラウザで
-  `localhost:8090` を開くと「**VM の** localhost:8090」に届く。
-- **落とし穴**: Chrome/大半のブラウザは `localhost`/`127.0.0.1` を**デフォルトでプロキシ除外**する。
-  `vmbrowse` は `--proxy-bypass-list="<-loopback>"` で loopback 除外を解除し、localhost も
-  SOCKS 経由に回している。さらに `--user-data-dir` を分けた**専用 Chrome プロファイル**で起動する
-  ので、普段のブラウジングは SOCKS を経由しない。
-- 検証: `curl --socks5-hostname 127.0.0.1:1080 https://api.ipify.org` が **VM の IP**
-  (`172.207.57.61`)を返せば正しく経由できている。
+- **自動マスター起動**: `vmproxy` の実行時、マスター接続が存在しなければ自動的に `ssh -fN vm` をバックグラウンド起動してから `ssh -O forward -D 127.0.0.1:1080 vm` を呼び出す。
+- **DNS と Loopback の解決**: SOCKS5 経由の接続は VM 側から発信されるため、ブラウザで開く `localhost:<port>` は「VM 内の localhost」に届く。
+- **Loopback 除外の解除**: 一般的なブラウザは `localhost` / `127.0.0.1` をプロキシから除外する。`vmbrowse` は `--proxy-bypass-list="<-loopback>"` を指定して localhost も SOCKS 経由に回し、`--user-data-dir` を分けた隔離プロファイル（`${XDG_CACHE_HOME:-~/.cache}/chrome-vm-proxy`）で起動するため、日常の通常ブラウジングに影響を与えない。
+- **動作検証**:
+  ```console
+  curl --socks5-hostname 127.0.0.1:1080 https://api.ipify.org
+  ```
+  上記の出力が VM のパブリック IP（`172.207.57.61`）と一致すれば正しく経由できている。
 
-### portless(subdomain 経由)で複数サービスに到達
+### サブドメインルーティング (portless 等)
 
-VM 側で portless 等の subdomain ルーティング(例: `a.localhost:1355` → サービスA、
-`b.localhost:1355` → サービスB)を使っている場合、**`vmbrowse` の Chrome でそのまま
-`http://a.localhost:1355` を開けば使える**。ポートごとに `vmfwd` を張る必要は無い。
+VM 側で `portless` 等のサブドメインルーティング（例: `a.localhost:1355`、`b.localhost:1355`）を利用している場合、`vmbrowse` のウィンドウでそのままアクセスできる。名前解決と HTTP `Host` ヘッダーが VM 側で保持されるため、ポートごとの個別設定は不要。
 
-- `vmbrowse` は loopback もプロキシ経由にしているので、`*.localhost` へのアクセスも SOCKS 経由で
-  VM に届く。名前解決も VM 側で行われ(`a.localhost` → VM の loopback。systemd-resolved が解決)、
-  `Host: a.localhost:1355` ヘッダが保持されるので portless が subdomain を見て振り分ける。
-- 実質「vmbrowse のウィンドウ = VM 上のブラウザ」。VM でローカルに開いたのと同じ挙動。
-- SOCKS を1本(`vmproxy`)張れば、`a.localhost` / `b.localhost` / … と変えるだけで全サービスに到達。
-- 注意: VM では `*.localhost` が `::1`(IPv6 loopback)に解決される。portless が IPv4 `127.0.0.1`
-  だけで listen していると届かない場合がある(VM ローカルで開けているなら vmbrowse でも開ける)。
-  ダメなら portless を `::` / 両 family で listen させる。
+> [!NOTE]
+> VM 側で `*.localhost` が IPv6（`::1`）に解決される場合がある。サービス側が IPv4（`127.0.0.1`）のみで listen していると届かないことがあるため、その場合はサービスをデュアルスタック（`::` / 両対応）で listen させる。
 
 ---
 
-## 5. 反映
+## 5. T3 Code サーバー (`gem-ai`) との接続
 
-- **ssh config**(`~/.ssh/config`)… ssh が直読みするので即時反映。
-- **zsh 関数**(`zsh.nix`)… home レイヤーなので `nix-switch` 後に有効化。
+`azureuser@gem-ai` ホストでは、T3 Code の headless server（ポート `3773`）が Home Manager の `programs.t3code.server` により systemd ユーザーサービスとして稼働している。
 
-```console
-nix-switch   # = nh home switch ~/dotfiles -c nosuke@nosuke-M5-MBP -b hm-bak
-```
+手元の Mac（GUI クライアント `t3-code`）から接続する方法は2通りある:
 
----
-
-## 6. トラブルシュート
-
-### `channel N: open failed: connect failed: Connection refused` が定期的に出る
-
-- 原因: 静的な `LocalForward 8090 localhost:8090` が `Host vm` にあり、**VM 側の 8090 で何も
-  listen していない**(サーバ未起動)のに、ローカルの何か(開きっぱなしのブラウザタブ等)が
-  `localhost:8090` を叩き続けている。herdr の SSH もこの config を継承するので herdr 画面に出る。
-- 対処: 静的 `LocalForward` をやめ、**必要な時だけ `vmfwd`/`vmproxy` で張る**方式に移行(本メモの構成)。
-  古い herdr セッションが動いている場合は貼り直すと消える。
+1. **T3 Connect（トンネル）経由**:
+   - 初回に VM 上で `t3 connect` を実行してサインインしておくと、サービス起動時に自動でトンネルリンクが維持される。
+   - 手元の T3 Code アプリから組織の T3 アカウント経由で接続する。
+2. **SSH ポートフォワード経由**:
+   - `vmfwd 3773` を実行して `localhost:3773` を手元に引き込む。
+   - 手元の T3 Code クライアントからローカルサーバーとして接続する。
 
 ---
 
-## 7. Windows での手順
+## 6. Windows での手順
 
-| 要素 | Mac | Windows ネイティブ | WSL |
+| 機能 | macOS | Windows ネイティブ | WSL |
 |---|---|---|---|
-| `ssh -D`(SOCKS) | ✅ | ✅ | ✅ |
-| ブラウザ SOCKS + loopback 解除 | ✅ | ✅(Chrome/Edge 同フラグ) | ✅ |
+| `ssh -D` (SOCKS) | ✅ | ✅ | ✅ |
+| 専用 Chrome + loopback 解除 | ✅ | ✅ | ✅ |
 | ControlMaster / `ssh -O forward` | ✅ | ❌ 未対応 | ✅ |
 
-Windows ネイティブの OpenSSH は**接続多重化(ControlMaster)を実装していない**
-([Win32-OpenSSH #1328](https://github.com/PowerShell/Win32-OpenSSH/issues/1328))。
-そのため `vmfwd`/`vmproxy` の「稼働中マスターに動的追加」は使えず、**SOCKS 用 ssh を常駐起動**する
-方式に置き換える。完全に Mac と同じ体験が欲しい場合は WSL を使う(下記 7-B)。
+Windows ネイティブの OpenSSH は接続多重化（ControlMaster）をサポートしていない（[Win32-OpenSSH #1328](https://github.com/PowerShell/Win32-OpenSSH/issues/1328)）。
+そのため、ネイティブ環境では SOCKS 用 SSH プロセスを常駐させる方式を用いるか、WSL を利用する。
 
-### 7-A. ネイティブ PowerShell の手順
+### 6-A. ネイティブ PowerShell
 
-#### 1) SSH config を置く
-
-`%USERPROFILE%\.ssh\config`(= `C:\Users\<name>\.ssh\config`)に記述。
-**ControlMaster 系の3行は入れない**(機能しないため)。
-
-```sshconfig
-Host vm
-  HostName 172.207.57.61
-  User azureuser
-  Port 22
-  # 1Password を使う場合(Windows は名前付きパイプ):
-  # IdentityAgent \\.\pipe\openssh-ssh-agent
-```
-
-`ssh vm` で接続できることを先に確認しておく。
-
-#### 2) PowerShell プロファイルに関数を追加
-
-```console
-notepad $PROFILE      # 無ければ New-Item -ItemType File -Path $PROFILE -Force で作成
-```
-
-以下を貼り付けて保存 → `. $PROFILE` で再読み込み。
+`%USERPROFILE%\.ssh\config` に `Host vm` を設定し（ControlMaster 設定は除く）、PowerShell プロファイル（`$PROFILE`）に以下を定義する。
 
 ```powershell
 function vmproxy {
     param([int]$Port = 1080)
-    # ControlMaster が無いので SOCKS 用 ssh を常駐起動(-O forward は使えない)
     $running = Get-CimInstance Win32_Process -Filter "Name='ssh.exe'" |
         Where-Object { $_.CommandLine -match "-D\s+$Port\b" }
     if ($running) { Write-Host "already up on :$Port"; return }
@@ -234,56 +177,7 @@ function vmbrowse {
 }
 ```
 
-> 単一ポートだけ転送したいなら(`vmfwd` 相当)、ControlMaster が無いので同様に常駐 ssh を使う:
-> `Start-Process ssh -ArgumentList "-N","-L","8090:localhost:8090","vm" -WindowStyle Hidden`
+### 6-B. WSL
 
-#### 3) 使い方
-
-```powershell
-ssh vm            # 認証を通しておく(1Password の承認が出ることがある)
-vmproxy           # SOCKS を localhost:1080 に常駐起動
-vmbrowse          # SOCKS 経由の隔離 Chrome で http://localhost:8090 を開く
-vmbrowse http://localhost:3000
-vmunproxy         # 常駐 ssh を停止
-```
-
-- `-N` はコマンド無し(転送専用)、`-f`(バックグラウンド化)は Windows で不安定なので
-  `Start-Process ... -WindowStyle Hidden` で裏に回す。
-- Edge を使うなら `$chrome` を `"${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"`
-  に変えるだけ(フラグは同じ)。
-- 検証: `curl.exe --socks5-hostname 127.0.0.1:1080 https://api.ipify.org` が **VM の IP** を返せばOK。
-
-### 7-B. WSL の手順(Mac と同一)
-
-WSL(Ubuntu 等)内は本物の Linux OpenSSH なので、**Mac と全く同じ ControlMaster ベースの仕組みが
-そのまま動く**。このリポジトリには WSL 用の home 構成があるので、そこに乗せるのが素直。
-
-1. WSL 内で home-manager を適用(`nosuke@nosuke-windows` 構成):
-
-   ```console
-   nix run home-manager/master -- switch -b backup --flake "path:$PWD#nosuke@nosuke-windows"
-   ```
-
-   → `zsh.nix` の `vmfwd`/`vmproxy`/`vmbrowse` が WSL 側にも配られる。
-
-2. WSL 内の `~/.ssh/config` に §2 と同じ `Host vm`(ControlMaster 込み)を置く。以降 `vmproxy`
-   等が Mac と同じに使える。
-
-3. **`vmbrowse` だけ要調整**: macOS の `open -na "Google Chrome"` は WSL では動かない。
-   Windows 側の Chrome を起動するよう分岐が必要:
-
-   ```zsh
-   # WSL から Windows の Chrome を SOCKS 経由で開く例
-   "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe" \
-     --user-data-dir="C:\\Users\\<name>\\AppData\\Local\\chrome-vm-proxy" \
-     --proxy-server="socks5://127.0.0.1:1080" \
-     --proxy-bypass-list="<-loopback>" \
-     "http://localhost:8090"
-   ```
-
-   > SOCKS を張る ssh は WSL 内で動く(`127.0.0.1:1080` は WSL の loopback)。Windows 側 Chrome から
-   > その 1080 へ届くかは WSL のネットワークモード次第(WSL2 のミラーモードなら `127.0.0.1` 共有可)。
-   > 確実に動かすなら、SOCKS を張る ssh も Windows 側(7-A)で動かし、ブラウザも Windows 側に統一する。
-
-> zsh.nix の `vmbrowse` を全ホスト共通で使いたいなら、`$OSTYPE` や `/proc/version` の "microsoft"
-> 判定で Chrome 起動コマンドを OS 別に切り替える形に一般化できる(未実装)。
+WSL（Ubuntu 等）は Linux ネイティブの OpenSSH が稼働するため、macOS と全く同一の ControlMaster 構成が利用できる。
+本リポジトリの WSL 向け構成（`nosuke@nosuke-windows` / `stko23@stko23-windows`）を適用することで、`vmfwd` や `vmproxy` などの関数がそのまま利用可能になる。

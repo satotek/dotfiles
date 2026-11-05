@@ -1,55 +1,99 @@
 # Determinate Nix から通常 Nix への移行
 
-このドキュメントは既存環境の移行方針と事前確認をまとめたものです。
-アンインストール・デーモン・マウントの切り替えは、各実機の状態と削除範囲を確認してから行います。
-既存 store を保持する自動移行処理は、このリポジトリにはありません。
+このドキュメントは、Determinate Nix（Determinate Systems の nix-installer）が導入された環境から、本リポジトリが前提とする公式の通常 Nix（Upstream Nix）のマルチユーザー構成へ移行する方針と手順をまとめたものです。
 
-## 導入状態を確認する
+> [!WARNING]
+> 既存の `/nix/store` を保持したままの自動移行処理は提供されていません。アンインストーラーの実行によって store やプロファイルは初期化される前提で進めてください。`/nix/store` の手動削除や、既存環境へのインストーラーの重ね掛けは行いません。
+
+---
+
+## 1. 導入状態の確認
+
+対象マシンに Determinate Nix が導入されているかを判定します。通常 Nix が既に導入されている環境では再インストールの必要はありません。
 
 ```sh
+# Nix のバージョンとパス確認
 nix --version
+which nix
+
+# Determinate 関連コマンドや記録の確認
 command -v determinate-nixd
+ls -l /nix/receipt.json 2>/dev/null
 ```
 
-インストール記録とサービスも確認し、実機に Determinate Nix があるかを先に判定します。
-通常 Nix の環境は再インストール不要です。補助コマンドの有無だけでは判定せず、
-実行中のデーモンと Nix 本体のパスも確認します。
+### 稼働デーモンの確認
 
-## 移行前の保全
+- **Linux / WSL**:
+  ```sh
+  systemctl status determinate-nixd.service
+  ```
+- **macOS**:
+  ```sh
+  sudo launchctl list | grep -i determinate
+  ```
 
-- dotfiles の未コミット変更を保全する。
-- システム設定・プロファイル・サービス構成を記録し、復旧手順を用意する。
-- 認証情報は Git に登録せず、安全なバックアップに保全する。
-- WSL は Windows 側でディストリビューションを export し、可能なら別名のコピー上で試す。
-  WSL の停止で SSH 接続も切れるため、Windows 側から復旧できる状態にする。
+---
 
-`/nix/store` の手動削除や、既存環境へのインストーラーの重ね掛けは行いません。
-アンインストーラーが store・プロファイルを削除する可能性もあるため、保持を前提にはしません。
+## 2. 移行前の保全
 
-## macOS
+アンインストールにより Nix 関連のバイナリやプロファイルが削除されるため、事前に必要なデータを退避します。
 
-Mac の設定は `nix.enable = true` になっていますが、Determinate が動いている Mac では
-**そのまま `darwin-switch` を実行しないでください**。
-デーモンと `/nix` のマウント管理を引き継ぐ必要があります。
+- **dotfiles の作業状態**: 未コミットの変更をコミットまたはリモートに退避する。
+- **リポジトリ外の設定・機密情報**: `~/.config/git.local`、`~/.config/zsh.local`、SSH 鍵、各種認証情報などを安全な場所にバックアップする。
+- **WSL の場合**: Windows 側で `wsl --export` を実行してディストリビューションのバックアップを取り、可能なら複製環境で移行を検証する。WSL 停止時は SSH 接続も切れるため、Windows 側から復旧できる手段を確保しておく。
 
-通常 Nix への切り替え後は nix-darwin が Nix 本体・デーモン・キャッシュ設定を管理します。
-GC は既存の nh ジョブに集約し、別の定期 GC は重ねて有効にしません。
+---
 
-## Linux / WSL
+## 3. アンインストールと再導入
 
-インストール記録に対応したアンインストーラーと削除範囲を確認したうえで、
-通常 Nix のマルチユーザー構成へ切り替えます。
-Determinate の補助サービスを残したまま Nix 本体だけを上書きする方法は避けます。
+### macOS
 
-通常 Nix とキャッシュの設定は [README の導入手順](../README.md#1-nixをインストール)を参照します。
-再導入で `nix-switch` が使えなくなった場合は、初回適用手順から Home Manager を復元します。
+> [!IMPORTANT]
+> Determinate が稼働している macOS 環境では、**絶対にそのまま `darwin-switch` を実行しないでください**。デーモンや `/nix` の APFS ボリュームマウントの管理競合が発生します。
 
-## 移行後の検証
+1. **Determinate Nix のアンインストール**:
+   公式のアンインストーラーを実行します。
+   ```sh
+   /nix/nix-installer uninstall
+   ```
+2. **通常 Nix のインストール**:
+   [README の導入手順](../README.md#1-nixをインストール)に従い、マルチユーザー構成（`--daemon`）でインストールします。
+   ```bash
+   sh <(curl --proto '=https' --tlsv1.2 -fsSL https://nixos.org/nix/install) --daemon
+   ```
+3. **nix-darwin と Home Manager の再適用**:
+   通常 Nix への切り替え後は、nix-darwin が Nix 本体・デーモン・キャッシュ設定を管理します。初回適用コマンドから再構成します。
 
-- 通常 Nix の本体とデーモンが動き、Determinate のサービスが残っていないこと。
-- numtide・satotek のキャッシュ取得と署名検証。
-- `nix-switch` と、Mac では `darwin-switch` の動作。
-- GC の定期ジョブと、再起動後のデーモン・store マウント。
+### Linux / WSL
 
-`nix-switch` だけでは Nix 本体は切り替わりません。
-リポジトリ設定の更新と、各実機のインストールの移行は別作業です。
+1. **Determinate Nix のアンインストール**:
+   インストール記録に対応したアンインストーラーを実行します。
+   ```sh
+   /nix/nix-installer uninstall
+   ```
+   Determinate の補助サービス（`determinate-nixd`）が完全に停止・削除されたことを確認します。
+2. **通常 Nix のインストール**:
+   [README の導入手順](../README.md#1-nixをインストール)に従い、マルチユーザー構成でインストールします。
+   ```bash
+   sh <(curl --proto '=https' --tlsv1.2 -fsSL https://nixos.org/nix/install) --daemon
+   ```
+3. **キャッシュとデーモンの設定**:
+   `/etc/nix/nix.conf` に numtide と satotek のキャッシュ設定を追加し、デーモンを再起動します。
+   ```sh
+   sudo systemctl restart nix-daemon.service
+   ```
+4. **Home Manager の復元**:
+   `nix run home-manager/master -- switch ...` でホーム環境を再適用します。ログインシェルが Nix の Zsh に向いているかも確認します。
+
+---
+
+## 4. 移行後の検証チェックリスト
+
+- [ ] **デーモン状態**: 通常 Nix の本体とデーモン（`nix-daemon`）が正常に稼働し、Determinate 関連サービスが残っていないこと。
+- [ ] **キャッシュ取得**: `satotek.cachix.org` および `cache.numtide.com` からバイナリキャッシュが取得でき、署名検証に成功すること。
+- [ ] **レイヤー適用**: `nix-switch`（macOS では `darwin-switch`）がエラーなく完了すること。
+- [ ] **定期 GC**: `nh clean` による世代整理ジョブが意図通り設定されていること（重複した別 GC ジョブがないこと）。
+- [ ] **マシン再起動**: 再起動後もデーモンが正常起動し、`/nix` が正しくマウントされること。
+
+> [!NOTE]
+> `nix-switch` はホーム環境を切り替えるコマンドであり、Nix 本体の構成やデーモンを切り替えるものではありません。リポジトリ側の更新と各実機の Nix インストール移行は独立した作業です。
