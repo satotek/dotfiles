@@ -275,7 +275,8 @@ dsh の `.env` には、OpenCode Go のキーが `OPENCODE_GO_API_KEY`、Command
 OpenCode は `{file:...}`、omp は `models.yml` の `apiKey: "!tr ... < <file>"` で
 復号済みファイルを読むため、キーは環境変数に載りません。
 同じ provider で `opencode auth login` すると credential が優先され、sops のキーは
-使われません。DeepSeek、Google、CommandCode は logout したままにします。
+使われません。Google と CommandCode は logout したままにします。DeepSeek 公式のキーは
+omp だけが使い、OpenCode の providers には含めていません。
 
 CommandCode へは ZDR（保持・学習なし）を要求しています。OpenCode は provider の
 `x-cmd-zdr: 1` ヘッダー（omp も同じ）、CLI と pi 拡張は `CMD_ZDR=1` を使います。ZDR 対応の

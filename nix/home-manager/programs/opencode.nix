@@ -29,9 +29,10 @@ let
     # そちらが優先され、ここは黙って無視されるので、該当 provider は logout しておく。
     # `//` は浅いマージで provider ごと置き換わり settings.apiKey が消えるため、
     # ヘッダーを足すときは recursiveUpdate を使う。
+    # DeepSeek 公式のモデルは omp だけで使い、キーは sops が配るがここには含めない。
     providers =
       lib.recursiveUpdate
-        (lib.genAttrs [ "deepseek" "google" "opencode-go" "commandcode" ] (name: {
+        (lib.genAttrs [ "google" "opencode-go" "commandcode" ] (name: {
           settings.apiKey = "{file:~/.config/opencode/secrets/${name}.key}";
         }))
         {
