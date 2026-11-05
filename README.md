@@ -22,7 +22,7 @@ macOSのシステム設定とホーム環境は独立して更新できます。
 - **ターミナル** — Ghostty。macOSではAeroSpace・Karabinerも設定
 - **macOSのアプリ** — Homebrewのformula・caskをnix-homebrewで宣言。Xcodeはxcodesで導入
 - **開発ツール** — Go、Rust、Node.js、Bun、pnpm、Python、uv、各種言語サーバー
-- **AIエージェント** — Claude Code、Codex、Cursor CLI、OpenCode、Antigravity CLI、Grok、Herdr、Hunk
+- **AIエージェント** — Claude Code、Codex、Cursor CLI、OpenCode、Antigravity CLI、Grok、Herdr、Hunk、T3 Code
 - **共通基盤** — エージェント向けルール・スキル・MCP設定、sopsによる機密情報の管理
 
 導入するツールはホストごとのプリセットで選択します。
@@ -150,7 +150,7 @@ nix-switch
 | 変更したもの | 実行するコマンド |
 |---|---|
 | シェル、CLI、Neovim、エージェントなど | `nix-switch` |
-| Homebrewのformula・cask、フォント、macOS設定 | `darwin-switch`（sudoが必要） |
+| Homebrewのformula・cask、フォント、macOS設定 | `darwin-switch`（sudo は nh が内部で要求） |
 | 両方 | `darwin-switch`の後に`nix-switch` |
 
 `nix-switch`は現在のユーザー名とホスト名から構成を選びます。
@@ -180,7 +180,7 @@ home-manager switch --flake 'path:/home/azureuser/dotfiles#azureuser@linux-x86_6
    macOSの既定値 / sudo認証        エージェント / リポジトリ内の設定
                  │                             │
           darwin-switch                    nix-switch
-             sudo必須                      sudo不要
+        必要時 sudo (nh)                    sudo不要
 ```
 
 macOS の Nix 本体・デーモン・キャッシュ設定は nix-darwin が管理します。
@@ -531,8 +531,10 @@ dotfiles/
 │       ├── roles.nix
 │       ├── presets/
 │       ├── programs/
+│       ├── lib/
 │       └── data/
 ├── .config/
+│   ├── aerospace/
 │   └── nvim/
 ├── docs/
 ├── secrets/
@@ -549,6 +551,7 @@ dotfiles/
 - [Neovimチートシート](docs/nvim-cheatsheet.md)
 - [AeroSpace](docs/aerospace.md)
 - [VMリモート作業手順](docs/vm-remote-workflow.md)
+- [Determinate Nixからの移行](docs/migrate-from-determinate-nix.md)
 
 ## 統計
 

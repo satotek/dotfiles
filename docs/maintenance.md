@@ -20,8 +20,8 @@
 
 | コマンド | 用途 |
 |---|---|
-| `nix-switch` | `nh home switch` で Home Manager レイヤーを適用する（`--ask` で差分確認後に適用） |
-| `darwin-switch` | `nh darwin switch` で macOS システムレイヤーを適用する（`sudo` 必須） |
+| `nix-switch` | `nh home switch` で Home Manager レイヤーを適用する（`--ask` を渡すと差分確認後に適用） |
+| `darwin-switch` | `nh darwin switch` で macOS システムレイヤーを適用する（sudo は nh が内部で要求） |
 | `home-manager switch --flake "path:$PWD#azureuser@linux-x86_64"` | 構成名を明示して直接 Home Manager を適用する |
 
 新規追加したファイルは Git が未追跡だと Flake ビルドに含まれない。`git add -N <path>` で認識させるか、`path:$PWD#...` を指定して適用する。

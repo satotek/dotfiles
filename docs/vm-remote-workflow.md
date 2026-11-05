@@ -18,7 +18,7 @@ AI エージェント特化のターミナルマルチプレクサ。各ペイ�
   - Home Manager の `cli` プリセット（`programs.herdr` / `pkgs.llm-agents.herdr` および `pkgs.llm-agents.herdr-core`）として管理。
   - macOS・Linux（VM 側含む）の両方に導入される。
   - プレフィックスキーは Neovim や Zsh と競合しにくい `Ctrl-Q` に設定。
-  - 起動シェルは Nix 製の Zsh（`/bin/zsh`）を指定し、OS 標準 Zsh と Nix 製 `fzf-tab` バイナリモジュール間の glibc 不一致を防止している。
+  - 起動シェルは Nix ストアの Zsh（`config.programs.zsh.package`）を指定し、OS 標準 Zsh と Nix 製 `fzf-tab` バイナリモジュール間の glibc 不一致を防止している。
 - **macOS GUI クライアント (`herdr-app`)**:
   - `nix/nix-darwin/homebrew.nix` の Cask（`casks = [ "herdr-app" ]`）で導入。
   - キーバインドや mod 設定は `nix/home-manager/programs/herdr-app.nix` で `~/.config/herdr-app/keys.json` に activation でマージ。
