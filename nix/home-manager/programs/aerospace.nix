@@ -1,14 +1,13 @@
-{ config, pkgs, ... }:
-let
-  homeDirectory = config.home.homeDirectory;
-  dotfilesDir = "${homeDirectory}/dotfiles";
-in
+{ pkgs, ... }:
 {
-  home.packages = [ pkgs.jankyborders ];
+  # 本体は Nix パッケージ、起動は launchd、設定はリポジトリの toml から生成する。
+  # 設定変更は保存では反映されず、nix-switch 時に reload-config が走る。
+  programs.aerospace = {
+    enable = true;
+    launchd.enable = true;
+    settings = builtins.fromTOML (builtins.readFile ../../../.config/aerospace/aerospace.toml);
+  };
 
-  # aerospace.toml だけを可変 symlink で配置する（karabiner / hunk と同じ方針）。
-  # mkOutOfStoreSymlink なので、キーバインドの調整はファイル編集ですぐ反映される。
-  # auto-reload-config を有効にしてあるので、初回の reload 以降は nix-switch 不要。
-  xdg.configFile."aerospace/aerospace.toml".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/.config/aerospace/aerospace.toml";
+  # after-startup-command から borders を引く。
+  home.packages = [ pkgs.jankyborders ];
 }

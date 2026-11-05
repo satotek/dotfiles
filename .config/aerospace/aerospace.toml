@@ -7,7 +7,8 @@ config-version = 2
 
 after-startup-command = ['exec-and-forget borders style=round order=above width=1.5 hidpi=on active_color=0xffcba6f7 inactive_color=0x33494d64']
 
-start-at-login = true
+# 起動は Home Manager の launchd が管理する。このファイルの start-at-login は
+# モジュールが false に上書きするので書かない。
 auto-reload-config = true
 
 enable-normalization-flatten-containers = true
@@ -166,8 +167,8 @@ on-window-detected = [
     alt-shift-k = ['join-with up', 'mode main']
     alt-shift-l = ['join-with right', 'mode main']
 
-# GUI 起動の AeroSpace は Homebrew と /usr/bin しか PATH を持たないため、
-# exec-* から Nix のバイナリ（borders など）を引けるようにする。
-# exec セクションを書くと既定の Homebrew PATH が消えるので、自分で先頭に戻す。
+# launchd から起動する AeroSpace は PATH が限られるため、exec-* から
+# Nix のバイナリ（borders など）を引けるようにする。
+# exec セクションを書くと既定の PATH が消えるので、自分で先頭に戻す。
 [exec.env-vars]
 PATH = '/opt/homebrew/bin:/opt/homebrew/sbin:${HOME}/.nix-profile/bin:${PATH}'

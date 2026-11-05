@@ -1,10 +1,11 @@
 # AeroSpace
 
 macOS 用の i3 風タイリングウィンドウマネージャ。
-本体は Homebrew cask、設定は `.config/aerospace/aerospace.toml` を Home Manager が symlink する。
+本体は Nix パッケージ（`programs.aerospace`）、起動は launchd、設定は
+`.config/aerospace/aerospace.toml` から Home Manager が生成する。
 JankyBordersもHome Managerで導入し、AeroSpace起動時に角丸・幅1.5の枠を表示する
 （`order=above`、activeはCatppuccinのmauve `#cba6f7`、inactiveは20%透過の`#494d64`）。
-GUI起動のAeroSpaceはHomebrewと`/usr/bin`のPATHしか持たないため、
+launchd から起動するAeroSpaceはPATHが限られるため、
 `[exec.env-vars]`で`~/.nix-profile/bin`を足して`borders`を解決している。
 ウィンドウ間・画面端の余白は3。
 
@@ -35,9 +36,9 @@ catch-all は必ず末尾に置く。設定アプリ・1Password・Karabiner・F
 aerospace run-callback --for-every-window on-window-detected
 ```
 
-`aerospace.toml` は `mkOutOfStoreSymlink` でリポジトリを直接指しているため、このファイルの
-変更に `nix-switch` は不要（`auto-reload-config = true` なら保存で、手動なら
-`aerospace reload-config` で反映される）。
+`aerospace.toml` は Home Manager が Nix ストアに生成するため、変更したら `nix-switch` する。
+モジュールが変更時に `aerospace reload-config` を呼ぶので、再ログインは要らない
+（未起動なら次回起動時に読まれる）。
 
 ## キーバインド
 
@@ -105,11 +106,10 @@ aerospace run-callback --for-every-window on-window-detected
 
 ## 初回セットアップ
 
-1. `darwin-switch` で cask を入れる
-2. `nix-switch` で設定を配置する
-3. AeroSpace.app を起動する
-4. システム設定 → プライバシーとセキュリティ → アクセシビリティ で AeroSpace を許可する
-5. マルチモニタなら、各モニタの右下または左下に空きが出るよう配置する
+1. `nix-switch` でアプリと設定を入れる
+2. AeroSpace.app を起動する（以後は launchd がログイン時に起動する）
+3. システム設定 → プライバシーとセキュリティ → アクセシビリティ で AeroSpace を許可する
+4. マルチモニタなら、各モニタの右下または左下に空きが出るよう配置する
 
-設定は `auto-reload-config = true` なので、初回の `Esc`（service モード）以降は
-toml を保存すると自動で再読み込みされる。
+設定変更は `nix-switch` で反映する。`auto-reload-config` は有効なままなので、
+ストアのファイルが差し替わったあとはモジュールの `reload-config` で読み直される。

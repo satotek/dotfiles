@@ -89,7 +89,6 @@ in
       "jordanbaird-ice" # メニューバーのアイコンを整理・非表示にする
       "karabiner-elements"
       "nosuke/meltype/meltype-for-mac" # 英数キーなしで日英を切り替える IME（上流ビルド）
-      "nikitabobko/tap/aerospace" # i3 風タイリングウィンドウマネージャ
       "raycast"
 
       # ブラウザ
