@@ -53,10 +53,18 @@ in
     pkgs.xcodegen
     # 常駐させず、使うときに ollama serve する。モデルは ~/.ollama に残る。
     pkgs.ollama
+    # Android SDK の avdmanager は JAVA_HOME か PATH の java を使う。
+    # Android Studio 同梱の JBR は PATH に出ないため、CLI 用の JDK を入れる。
+    pkgs.zulu21
   ];
 
   home.sessionVariables = {
     ANDROID_HOME = androidHome;
+    # XDG_CONFIG_HOME が設定されていると cmdline-tools は ~/.config/.android/avd を
+    # 見るが、AVD の実体は ~/.android/avd にある。
+    ANDROID_AVD_HOME = "${config.home.homeDirectory}/.android/avd";
+    # avdmanager は PATH より JAVA_HOME を優先する。
+    JAVA_HOME = "${pkgs.zulu21}";
     # `brew shellenv` は読み込むたびに path_helper を呼ぶので、prefix を直接宣言する。
     HOMEBREW_PREFIX = homebrewPrefix;
     HOMEBREW_CELLAR = "${homebrewPrefix}/Cellar";
