@@ -6,7 +6,7 @@ $packages = @(
     'Microsoft.PowerShell'
     'Git.Git'
     'dandavison.delta'
-    'jesseduffield.lazygit'
+    'JesseDuffield.lazygit'
     'Starship.Starship'
     'Neovim.Neovim'
     'ajeetdsouza.zoxide'

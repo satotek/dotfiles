@@ -2,7 +2,7 @@
 # Windows 用の設定。コミット種別の項目は Nix 側と揃えること。
 #
 # git.diffRenderers は lazygit 0.64 以降のキー名。それ以前は無視されて delta が
-# 効かないので、`winget upgrade jesseduffield.lazygit` で更新する。
+# 効かないので、`winget upgrade JesseDuffield.lazygit` で更新する。
 # dark / side-by-side などは delta が ~/.config/git/config の [delta] から読む。
 git:
   overrideGpg: true
