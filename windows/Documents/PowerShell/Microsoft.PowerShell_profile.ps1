@@ -94,10 +94,6 @@ if ($isInteractiveConsole -and (Get-Command Set-PSReadLineOption -ErrorAction Si
     }
 }
 
-if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    Invoke-Expression (& { (zoxide init powershell | Out-String) })
-}
-
 # 仕事用プロファイル。共通設定の後に読むので、ここで上書きできる。
 $workProfile = Join-Path $PSScriptRoot 'profile.work.ps1'
 if (Test-Path -LiteralPath $workProfile) { . $workProfile }
@@ -106,6 +102,12 @@ Remove-Variable workProfile -ErrorAction SilentlyContinue
 # プロンプトは最後に差し替える。他の初期化がプロンプトを上書きしても starship を優先する。
 if (Get-Command starship -ErrorAction SilentlyContinue) {
     Invoke-Expression (& starship init powershell)
+}
+
+# zoxide は prompt 関数を包んでディレクトリの移動を記録する。starship の prompt に
+# 上書きされると記録されなくなるので、必ず starship の後に初期化する。
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+    Invoke-Expression (& { (zoxide init powershell | Out-String) })
 }
 
 # >>> intelligent-terminal shell-integration >>>
