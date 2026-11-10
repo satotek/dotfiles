@@ -18,6 +18,9 @@
       navigate = true;
       dark = true;
       side-by-side = true;
+      # side-by-side では左右それぞれに行番号が付き、変更位置を数字で追える。
+      # lazygit も gitconfig を読むので、あちらの指定は不要になる。
+      line-numbers = true;
     };
   };
 
@@ -37,26 +40,37 @@
       init.defaultBranch = "main";
       core = {
         editor = "nvim";
-        autocrlf = "input";
       };
+      # 素の `git pull` でもマージコミットを作らず rebase で取り込む。
+      pull.rebase = true;
+      # コミットメッセージ編集中に diff を表示し、内容を見ながら書けるようにする。
+      commit.verbose = true;
       merge.conflictstyle = "zdiff3";
       # リモート追従と競合解決を日常操作で楽にするための既定値。
-      push.autoSetupRemote = true;
+      push = {
+        autoSetupRemote = true;
+        # --force-with-lease 時、リモートの最新を取り込み済みの場合に限って上書きを許す。
+        useForceIfIncludes = true;
+      };
       fetch = {
         prune = true;
+        all = true;
         writeCommitGraph = true;
       };
       rebase = {
         autoStash = true;
         autoSquash = true;
+        # スタックしたブランチを rebase したとき、中間ブランチの参照も追従させる。
+        updateRefs = true;
       };
+      tag.sort = "version:refname";
       rerere = {
         enabled = true;
         autoupdate = true;
       };
       diff = {
         algorithm = "histogram";
-        colorMoved = "plain";
+        colorMoved = "dimmed-zebra";
         renames = true;
         mnemonicPrefix = true;
       };
