@@ -1,0 +1,84 @@
+# Linux/macOS の nix/home-manager/programs/git.nix に対応する Windows 用の設定。
+# ユーザー名・メール・プロキシなどマシンごとに違う値は ~/.config/git.local に置く
+# （初回だけ chezmoi が雛形を作る）。
+#
+# core.autocrlf と credential.helper は Git for Windows のシステム設定に任せる。
+
+[core]
+	editor = nvim
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	dark = true
+	side-by-side = true
+	line-numbers = true
+
+[init]
+	defaultBranch = main
+
+[color]
+	ui = true
+
+[merge]
+	conflictstyle = zdiff3
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+	useForceIfIncludes = true
+
+[fetch]
+	prune = true
+	all = true
+	writeCommitGraph = true
+
+[rebase]
+	autoStash = true
+	autoSquash = true
+	updateRefs = true
+
+[rerere]
+	enabled = true
+	autoupdate = true
+
+[diff]
+	algorithm = histogram
+	colorMoved = dimmed-zebra
+	renames = true
+	mnemonicPrefix = true
+
+[commit]
+	verbose = true
+
+[tag]
+	sort = version:refname
+
+[column]
+	ui = auto
+
+[branch]
+	sort = -committerdate
+
+[help]
+	autocorrect = prompt
+
+[alias]
+	st = status
+	ss = status -s
+	co = checkout
+	br = branch
+	sw = switch
+	pr = pull -r
+	ps = push
+	fixit = commit --amend --no-edit
+	fixmsg = commit --amend
+
+# 最後に読むことで、マシンごとの値が上の設定を上書きできる。
+[include]
+	path = ~/.config/git.local

@@ -1,0 +1,142 @@
+"$schema" = "https://starship.rs/config-schema.json"
+add_newline = false
+format = "$os$directory$git_branch$git_commit$git_metrics$git_state$git_status$fill$python$nodejs$line_break$character"
+right_format = "$cmd_duration$memory_usage$battery$time"
+
+[battery]
+charging_symbol = "󰂄 "
+disabled = false
+discharging_symbol = "󰂃 "
+empty_symbol = "󰂎 "
+format = "[$symbol$percentage]($style) "
+full_symbol = "󰁹 "
+unknown_symbol = "󰂑 "
+
+[[battery.display]]
+style = "bold white"
+threshold = 100
+
+[character]
+disabled = false
+
+[cmd_duration]
+format = "took [  $duration]($style) "
+min_time = 500
+style = "bold yellow"
+
+[directory]
+format = "[  $path]($style)[$read_only]($read_only_style) "
+home_symbol = "~"
+read_only = " 󰌾"
+read_only_style = "bold cyan"
+style = "bold cyan"
+truncate_to_repo = false
+truncation_length = 6
+truncation_symbol = "…/"
+
+[fill]
+symbol = " "
+
+[git_branch]
+disabled = false
+
+[git_commit]
+disabled = false
+
+[git_metrics]
+disabled = false
+
+[git_state]
+disabled = false
+
+[git_status]
+disabled = false
+
+[memory_usage]
+disabled = false
+format = "[$symbol$ram_pct]($style) "
+style = "bold white"
+symbol = "󰍛 "
+threshold = -1
+
+[nodejs]
+disabled = true
+format = "[$symbol]($style) "
+style = "green"
+symbol = " "
+
+[os]
+disabled = false
+style = "bg:surface0 fg:text"
+
+[os.symbols]
+AIX = " "
+ALTLinux = " "
+AOSC = " "
+AlmaLinux = " "
+Alpaquita = " "
+Alpine = " "
+Amazon = " "
+Android = " "
+Arch = " "
+Artix = " "
+Bluefin = " "
+CachyOS = " "
+CentOS = " "
+Debian = " "
+DragonFly = " "
+Elementary = " "
+Emscripten = " "
+EndeavourOS = " "
+Fedora = " "
+FreeBSD = " "
+Garuda = " "
+Gentoo = " "
+HardenedBSD = "󰞌 "
+Illumos = " "
+InstantOS = " "
+Ios = "󰀷 "
+Kali = " "
+Linux = " "
+Mabox = " "
+Macos = " "
+Manjaro = " "
+Mariner = " "
+MidnightBSD = " "
+Mint = " "
+NetBSD = " "
+NixOS = " "
+Nobara = " "
+OpenBSD = " "
+OpenCloudOS = " "
+OracleLinux = "󰺡 "
+PikaOS = " "
+Pop = " "
+Raspbian = " "
+RedHatEnterprise = "󱄛 "
+Redhat = "󱄛 "
+Redox = "󰀘 "
+RockyLinux = " "
+SUSE = " "
+Solus = " "
+Ubuntu = " "
+Ultramarine = " "
+Unknown = " "
+Uos = " "
+Void = " "
+Windows = "󰍲 "
+Zorin = " "
+openEuler = " "
+openSUSE = " "
+
+[python]
+disabled = false
+format = "[${symbol}(\\($virtualenv\\))]($style) "
+style = "yellow"
+symbol = " "
+
+[time]
+disabled = false
+format = "[  $time]($style)"
+style = "bold blue"
+time_format = "%T"

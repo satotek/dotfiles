@@ -1,0 +1,4 @@
+{{- /* この PC のプロファイル。答えは ~/.config/chezmoi/chezmoi.toml に保存され、2 回目以降は聞かれない。 */ -}}
+{{- $profile := promptChoiceOnce . "profile" "この PC のプロファイル" (list "personal" "work") "personal" -}}
+[data]
+    profile = {{ $profile | quote }}

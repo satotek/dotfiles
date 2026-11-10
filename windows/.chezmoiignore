@@ -1,0 +1,10 @@
+# Linux/macOS は Nix が管理する。誤って chezmoi apply しても、Nix が配った
+# 設定を上書きしないよう Windows 以外では何も配らない。
+{{ if ne .chezmoi.os "windows" }}
+*
+{{ end }}
+
+# 仕事用プロファイルは work を選んだ PC にだけ配る。init を通していない場合は personal 扱い。
+{{ if ne (get . "profile") "work" }}
+Documents/PowerShell/profile.work.ps1
+{{ end }}

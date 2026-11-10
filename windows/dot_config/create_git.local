@@ -1,0 +1,8 @@
+# マシンごとの Git 設定。chezmoi は無ければ作るだけで、以後は上書きしない。
+
+[user]
+	name = Your Name
+	email = your@email.com
+
+# [http]
+# 	proxy = http://proxy.example.com:8080
