@@ -21,6 +21,21 @@ let
     inherit name description;
     value = name;
   };
+
+  commitTypes = [
+    (mkOption "fix" "バグや不具合の修正")
+    (mkOption "feat" "新機能の追加")
+    (mkOption "docs" "ドキュメントの更新や改善")
+    (mkOption "style" "コードフォーマットの修正、UIのみの変更")
+    (mkOption "refactor" "パフォーマンスの改善なしのコードの改善")
+    (mkOption "test" "テストの追加や改善")
+    (mkOption "perf" "パフォーマンスの改善")
+    (mkOption "chore" "ビルドプロセスの変更や改善")
+    (mkOption "ci" "CI設定の変更")
+    (mkOption "build" "ビルドシステムや依存関係の変更")
+    (mkOption "revert" "以前の変更の取り消し")
+    (mkOption "wip" "作業中")
+  ];
 in
 {
   programs.lazygit = {
@@ -31,21 +46,29 @@ in
       gui = {
         language = "ja";
         nerdFontsVersion = "3";
+        colorScheme = "dark";
+        showRandomTip = false;
+        # フォーカス中のパネルを広げ、コミット一覧などを読みやすくする。
+        expandFocusedSidePanel = true;
+        showNumstatInFilesView = true;
+        showDivergenceFromBaseBranch = "arrowAndNumber";
+        commitHashLength = 7;
       };
 
       git = {
+        # 署名コミットでも lazygit 内で完結させ、Touch ID 待ちで固まるのを避ける。
+        overrideGpg = true;
         parseEmoji = true;
         branchLogCmd = "${gitLogFormat} {{branchName}} --";
         allBranchesLogCmds = [ "${gitLogFormat} --" ];
         log.showWholeGraph = true;
-        # lazygit 0.64 で git.pagers -> git.diffRenderers、pager -> command に改称された。
-        # config.yml は Nix store のシンボリックリンクで書き込めず、lazygit の自動移行が
-        # 毎回失敗するため、宣言側を新スキーマに合わせる。type は delta 向けの
-        # 既定値 "stdinFilter" のままでよい。
+        # config.yml は読み取り専用で lazygit の自動移行が失敗するため、新スキーマで書く。
         diffRenderers = [
           {
             colorArg = "always";
-            command = "${delta} --dark --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format=\"lazygit-edit://{path}:{line}\"";
+            # dark / side-by-side などは delta が gitconfig の [delta] から読むので、
+            # ここには lazygit 固有の指定だけを置く。
+            command = "${delta} --paging=never --hyperlinks --hyperlinks-file-link-format=\"lazygit-edit://{path}:{line}\"";
           }
         ];
       };
@@ -75,20 +98,7 @@ in
               type = "menu";
               title = "What kind of commit type is it?";
               key = "Type";
-              options = [
-                (mkOption "fix" "バグや不具合の修正")
-                (mkOption "feat" "新機能の追加")
-                (mkOption "docs" "ドキュメントの更新や改善")
-                (mkOption "style" "コードフォーマットの修正、UIのみの変更")
-                (mkOption "refactor" "パフォーマンスの改善なしのコードの改善")
-                (mkOption "test" "テストの追加や改善")
-                (mkOption "perf" "パフォーマンスの改善")
-                (mkOption "chore" "ビルドプロセスの変更や改善")
-                (mkOption "ci" "CI設定の変更")
-                (mkOption "build" "ビルドシステムや依存関係の変更")
-                (mkOption "revert" "以前の変更の取り消し")
-                (mkOption "wip" "作業中")
-              ];
+              options = commitTypes;
             }
             {
               type = "input";
@@ -110,6 +120,29 @@ in
           ];
           # Quote the complete message once so user input cannot become shell syntax.
           command = ''{{$scope := ""}}{{if .Form.Scope}}{{$scope = printf "(%s)" .Form.Scope}}{{end}}git commit -m {{printf "%s%s: %s" .Form.Type $scope .Form.Message | quote}}'';
+        }
+        {
+          key = "<c-e>";
+          context = "files";
+          description = "commit with body (エディターで本文まで書く)";
+          # エディターを開くので lazygit を一時停止してターミナルで実行する。
+          output = "terminal";
+          prompts = [
+            {
+              type = "menu";
+              title = "What kind of commit type is it?";
+              key = "Type";
+              options = commitTypes;
+            }
+            {
+              type = "input";
+              title = "Scope (optional)";
+              key = "Scope";
+              initialValue = "";
+            }
+          ];
+          # 件名の接頭辞だけ -m で渡し、-e でエディターを開いて件名の続きと本文を書く。
+          command = ''{{$scope := ""}}{{if .Form.Scope}}{{$scope = printf "(%s)" .Form.Scope}}{{end}}git commit -e -m {{printf "%s%s: " .Form.Type $scope | quote}}'';
         }
       ];
     };
