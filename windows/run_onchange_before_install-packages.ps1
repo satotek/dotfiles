@@ -41,6 +41,20 @@ foreach ($id in $packages) {
     }
 }
 
+# herdr-app は winget に無いので公式インストーラで入れる。入れた後はアプリ自身が
+# 本体と herdr-core を更新するので、未導入のときだけ実行する。
+$herdrApp = Join-Path $env:LOCALAPPDATA 'Programs\herdr-app\herdr-app.exe'
+if (-not (Test-Path $herdrApp)) {
+    Write-Host 'Installing herdr-app'
+    try {
+        # インストーラは失敗を exit ではなく throw で返すので、ここで受け止められる。
+        Invoke-RestMethod 'https://releases.herdr.dev/app/install.ps1' | Invoke-Expression
+    } catch {
+        Write-Warning "herdr-app: $_"
+        $failed += 'herdr-app'
+    }
+}
+
 # この処理が Windows PowerShell 5.1 で動いていても、モジュールは PowerShell 7 に入れる。
 # 導入直後は PATH に載っていないので、標準の場所も探す。
 $pwsh = (Get-Command pwsh -ErrorAction SilentlyContinue).Source
