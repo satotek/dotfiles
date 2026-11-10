@@ -60,9 +60,11 @@ if ($isInteractiveConsole -and (Get-Command Set-PSReadLineOption -ErrorAction Si
         ListPrediction = "`e[38;5;39m"
     }
 
-    # Tab 補完は挿入モードだけ。↑↓は入力済みの文字列に前方一致する履歴だけを辿る
-    # （zsh の history-prefix-up/down 相当）。
-    Set-PSReadLineKeyHandlerSafe -Key Tab -Function MenuComplete -ViMode Insert
+    # Tab 補完は挿入モードだけ。MenuComplete は補完メニューと ListView の予測表示が同じ領域を
+    # 再描画してちらつくため、メニューを出さずに候補を順に挿入する方式にする。
+    # ↑↓は入力済みの文字列に前方一致する履歴だけを辿る（zsh の history-prefix-up/down 相当）。
+    Set-PSReadLineKeyHandlerSafe -Key Tab -Function TabCompleteNext -ViMode Insert
+    Set-PSReadLineKeyHandlerSafe -Key Shift+Tab -Function TabCompletePrevious -ViMode Insert
     Set-PSReadLineKeyHandlerSafe -Key UpArrow -Function HistorySearchBackward
     Set-PSReadLineKeyHandlerSafe -Key DownArrow -Function HistorySearchForward
 
