@@ -3,11 +3,11 @@
     "agent-browser": {
       "flake": false,
       "locked": {
-        "lastModified": 1794103118,
-        "narHash": "sha256-V0KcdCGAdtYQqFnZYv4DfN1PEj5cAYaoSHaw9HxJJ+8=",
+        "lastModified": 1794252652,
+        "narHash": "sha256-5NoZ78KkdGjGu6Nam/KlVy+xrgwG088XAAbbdCbZD1g=",
         "owner": "vercel-labs",
         "repo": "agent-browser",
-        "rev": "4b0e9f01fa8d214d39bbfe5391257640634fb9a0",
+        "rev": "e7519957b9067c541825afa21a792fbe1f483047",
         "type": "github"
       },
       "original": {
@@ -235,11 +235,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1794178147,
-        "narHash": "sha256-RDWuueNfF5JxlTDQUpZfDmpsiG2kXvTW4Cw8COvKJmQ=",
+        "lastModified": 1794277792,
+        "narHash": "sha256-sjytOnBfBG0BTJUongIbNAT3Xxlkou7OnlfWUjWB21M=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "e7ec2cef4fda261e0f92e65ea55ac54948ca3a40",
+        "rev": "5cf73febc46a1251854b305a44916b60022cc319",
         "type": "github"
       },
       "original": {
@@ -434,11 +434,11 @@
     "vercel-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1793930766,
-        "narHash": "sha256-TDLIerf2DHWDuFfWnzBp5fEEQj3B9jtW4IIrpRXwoHg=",
+        "lastModified": 1794285368,
+        "narHash": "sha256-jTq0XSGyqPTnzTNlTrwVAm1xKeipW9cfD1uEwFJW9Rw=",
         "owner": "vercel-labs",
         "repo": "skills",
-        "rev": "d3701c11b1101251af14c9d148f026e1a47ebe17",
+        "rev": "e2aa6c35389f1b4ea9c4208f866c7a3c5010ec4f",
         "type": "github"
       },
       "original": {
