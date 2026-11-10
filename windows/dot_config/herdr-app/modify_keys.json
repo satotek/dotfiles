@@ -1,0 +1,25 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /*
+keys.json はアプリも書き換えるうえ、既定のキー割り当てがすべてこのファイルに入る。
+丸ごと管理すると既定値の更新を取り込めないので、Nix の herdr-app.nix と同じく
+ctrl-q まわりだけを差し替える。ctrl-q は tmux-prefix mod が単独で受け取るので、
+旧来の ctrl-q で始まる 2 打鍵の割り当ては落とす。
+まだ無いときは何も出力せず作らない。初回起動でアプリが既定値を書き出すのを待つ。
+*/ -}}
+{{- if .chezmoi.stdin | trim -}}
+{{- $keys := fromJson .chezmoi.stdin -}}
+{{- range $section := list "global" "terminal" -}}
+{{-   $merged := dict -}}
+{{-   range $key, $action := (get $keys $section | default dict) -}}
+{{-     if not (hasPrefix "ctrl-q" $key) -}}
+{{-       $_ := set $merged $key $action -}}
+{{-     end -}}
+{{-   end -}}
+{{-   $_ := set $merged "ctrl-q" "mod.open:tmux-prefix" -}}
+{{-   $_ := set $keys $section $merged -}}
+{{- end -}}
+{{- $mod := get $keys "mod:tmux-prefix" | default dict -}}
+{{- $_ := set $mod "ctrl-q" "tmux-prefix.send-prefix" -}}
+{{- $_ := set $keys "mod:tmux-prefix" $mod -}}
+{{ toPrettyJson $keys }}
+{{ end -}}

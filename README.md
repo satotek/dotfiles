@@ -368,6 +368,11 @@ GUIのキーバインドは`~/.config/herdr-app/keys.json`にあります。tmux
 Ctrl+Q向けに移植して配置し、`keys.json`の`ctrl-q`関連だけをactivationでマージします。
 アプリが同じファイルとmodフォルダの`.d.ts`を書き換えるため、丸ごとsymlinkにはしません。
 
+Windowsでもherdr-appの設定は`~/.config/herdr-app`にあり、chezmoiが同じ方針で扱います。
+modは同じ正本を`include`して実ファイルとして配り、`keys.json`は`modify_keys.json`で`ctrl-q`関連だけを差し替えます。
+`keys.json`はアプリの初回起動で作られるので、その後の`chezmoi apply`で反映されます。
+アプリ本体はwingetにないため、未導入なら`run_onchange_before_install-packages.ps1`が公式インストーラを実行します。
+
 `herdr-app --skill` が出力するagent skillはfrontmatterを持たないので、同じactivationで
 `~/.agents/skills/herdr-app`と`~/.claude/skills/herdr-app`に生成します。本文には生成時の
 バージョンを残し、アプリが自己更新してずれた場合は`herdr-app --skill`を読み直すよう書いています。

@@ -1,0 +1,2 @@
+{{- /* 正本は Nix と共有するリポジトリ直下の .config/herdr-app。アプリが同じフォルダに .d.ts を書き出すので、symlink にせず実ファイルとして配る。 */ -}}
+{{ include (joinPath .chezmoi.workingTree ".config" "herdr-app" "mods" "tmux-prefix" "mod.json") -}}
