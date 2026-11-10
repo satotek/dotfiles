@@ -2,11 +2,14 @@
 # ユーザー名・メール・プロキシなどマシンごとに違う値は ~/.config/git.local に置く
 # （初回だけ chezmoi が雛形を作る）。
 #
-# core.autocrlf と credential.helper は Git for Windows のシステム設定に任せる。
+# credential.helper は Git for Windows のシステム設定に任せる。
+# core.symlinks は、シンボリックリンクを含むリポジトリを扱う PC だけ git.local に書く。
 
 [core]
 	editor = nvim
 	pager = delta
+	# 動作が環境の既定値に依存しないよう、明示して固定する。
+	autocrlf = true
 
 [interactive]
 	diffFilter = delta --color-only
@@ -78,6 +81,20 @@
 	ps = push
 	fixit = commit --amend --no-edit
 	fixmsg = commit --amend
+	# ベースブランチに戻って最新化し、リモートで消えた(マージ済み)ローカルブランチを一括削除する。
+	# 使い方: `git sweep`(=develop) / `git sweep main` のように引数でベースを指定可能。
+	sweep = "!f() { \
+		base=\"${1:-develop}\"; \
+		git switch \"$base\" && \
+		git fetch --prune && \
+		git pull && \
+		git branch -vv | awk '/: gone]/{print $1}' | grep -vE '^[*+]' | xargs -r git branch -D; \
+	}; f"
+
+# GitHub: push だけ SSH 化する。fetch/clone は HTTPS のままにして、
+# lazy.nvim など public repo を読むツールが SSH port 22 に依存しないようにする。
+[url "git@github.com:"]
+	pushInsteadOf = https://github.com/
 
 # 最後に読むことで、マシンごとの値が上の設定を上書きできる。
 [include]
