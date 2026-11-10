@@ -264,16 +264,20 @@ gcloud auth application-default set-quota-project nosuke-net
 | `secrets/agents.yaml` | `~/.config/opencode/secrets/opencode-go.key` | 全環境 |
 | `secrets/agents.yaml` | `~/.config/opencode/secrets/commandcode.key` | 全環境 |
 | `secrets/agents.yaml` | `~/.dsh/.env` | 全環境 |
+| `secrets/agents.yaml` | `~/.config/t3code/opencode.env` | 全環境 |
 | `secrets/cloudflare.yaml` | `~/.config/cloudflare/cloudflare-infra.env` | macOSのみ |
 
 dsh の `.env` には、OpenCode Go のキーが `OPENCODE_GO_API_KEY`、CommandCode の
 キーが `CMD_API_KEY` として追記されます。前者は
 `~/.config/opencode/secrets/opencode-go.key` と同じ sops キーから作るので、
 ローテートは `opencode_go_api_key` の1か所だけです。dsh の provider 設定では
-`apiKeyEnv: CMD_API_KEY` を指定します。
+`apiKeyEnv: CMD_API_KEY` を指定します。T3 Code は usage limits を取るときだけ
+`OPENCODE_API_KEY` をプロセス環境から読み、`opencode.jsonc` の `{file:...}` は
+参照しないため、同じ sops キーから `~/.config/t3code/opencode.env` にも配って
+`t3code` サービスの `EnvironmentFile` で渡します。
 
 OpenCode は `{file:...}`、omp は `models.yml` の `apiKey: "!tr ... < <file>"` で
-復号済みファイルを読むため、キーは環境変数に載りません。
+復号済みファイルを読みます。
 同じ provider で `opencode auth login` すると credential が優先され、sops のキーは
 使われません。Google と CommandCode は logout したままにします。OpenCode の公式 DeepSeek
 provider は削除したため、復号された `deepseek.key` は omp のみが参照します。

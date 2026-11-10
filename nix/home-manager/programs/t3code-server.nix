@@ -33,7 +33,11 @@
       Environment = [ "PATH=${config.systemd.user.sessionVariables.PATH}" ];
       # PR の状態は az repos で引く。DevOps の組織は az login と別テナントなので、
       # PAT を渡す。リポジトリ管理外のファイルで、無ければ渡さない。
-      EnvironmentFile = [ "-%h/.config/azure-devops/env" ];
+      EnvironmentFile = [
+        "-%h/.config/azure-devops/env"
+        # T3 Code の usage limits は環境変数のキーを読むため、sops から配る。
+        "-%h/.config/t3code/opencode.env"
+      ];
     };
   };
 }

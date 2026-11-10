@@ -55,6 +55,15 @@ let
       sopsFile = agentsSopsFile;
       target = "${config.home.homeDirectory}/.dsh/.env";
     }
+    # T3 Code は OpenCode Go の usage limits を取るときだけキーを自分で探し、
+    # auth.json・opencode.db・環境変数の順に見る。opencode.jsonc の {file:...}
+    # は読まないので、同じ sops キーから env としても配る。
+    {
+      key = "opencode_go_api_key";
+      envVar = "OPENCODE_API_KEY";
+      sopsFile = agentsSopsFile;
+      target = "${config.home.homeDirectory}/.config/t3code/opencode.env";
+    }
   ];
 
   secrets = lib.optional pkgs.stdenv.hostPlatform.isDarwin cloudflareSecret ++ agentSecrets;
