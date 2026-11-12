@@ -31,6 +31,11 @@
 
     llm-agents.url = "github:numtide/llm-agents.nix";
 
+    # Rex 公式の prebuilt flake。stable はまだリリースが無いので preview を追う。
+    # lock にはリリースごとの固定 URL が記録される。
+    rex.url = "https://pkgs.superlogical.com/rex/nix/preview.tar.gz";
+    rex.inputs.nixpkgs.follows = "nixpkgs";
+
     # comma と command-not-found 用の nix-index データベース（毎週ビルド済みを配布）。
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";

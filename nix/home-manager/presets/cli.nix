@@ -58,6 +58,7 @@ in
     ../programs/herdr.nix
     ../programs/hunk.nix
     ../programs/nix-your-shell.nix
+    ../programs/rex.nix
     ../programs/ripgrep.nix
     ../programs/yazi.nix
   ];
