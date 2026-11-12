@@ -6,3 +6,6 @@
   because the pattern is in its command line, and kill it (exit 144). Bracket
   one character (`pkill -f '[s]erver.js'`), or record the PID at start and
   kill that.
+- Commands already start in the working directory; do not prefix
+  `cd <path> &&`. For another directory, use the command's own option
+  (`git -C`, `pnpm -C`).
