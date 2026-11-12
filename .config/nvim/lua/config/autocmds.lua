@@ -18,6 +18,18 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   end,
 })
 
+-- clipboard=unnamedplus だと d/c/x のたびに OSC 52 が飛び、クリップボードも汚れるので、
+-- レジスタ未指定の y だけを + に送る。"ay など明示したものは意図を尊重して送らない。
+vim.api.nvim_create_autocmd("TextYankPost", {
+  group = augroup("yank_to_clipboard"),
+  callback = function()
+    local event = vim.v.event
+    if event.operator == "y" and event.regname == "" then
+      vim.fn.setreg("+", event.regcontents, event.regtype)
+    end
+  end,
+})
+
 vim.api.nvim_create_autocmd("VimResized", {
   group = augroup("resize_splits"),
   callback = function()
