@@ -4,6 +4,9 @@
 # git.diffRenderers は lazygit 0.64 以降のキー名。それ以前は無視されて delta が
 # 効かないので、`winget upgrade JesseDuffield.lazygit` で更新する。
 # dark / side-by-side などは delta が ~/.config/git/config の [delta] から読む。
+#
+# lazygit は起動時の設定 migration で YAML のアンカー・エイリアス (&x / *x) を
+# 扱えず "Alias nodes are not supported" を出すので、重複していても展開して書く。
 git:
   overrideGpg: true
   parseEmoji: true
@@ -29,8 +32,7 @@ customCommands:
     description: commit files with format
     loadingText: Committing...
     prompts:
-      - &commitType
-        type: menu
+      - type: menu
         key: Type
         title: What kind of commit type is it?
         options:
@@ -46,8 +48,7 @@ customCommands:
           - { name: build, value: build, description: ビルドシステムや依存関係の変更 }
           - { name: revert, value: revert, description: 以前の変更の取り消し }
           - { name: wip, value: wip, description: 作業中 }
-      - &commitScope
-        type: input
+      - type: input
         key: Scope
         title: Scope (optional)
         initialValue: ''
@@ -64,6 +65,24 @@ customCommands:
     description: commit with body (エディターで本文まで書く)
     output: terminal
     prompts:
-      - *commitType
-      - *commitScope
+      - type: menu
+        key: Type
+        title: What kind of commit type is it?
+        options:
+          - { name: fix, value: fix, description: バグや不具合の修正 }
+          - { name: feat, value: feat, description: 新機能の追加 }
+          - { name: docs, value: docs, description: ドキュメントの更新や改善 }
+          - { name: style, value: style, description: コードフォーマットの修正、UIのみの変更 }
+          - { name: refactor, value: refactor, description: パフォーマンスの改善なしのコードの改善 }
+          - { name: test, value: test, description: テストの追加や改善 }
+          - { name: perf, value: perf, description: パフォーマンスの改善 }
+          - { name: chore, value: chore, description: ビルドプロセスの変更や改善 }
+          - { name: ci, value: ci, description: CI設定の変更 }
+          - { name: build, value: build, description: ビルドシステムや依存関係の変更 }
+          - { name: revert, value: revert, description: 以前の変更の取り消し }
+          - { name: wip, value: wip, description: 作業中 }
+      - type: input
+        key: Scope
+        title: Scope (optional)
+        initialValue: ''
     command: '{{$scope := ""}}{{if .Form.Scope}}{{$scope = printf "(%s)" .Form.Scope}}{{end}}git commit -e -m {{printf "%s%s: " .Form.Type $scope | quote}}'
