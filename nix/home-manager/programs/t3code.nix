@@ -25,6 +25,9 @@ let
     # エージェントのバージョンは llm-agents で揃えるので、更新の通知は要らない。
     enableProviderUpdateChecks = false;
 
+    # 再開時に cache なしで全 context を送り直さないため。
+    idleCompaction = "beforeCacheExpires";
+
     # driver が欠けたインスタンスがあると settings.json 全体が読み込まれないので、
     # 必ず書く。displayName も省かない。解決済みのバイナリパスがラベルとして
     # 保存され、UI に /nix/store/... が出たままマージで残る。
