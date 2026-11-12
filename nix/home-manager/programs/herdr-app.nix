@@ -9,6 +9,7 @@ let
   dotfilesDir = "${homeDirectory}/dotfiles";
   appHome = "${config.xdg.configHome}/herdr-app";
   modSource = "${dotfilesDir}/.config/herdr-app/mods/tmux-prefix";
+  package = pkgs.llm-agents.herdr-app;
 
   # keys.json はアプリも書き換える設定ファイルなので、宣言した分だけを jq で足す。
   # ctrl-q は tmux-prefix mod が単独で受け取るため、旧来の2打鍵コードは落とす。
@@ -20,7 +21,10 @@ let
   '';
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
-  # herdr-app 本体は cask 管理。ここでは GUI の mod とキーバインドだけを用意する。
+  # herdr-core と同じ llm-agents から入れ、core と app の版を flake.lock で揃える。
+  # Nix 版はビルド時に HERDR_APP_RELEASE が無いので自己更新しない。
+  home.packages = [ package ];
+
   # mod のフォルダにはアプリが gpui-kit.d.ts と jsconfig.json を書き出すので、
   # リポジトリへ symlink せずコピーで置く。
   home.activation.installHerdrAppMods = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -50,19 +54,10 @@ lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
   '';
 
   # agent skill はアプリのバイナリが持っている (herdr-app --skill)。frontmatter が
-  # 無いので、switch のたびに取り出して付けて配る。アプリは自己更新するため、
-  # 更新後は次の switch まで古い内容になりうる。その判断は本文の先頭に書く。
+  # 無いので、switch のたびに取り出して付けて配る。
   home.activation.installHerdrAppSkill = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    # activation の PATH は Home Manager が固定値に置き換えるため、
-    # Homebrew の cask で入れたバイナリは名前では見つからない。絶対パスで探す。
-    app_bin=""
-    for candidate in /opt/homebrew/bin/herdr-app /usr/local/bin/herdr-app "$(command -v herdr-app || true)"; do
-      if [ -x "$candidate" ]; then
-        app_bin="$candidate"
-        break
-      fi
-    done
-    if [ -n "$app_bin" ] && skill="$("$app_bin" --skill 2>/dev/null)"; then
+    app_bin="${lib.getExe package}"
+    if skill="$("$app_bin" --skill 2>/dev/null)"; then
       version="$("$app_bin" --version 2>/dev/null)"
       version="''${version##* }"
       tmp="$(${pkgs.coreutils}/bin/mktemp)"
