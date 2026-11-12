@@ -73,6 +73,9 @@ in
 
     envExtra = ''
       [ -f "$HOME/.config/profile" ] && . "$HOME/.config/profile"
+      # エージェントの bash 前提の書き方（`echo ===`、`--include=*.ts`）を通す。
+      setopt NO_EQUALS
+      [[ -o interactive ]] || setopt NO_NOMATCH
     '';
 
     initContent = lib.mkMerge [
