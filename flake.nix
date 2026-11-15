@@ -36,6 +36,11 @@
     rex.url = "https://pkgs.superlogical.com/rex/nix/preview.tar.gz";
     rex.inputs.nixpkgs.follows = "nixpkgs";
 
+    # Rex 用の Neovim フロントエンド。nixpkgs には未収録なので上流の flake を追う。
+    # ビルドには Zig 0.17 が要るが、nixpkgs unstable に入っているので pin は共有する。
+    neorex.url = "github:alexrlocke/neorex";
+    neorex.inputs.nixpkgs.follows = "nixpkgs";
+
     # comma と command-not-found 用の nix-index データベース（毎週ビルド済みを配布）。
     nix-index-database.url = "github:nix-community/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";

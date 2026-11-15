@@ -43,6 +43,7 @@ in
     ../programs/aerospace.nix
     ../programs/karabiner.nix
     ../programs/mpv.nix
+    ../programs/neorex.nix
     ../programs/nh.nix
     ../presets/terminal.nix
   ];
