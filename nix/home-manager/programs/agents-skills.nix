@@ -33,6 +33,14 @@ in
   programs.agent-skills = {
     enable = true;
 
+    # ~/.claude/skills は Claude アプリも使う。同期は rsync --delete なので、
+    # アプリが claude.ai からダウンロードする synced と退避先の .trash を除外する。
+    excludePatterns = [
+      "/.system"
+      "/synced"
+      "/.trash"
+    ];
+
     sources = {
       vercel-agent-skills = {
         input = "vercel-agent-skills";
