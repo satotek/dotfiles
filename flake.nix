@@ -88,6 +88,13 @@
       flake = false;
     };
 
+    # Chrome チームが配布する Web プラットフォーム知識の Agent Skill。
+    # CLI 本体は npm tarball を nix/packages でラップし、SKILL.md は transform で差し替える。
+    modern-web-guidance-skill = {
+      url = "github:GoogleChrome/modern-web-guidance";
+      flake = false;
+    };
+
     # OpenAI 公式の Claude Code 用 Codex プラグイン。
     codex-plugin-cc = {
       url = "github:openai/codex-plugin-cc";

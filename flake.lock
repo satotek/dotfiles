@@ -264,6 +264,22 @@
         "type": "github"
       }
     },
+    "modern-web-guidance-skill": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794280113,
+        "narHash": "sha256-bqsUEI1yaGy1sd8DBJzG5cOv4Yv0RSYac6e9egqYFJU=",
+        "owner": "GoogleChrome",
+        "repo": "modern-web-guidance",
+        "rev": "4dd968349e54ca45a05dd5c818fb035c9054b022",
+        "type": "github"
+      },
+      "original": {
+        "owner": "GoogleChrome",
+        "repo": "modern-web-guidance",
+        "type": "github"
+      }
+    },
     "neorex": {
       "inputs": {
         "nixpkgs": [
@@ -424,6 +440,7 @@
         "home-manager": "home-manager",
         "homebrew-nikitabobko-tap": "homebrew-nikitabobko-tap",
         "llm-agents": "llm-agents",
+        "modern-web-guidance-skill": "modern-web-guidance-skill",
         "neorex": "neorex",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",

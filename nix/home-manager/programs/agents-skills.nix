@@ -10,6 +10,8 @@ let
 
   astGrepBin = "${pkgs.ast-grep}/bin/ast-grep";
   agentBrowserBin = "${pkgs.llm-agents.agent-browser}/bin/agent-browser";
+  modernWebGuidance = pkgs.callPackage ../../packages/modern-web-guidance.nix { };
+  modernWebGuidanceBin = "${modernWebGuidance}/bin/modern-web-guidance";
 
   localSkillsDir = ../../../agents/skills;
 
@@ -74,6 +76,11 @@ in
 
       yomiyasu = {
         input = "yomiyasu-skill";
+        subdir = "skills";
+      };
+
+      modern-web-guidance = {
+        input = "modern-web-guidance-skill";
         subdir = "skills";
       };
 
@@ -185,6 +192,53 @@ in
 
         yomiyasu = {
           from = "yomiyasu";
+        };
+
+        modern-web-guidance = {
+          from = "modern-web-guidance";
+          packages = [ modernWebGuidance ];
+          # rewriteCommands を切って transform で store の絶対パスへ書き換える。
+          # 自動 rewrite は "modern-web-guidance" を SKILL.md 全体で
+          # "./modern-web-guidance" に置換し、frontmatter の name まで壊す。
+          rewriteCommands = false;
+          transform =
+            { original, dependencies }:
+            let
+              # 上流は npx 実行を前提にしている。nix では store のバイナリを直接叩くので、
+              # その前提の節ごと差し替える。見出しが変わったら評価時に落ちるので気付ける。
+              npxSection = lib.splitString "## Using npx / pnpx" original;
+              guidelinesSection = lib.splitString "## Guidelines" (lib.last npxSection);
+
+              body = ''
+                ${lib.head npxSection}## Running the CLI
+
+                - **Provided by Nix**: `modern-web-guidance` is a pinned Nix store binary. It bundles its own guide corpus, runs offline, and needs neither network access nor `npx`.
+                - **Telemetry**: disabled by the wrapper.
+
+                ## Guidelines${lib.last guidelinesSection}
+              '';
+
+              patched =
+                builtins.replaceStrings
+                  [
+                    "Run `modern-web-guidance` directly with `npx` using a"
+                    "npx -y modern-web-guidance@latest search \"<query>\" --skill-version 2026_11_09-5bcc021b"
+                    "npx -y modern-web-guidance@latest "
+                    "name: modern-web-guidance\n"
+                  ]
+                  [
+                    "Run `${modernWebGuidanceBin}` using a"
+                    "${modernWebGuidanceBin} search \"<query>\""
+                    "${modernWebGuidanceBin} "
+                    "name: modern-web-guidance\nallowed-tools: Bash(${modernWebGuidanceBin}:*)\n"
+                  ]
+                  body;
+            in
+            ''
+              ${patched}
+
+              ${dependencies}
+            '';
         };
 
         web-fetch = {
