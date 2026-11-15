@@ -9,6 +9,8 @@
 
   programs.rex = {
     enable = true;
+    # Herdr 風の prefix キーバインド。変更後は `rex config reload` で反映する。
+    config = ./rex/init.lua;
     # ガードは programs.ssh 経由で ~/.ssh/config に書かれるが、この dotfiles は
     # ~/.ssh/config を管理していない。ガードが無いとサーバーは TERM=xterm-rex を
     # 名乗らないので、外して警告だけ止める。
