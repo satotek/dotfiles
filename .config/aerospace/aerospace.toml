@@ -62,6 +62,8 @@ on-window-detected = [
     { if = 'test %{app-bundle-id} = com.1password.1password', run = 'layout floating' },
     { if = 'test %{app-bundle-id} = org.pqrs.Karabiner-Elements.Settings', run = 'layout floating' },
     { if = 'test %{app-bundle-id} = org.pqrs.Karabiner-EventViewer', run = 'layout floating' },
+    # Strata の設定ウィンドウもタイルせずフロート。
+    { if.window-title-regex-substring = 'Strata Settings', run = 'layout floating' },
     # Finder はファイル操作の補助なので、タイルに混ぜず開いた場所にフロートさせる。
     { if = 'test %{app-bundle-id} = com.apple.finder', run = 'layout floating' },
     # 3: その他（catch-all）

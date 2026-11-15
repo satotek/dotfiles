@@ -27,8 +27,9 @@ launchd から起動するAeroSpaceはPATHが限られるため、
 
 AeroSpace はウィンドウの配置を覚えないため、`on-window-detected` のルールで検出のたびに
 寄せ直す。ルールは上から順に評価され、最初にマッチしたものだけが実行されるので
-catch-all は必ず末尾に置く。設定アプリ・1Password・Karabiner・Finder は catch-all より前に
-フロート指定があり、開いた場所に浮いたまま残る（Finder はファイル操作の補助なのでタイルに混ぜない）。
+catch-all は必ず末尾に置く。設定アプリ・1Password・Karabiner・Finder・Strata の設定ウィンドウは
+catch-all より前にフロート指定があり、開いた場所に浮いたまま残る
+（Finder はファイル操作の補助なのでタイルに混ぜない）。
 
 ルールを変更した後は、開いているウィンドウにも再適用できる。
 
