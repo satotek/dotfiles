@@ -72,11 +72,13 @@ in
     enable = true;
     flake = dotfilesDir;
     # standalone HM は home-manager と profile (home-manager-path) の 2 プロファイルに
-    # 世代を積むため、片方だけでなく `nh clean user` で両方を整理する。
+    # 世代を積む。Linux はユーザーの timer で `nh clean user` を回し、両方を整理する。
+    # macOS は system 側の launchd job (nix-darwin/nix-cleanup.nix) が root で
+    # `nh clean all` を実行するため、ユーザー側の job は作らない。
     # 7 日以内の世代と最低 2 世代のロールバック先を残し、direnv などの開発用
-    # GC root は保持する。macOS は Store GC を system 側の job に集約している。
-    # GC 後に同一内容のファイルをハードリンクでまとめ、store を 15% ほど縮める。
-    clean = {
+    # GC root は保持する。GC 後に同一内容のファイルをハードリンクでまとめ、
+    # store を 15% ほど縮める。
+    clean = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       enable = true;
       dates = "weekly";
       extraArgs = [
@@ -85,15 +87,13 @@ in
         "--keep-since"
         "7d"
         "--no-gcroots"
-      ]
-      ++ (if pkgs.stdenv.hostPlatform.isDarwin then [ "--no-gc" ] else [ "--optimise" ]);
+        "--optimise"
+      ];
     };
   };
   systemd.user.services.nh-clean.Service.Environment = lib.mkIf pkgs.stdenv.hostPlatform.isLinux [
     "PATH=${nhCleanPath}"
   ];
-  launchd.agents.nh-clean.config.EnvironmentVariables.PATH =
-    lib.mkIf pkgs.stdenv.hostPlatform.isDarwin nhCleanPath;
 
   xdg.configFile."nix/nix.conf".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/.config/nix/nix.conf";
