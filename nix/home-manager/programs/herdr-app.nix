@@ -70,7 +70,10 @@ lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
         printf '<!-- Generated from herdr-app %s at switch time. If herdr-app --version reports another version, run herdr-app --skill and follow that instead. -->\n\n' "$version"
         printf '%s\n' "$skill"
       } > "$tmp"
-      for dest in "$HOME/.agents/skills/herdr-app/SKILL.md" "$HOME/.claude/skills/herdr-app/SKILL.md"; do
+      for dest in \
+        "$HOME/.agents/skills/herdr-app/SKILL.md" \
+        "$HOME/.claude/skills/herdr-app/SKILL.md" \
+        "$HOME/.claude_work/skills/herdr-app/SKILL.md"; do
         if [ ! -f "$dest" ] || ! ${pkgs.coreutils}/bin/cmp -s "$tmp" "$dest"; then
           run ${pkgs.coreutils}/bin/install -Dm644 "$tmp" "$dest"
         fi
