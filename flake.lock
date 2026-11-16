@@ -3,11 +3,11 @@
     "agent-browser": {
       "flake": false,
       "locked": {
-        "lastModified": 1794693767,
-        "narHash": "sha256-uyDdlnvfdiv0F6eQ/1UNDhW+9esBXn4KsqQHE/j2gtM=",
+        "lastModified": 1794730612,
+        "narHash": "sha256-14eOMMT52T7Z1CNewg+nRUqoBgFfWDWB+o08IzTQICE=",
         "owner": "vercel-labs",
         "repo": "agent-browser",
-        "rev": "e0c121a96d3a5412e2078e0c8eba3f4d2db2b616",
+        "rev": "53384771fbafc261ba67608ac806dd5aa70b84f0",
         "type": "github"
       },
       "original": {
@@ -251,11 +251,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1794697722,
-        "narHash": "sha256-kLUWR2G8oUYuciZVazof7fZ+M/baRaemoNjmwXH9Pic=",
+        "lastModified": 1794787251,
+        "narHash": "sha256-LHm/x1owamrkGb9am4LofA1jn8yJBQHPxfAUdEDDNfA=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "db5b3ff7fca0005b0162c3c417fb98e369534e5c",
+        "rev": "8adf052a0006d9617a7d6c0fe5a628e1eb48a5dc",
         "type": "github"
       },
       "original": {
