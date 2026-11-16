@@ -37,8 +37,37 @@ return {
       vim.lsp.document_color.enable(true, nil, { style = "virtual" })
 
       local capabilities = require("blink.cmp").get_lsp_capabilities()
+
+      -- oxlintのroot_dirは設定ファイルの有無しか見ないため、oxlintを導入していない
+      -- プロジェクトでも起動を試みてspawn失敗の通知が出る。実行ファイルの存在も条件にする。
+      local function oxlint_available(dir)
+        for _, name in ipairs({ "oxlint", "vp" }) do
+          if vim.fn.executable(name) == 1 then
+            return true
+          end
+          if dir and vim.fn.executable(vim.fs.joinpath(dir, "node_modules/.bin", name)) == 1 then
+            return true
+          end
+        end
+        return false
+      end
+
+      local oxlint_root_dir = vim.lsp.config["oxlint"].root_dir
+      vim.lsp.config("oxlint", {
+        capabilities = capabilities,
+        root_dir = function(bufnr, on_dir)
+          oxlint_root_dir(bufnr, function(dir)
+            if dir and oxlint_available(dir) then
+              on_dir(dir)
+            end
+          end)
+        end,
+      })
+
       for _, server in ipairs(servers) do
-        vim.lsp.config(server, { capabilities = capabilities })
+        if server ~= "oxlint" then
+          vim.lsp.config(server, { capabilities = capabilities })
+        end
         vim.lsp.enable(server)
       end
 
