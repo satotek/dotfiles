@@ -162,10 +162,62 @@ let
       continueThemeAcrossLines = false;
     };
   };
+  # 追加アカウント用の config ディレクトリへ共有する項目。CLAUDE_CONFIG_DIR は
+  # ディレクトリを丸ごと差し替えるので、管理下の設定はアカウントごとの
+  # ディレクトリにも置く必要がある。認証情報 (.credentials.json, .claude.json) と
+  # セッション履歴、claude.ai 同期データ (skills/synced, plugins/synced) は
+  # アカウント固有なので共有しない。
+  sharedConfigEntries = [
+    "CLAUDE.md"
+    "settings.json"
+    "settings.local.json"
+    "keybindings.json"
+    "agents"
+    "hooks"
+    "plugins/marketplaces"
+    "plugins/repos"
+    "plugins/data"
+    "plugins/cache"
+    "plugins/config.json"
+    "plugins/installed_plugins.json"
+    "plugins/known_marketplaces.json"
+    "plugins/blocklist.json"
+    "plugins/plugin-catalog-cache.json"
+  ];
+  # 追加アカウント用の config ディレクトリ (T3 Code の Claude Work インスタンス)。
+  # 全ホストで同じ設定を参照させるだけなので、認証情報が無いホストでは
+  # 単に使われない。
+  altConfigDirs = [ "${homeDir}/.claude_work" ];
 in
 {
   # ccstatusline 設定を Home Manager 管理下に置く。
-  home.file.".config/ccstatusline/settings.json".text = builtins.toJSON ccstatuslineSettings;
+  home.file = {
+    ".config/ccstatusline/settings.json".text = builtins.toJSON ccstatuslineSettings;
+  }
+  // lib.listToAttrs (
+    lib.concatMap (
+      dir:
+      map (entry: {
+        name = "${dir}/${entry}";
+        # 実ファイルへのリンクにする。Nix store へコピーすると
+        # /config などアプリ側の書き戻しが効かなくなる。
+        value.source = config.lib.file.mkOutOfStoreSymlink "${homeDir}/.claude/${entry}";
+      }) sharedConfigEntries
+    ) altConfigDirs
+  );
+
+  # skills は agent-skills の同期対象にすると、同期データ (synced) を
+  # アカウントごとに保ったまま同じスキルを配れる。
+  programs.agent-skills.targets = lib.listToAttrs (
+    map (dir: {
+      name = "claude-${lib.removePrefix "." (baseNameOf dir)}";
+      value = {
+        enable = true;
+        dest = "${dir}/skills";
+        structure = "symlink-tree";
+      };
+    }) altConfigDirs
+  );
 
   # statusLine.command は nix store の絶対パス参照なので PATH には入らない。
   # 設定 TUI（ccstatusline コマンド）を手動起動できるよう PATH にも追加する。
