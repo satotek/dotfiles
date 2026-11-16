@@ -184,6 +184,21 @@ let
     "plugins/blocklist.json"
     "plugins/plugin-catalog-cache.json"
   ];
+  # Claude は設定 JSON を rename で書き換えるため、symlink が実ファイルに置き換わる。
+  # 実ファイルが残った状態で switch すると既存の .hm-bak と衝突して activation が
+  # 止まるので、ファイルだけ force で張り直す。ディレクトリを force にすると実
+  # ディレクトリを backup へ mv してしまうため、ここには入れない。
+  forcedConfigEntries = [
+    "CLAUDE.md"
+    "settings.json"
+    "settings.local.json"
+    "keybindings.json"
+    "plugins/config.json"
+    "plugins/installed_plugins.json"
+    "plugins/known_marketplaces.json"
+    "plugins/blocklist.json"
+    "plugins/plugin-catalog-cache.json"
+  ];
   # 追加アカウント用の config ディレクトリ (T3 Code の Claude Work インスタンス)。
   # 全ホストで同じ設定を参照させるだけなので、認証情報が無いホストでは
   # 単に使われない。
@@ -201,7 +216,10 @@ in
         name = "${dir}/${entry}";
         # 実ファイルへのリンクにする。Nix store へコピーすると
         # /config などアプリ側の書き戻しが効かなくなる。
-        value.source = config.lib.file.mkOutOfStoreSymlink "${homeDir}/.claude/${entry}";
+        value = {
+          source = config.lib.file.mkOutOfStoreSymlink "${homeDir}/.claude/${entry}";
+          force = builtins.elem entry forcedConfigEntries;
+        };
       }) sharedConfigEntries
     ) altConfigDirs
   );
