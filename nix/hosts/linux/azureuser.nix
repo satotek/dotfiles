@@ -24,6 +24,15 @@
         ../../home-manager/programs/t3code-server.nix
         ../../home-manager/programs/tailscale.nix
         ../../home-manager/programs/zsh-history-check.nix
+        {
+          # `rex server tailscale on` は再起動をまたいで残らず、VM の停止ごとに
+          # tailnet から消えるので、サーバーの起動フラグで有効にする。
+          # 名前を変えると別ノードとして登録し直しになるため、既存の名前に合わせる。
+          services.rex.tailscale = {
+            enable = true;
+            hostname = "gem-ai-rex";
+          };
+        }
       ]
     else
       [ ]
