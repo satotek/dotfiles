@@ -70,12 +70,27 @@ map("n", "<leader>-", "<C-w>s", { remap = true, desc = "Split Window Below" })
 map("n", "<leader>|", "<C-w>v", { remap = true, desc = "Split Window Right" })
 map("n", "<leader>wd", "<C-w>c", { remap = true, desc = "Delete Window" })
 map("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit All" })
+-- 設定変更の反映用。:restartはセッションを保存して復元するので、開いていたバッファは残る。
+map("n", "<leader>qr", "<cmd>restart<cr>", { desc = "Restart Neovim" })
+map("n", "<leader>uu", function()
+  vim.cmd.packadd("nvim.undotree")
+  require("undotree").open()
+end, { desc = "Undotree" })
 
 map("n", "<leader><tab><tab>", "<cmd>tabnew<cr>", { desc = "New Tab" })
 map("n", "<leader><tab>]", "<cmd>tabnext<cr>", { desc = "Next Tab" })
 map("n", "<leader><tab>[", "<cmd>tabprevious<cr>", { desc = "Previous Tab" })
 map("n", "<leader><tab>d", "<cmd>tabclose<cr>", { desc = "Close Tab" })
 map("n", "<leader><tab>o", "<cmd>tabonly<cr>", { desc = "Close Other Tabs" })
+
+-- 汎用のフロートターミナル。<C-_>は<C-/>を送れない端末向けの別名。
+-- 背景透過ではSnacksのbackdropが無効になり、枠が無いと編集画面と見分けられないので
+-- winborderに従う枠を付ける。
+for _, lhs in ipairs({ "<C-/>", "<C-_>" }) do
+  map({ "n", "t" }, lhs, function()
+    Snacks.terminal.toggle(nil, { win = { position = "float", border = true } })
+  end, { desc = "Toggle Terminal" })
+end
 
 map("n", "<leader>D", function()
   Snacks.terminal("oxker", {

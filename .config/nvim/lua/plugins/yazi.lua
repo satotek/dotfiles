@@ -21,7 +21,8 @@ return {
       desc = "Open the file manager in nvim's working directory",
     },
     {
-      "<c-up>",
+      -- <C-Up>はウィンドウの高さ変更(keymaps.lua)に使うので避ける。
+      "<leader>fY",
       "<cmd>Yazi toggle<cr>",
       desc = "Resume the last yazi session",
     },

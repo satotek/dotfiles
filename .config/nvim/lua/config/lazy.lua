@@ -23,6 +23,8 @@ require("lazy").setup({
     version = false,
   },
   install = { colorscheme = { "tokyonight", "habamax" } },
+  -- 背景透過ではbackdropが作られず、枠が無いと編集画面と見分けられない。
+  ui = { border = "rounded" },
   checker = {
     enabled = true, -- check for plugin updates periodically
     notify = false, -- notify on update

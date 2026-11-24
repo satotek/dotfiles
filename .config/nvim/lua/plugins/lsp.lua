@@ -74,8 +74,10 @@ return {
         severity_sort = true,
         underline = true,
         update_in_insert = false,
-        virtual_text = { spacing = 2, source = "if_many" },
-        float = { border = "rounded", source = true },
+        -- 長いエラーが行末で切れないよう、カーソル行だけ複数行で展開し、他の行は従来どおり行末に出す。
+        virtual_text = { spacing = 2, source = "if_many", current_line = false },
+        virtual_lines = { current_line = true },
+        float = { source = true },
       })
 
       vim.api.nvim_create_autocmd("LspAttach", {
@@ -105,17 +107,7 @@ return {
             Snacks.picker.lsp_workspace_symbols()
           end, "LSP Workspace Symbols")
           map("<leader>ca", vim.lsp.buf.code_action, "Code Action", { "n", "x" })
-          vim.keymap.set("n", "<leader>cr", function()
-            return ":IncRename " .. vim.fn.expand("<cword>")
-          end, {
-            buffer = event.buf,
-            expr = true,
-            desc = "Rename",
-          })
-          map("gD", "<cmd>Glance definitions<cr>", "Glance Definitions")
-          map("gR", "<cmd>Glance references<cr>", "Glance References")
-          map("gY", "<cmd>Glance type_definitions<cr>", "Glance Type Definitions")
-          map("gM", "<cmd>Glance implementations<cr>", "Glance Implementations")
+          map("<leader>cr", vim.lsp.buf.rename, "Rename")
         end,
       })
     end,

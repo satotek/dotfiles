@@ -13,9 +13,14 @@ opt.fillchars = {
   diff = "╱",
   eob = " ",
 }
+-- 起動時は全部開いた状態にする。treesitterが使えるバッファではtreesitter.luaが
+-- foldexprに切り替え、使えないバッファはインデントで畳む。
+opt.foldcolumn = "1"
+opt.foldenable = true
 opt.foldlevel = 99
+opt.foldlevelstart = 99
 opt.foldmethod = "indent"
-opt.foldtext = ""
+opt.foldtext = "v:lua.require'config.foldtext'.render()"
 opt.formatoptions = "jcroqlnt"
 opt.grepformat = "%f:%l:%c:%m"
 opt.grepprg = "rg --vimgrep"
@@ -27,6 +32,8 @@ opt.linebreak = true
 opt.list = true
 opt.number = true
 opt.pumblend = 10
+-- 枠の指定をプラグインごとに書かず、標準のフロート(hover・診断など)をまとめて角丸にする。
+opt.winborder = "rounded"
 opt.pumheight = 10
 opt.relativenumber = true
 opt.ruler = false
@@ -113,4 +120,31 @@ if vim.fn.has("win32") == 1 then
   vim.o.shellpipe = '2>&1 | %%{ "$_" } | tee %s; exit $LastExitCode'
   vim.o.shellquote = ""
   vim.o.shellxquote = ""
+end
+
+-- メッセージとcmdlineは本体のUI(ui2)で表示する。実験的機能でモジュール名が
+-- 変わりうるので、読み込めなければ従来のcmdlineのまま使う。
+local ok_ui2, ui2 = pcall(require, "vim._core.ui2")
+if ok_ui2 then
+  -- cmdlineは使うときだけ最下段に出す。cmdheight=0では"cmd"の表示先が
+  -- 見えないので、メッセージは右下の一時ウィンドウ("msg")へ送る。
+  vim.o.cmdheight = 0
+  ui2.enable({ msg = { targets = "msg" } })
+
+  -- 0.12のLSPは進捗を自分では表示しないので、progressメッセージとして流す。
+  -- 同じidで出し直すと上書きされ、進捗が積み重ならない。
+  vim.api.nvim_create_autocmd("LspProgress", {
+    group = vim.api.nvim_create_augroup("dotfiles_lsp_progress", { clear = true }),
+    callback = function(event)
+      local value = event.data.params.value
+      vim.api.nvim_echo({ { value.message or "done" } }, false, {
+        id = "lsp." .. event.data.params.token,
+        kind = "progress",
+        source = "vim.lsp",
+        title = value.title,
+        status = value.kind ~= "end" and "running" or "success",
+        percent = value.percentage,
+      })
+    end,
+  })
 end

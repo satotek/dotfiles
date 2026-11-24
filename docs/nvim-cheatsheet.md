@@ -120,6 +120,7 @@
 | `<leader>E` | Snacks Explorer をカレントディレクトリで開く |
 | `<leader>fy` | Yazi を現在のファイル位置で開く |
 | `<leader>cw` | Yazi を Neovim のカレントディレクトリで開く |
+| `<leader>fY` | 前回の Yazi を再開 |
 | Explorer 内 `a` | ファイルまたはディレクトリを新規作成 |
 | Explorer 内 `r` | リネーム |
 | Explorer 内 `d` | 削除 |
@@ -129,7 +130,7 @@
 
 ## ターミナル
 
-汎用ターミナルは ToggleTerm を使用する。Docker コンテナ管理には Oxker も呼び出せる。
+汎用ターミナルは Snacks Terminal を使用する。Docker コンテナ管理には Oxker も呼び出せる。
 
 | キー | 用途 |
 |---|---|
@@ -176,16 +177,12 @@
 | キー | 用途 |
 |---|---|
 | `gd` | 定義へジャンプ (`Snacks.picker.lsp_definitions`) |
-| `gD` | 定義一覧を Glance でプレビュー |
 | `gr` | 参照一覧 (`Snacks.picker.lsp_references`) |
-| `gR` | 参照一覧を Glance でプレビュー |
 | `gI` | 実装へジャンプ |
-| `gM` | 実装一覧を Glance でプレビュー |
 | `gy` | 型定義へジャンプ |
-| `gY` | 型定義一覧を Glance でプレビュー |
 | `K` | ホバー情報（ドキュメント）を表示 |
 | `<leader>ca` | コードアクションを実行 |
-| `<leader>cr` | シンボルのリネーム (`IncRename`) |
+| `<leader>cr` | シンボルのリネーム (`vim.lsp.buf.rename`、`grn` も同じ) |
 | `<leader>cf` | ファイルのフォーマットを実行 |
 | `[d` / `]d` | 前 / 次の診断（エラー・警告等）へ移動 |
 | `[e` / `]e` | 前 / 次のエラーへ移動 |

@@ -28,6 +28,11 @@ return {
       quickfile = { enabled = true },
       notifier = { enabled = true },
       words = { enabled = true },
+      styles = {
+        -- 背景透過ではbackdropが作られず、枠が無いと編集画面と見分けられない。
+        -- lazygitスタイルは<leader>gg(lazygit)と<leader>D(oxker)が使う。
+        lazygit = { border = true },
+      },
     },
     keys = {
       {
