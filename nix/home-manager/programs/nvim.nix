@@ -28,6 +28,12 @@ let
     # storeでは失敗する。ヘルプは下のtreesitterDocとして、lazyの管理外から読ませる。
     postBuild = "rm -r $out/doc";
   };
+  # luamigemoに同梱の辞書(BSD版)は語彙が少ないので、SKK-JISYO.L由来の大きい辞書を渡す。
+  # kensaku.vimが既定で使っていたものと同じ、更新されない固定のリリース。
+  migemoDict = pkgs.fetchurl {
+    url = "https://github.com/oguna/migemo-compact-dict-latest/releases/download/v0.2/migemo-compact-dict";
+    sha256 = "06ls5sm87xnxnlmxq55g0573g5qn5knhv4a0rlpj529mnd0c4fps";
+  };
   treesitterDoc = pkgs.runCommand "nvim-treesitter-doc" { } ''
     mkdir -p $out
     ln -s ${nvimTreesitter}/doc $out/doc
@@ -40,4 +46,5 @@ in
 
   xdg.dataFile."nvim/nix/nvim-treesitter".source = treesitterRuntime;
   xdg.dataFile."nvim/nix/nvim-treesitter-doc".source = treesitterDoc;
+  xdg.dataFile."nvim/nix/migemo-compact-dict".source = migemoDict;
 }

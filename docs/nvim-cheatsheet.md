@@ -151,6 +151,7 @@
 | `<leader>fr` | 最近開いたファイルを検索 (`recent`) |
 | `<leader>,` / `<leader>fb` | 開いているバッファ一覧 |
 | `<leader>/` / `<leader>sg` | Git root から全文 grep |
+| `<leader>sj` | ローマ字で日本語を grep（`nihongo` → 日本語・にほんご・ニホンゴ） |
 | `<leader>sG` | カレントディレクトリから全文 grep |
 | `<leader>sw` | カーソル下の単語または Visual 選択範囲を grep |
 | `<leader>sb` | 現在のバッファ内を行単位で検索 (`lines`) |
