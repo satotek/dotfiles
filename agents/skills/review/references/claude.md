@@ -1,6 +1,6 @@
 # Claude Code reviewer
 
-Use `claude -p` from Codex or OpenCode. It runs headlessly in the same
+Use `claude -p` from Antigravity, Codex or OpenCode. It runs headlessly in the same
 repository, prints the review to stdout, and exits; it does not open an
 interactive session.
 
