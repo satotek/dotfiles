@@ -11,13 +11,6 @@ vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
   end,
 })
 
-vim.api.nvim_create_autocmd("TextYankPost", {
-  group = augroup("highlight_yank"),
-  callback = function()
-    (vim.hl or vim.highlight).on_yank()
-  end,
-})
-
 -- clipboard=unnamedplus だと d/c/x のたびに OSC 52 が飛び、クリップボードも汚れるので、
 -- レジスタ未指定の y だけを + に送る。"ay など明示したものは意図を尊重して送らない。
 vim.api.nvim_create_autocmd("TextYankPost", {

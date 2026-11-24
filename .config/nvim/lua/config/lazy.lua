@@ -22,7 +22,7 @@ require("lazy").setup({
     lazy = false,
     version = false,
   },
-  install = { colorscheme = { "tokyonight", "habamax" } },
+  install = { colorscheme = { "catppuccin", "habamax" } },
   -- 背景透過ではbackdropが作られず、枠が無いと編集画面と見分けられない。
   ui = { border = "rounded" },
   checker = {

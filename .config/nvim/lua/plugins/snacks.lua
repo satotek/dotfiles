@@ -252,13 +252,6 @@ return {
         desc = "Resume",
       },
       {
-        "<leader>st",
-        function()
-          Snacks.picker.todo_comments()
-        end,
-        desc = "Todo",
-      },
-      {
         "<leader>uC",
         function()
           Snacks.picker.colorschemes()

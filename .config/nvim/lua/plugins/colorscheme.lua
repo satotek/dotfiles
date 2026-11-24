@@ -1,61 +1,30 @@
 return {
-  -- kanagawa（併用: 棚に残す。:colorscheme kanagawa で切替可）
-  {
-    "rebelot/kanagawa.nvim",
-    lazy = true,
-    opts = {
-      transparent = true,
-      theme = "wave", -- wave, dragon, lotus
-    },
-  },
-
-  -- catppuccin（併用: デフォルト。flavour = latte/frappe/macchiato/mocha）
   {
     "catppuccin/nvim",
     name = "catppuccin",
     priority = 1000,
     lazy = false,
-    init = function()
-      local function apply_transparency()
-        for _, group in ipairs({
-          "Normal",
-          "NormalNC",
-          "NormalFloat",
-          "FloatBorder",
-          "SignColumn",
-          "EndOfBuffer",
-          "LineNr",
-          "CursorLineNr",
-          "FoldColumn",
-        }) do
-          local hl = vim.api.nvim_get_hl(0, { name = group, link = false })
-          hl.bg = nil
-          vim.api.nvim_set_hl(0, group, hl)
-        end
-      end
-
-      vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
-        group = vim.api.nvim_create_augroup("TransparentBackground", { clear = true }),
-        callback = apply_transparency,
-      })
-    end,
     opts = {
       flavour = "mocha", -- 暗め。明るくするなら latte
-      transparent_background = true, -- kanagawa と揃えて背景透過
+      -- 本文・行番号・サイン列・フロートまで背景を透過する。
+      transparent_background = true,
       float = {
         transparent = true,
       },
-      custom_highlights = function()
+      integrations = {
+        blink_pairs = true,
+      },
+      custom_highlights = function(colors)
         return {
-          Normal = { bg = "NONE" },
-          NormalNC = { bg = "NONE" },
-          NormalFloat = { bg = "NONE" },
-          FloatBorder = { bg = "NONE" },
-          SignColumn = { bg = "NONE" },
-          EndOfBuffer = { bg = "NONE" },
-          LineNr = { bg = "NONE" },
-          CursorLineNr = { bg = "NONE" },
-          FoldColumn = { bg = "NONE" },
+          -- 1段目の括弧と同じ赤なので、波線を足して対応の取れない括弧を見分ける。
+          BlinkPairsUnmatched = { fg = colors.red, sp = colors.red, style = { "undercurl" } },
+          -- 背景が透過でもタブの区切りが見えるよう、今のタブを明るく、ほかを暗くする。
+          MiniTablineCurrent = { fg = colors.text, bg = colors.surface0, style = { "bold" } },
+          MiniTablineVisible = { fg = colors.subtext0, bg = colors.mantle },
+          MiniTablineHidden = { fg = colors.overlay1, bg = colors.mantle },
+          MiniTablineModifiedCurrent = { fg = colors.peach, bg = colors.surface0, style = { "bold" } },
+          MiniTablineModifiedVisible = { fg = colors.peach, bg = colors.mantle },
+          MiniTablineModifiedHidden = { fg = colors.peach, bg = colors.mantle },
         }
       end,
     },

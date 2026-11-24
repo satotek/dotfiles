@@ -1,3 +1,20 @@
+-- todo-commentsの既定と同じキーワード。ハイライト・移動・一覧のすべてがこれを使う。
+local todo_groups = {
+  MiniHipatternsFixme = { "FIX", "FIXME", "BUG", "FIXIT", "ISSUE" },
+  MiniHipatternsHack = { "HACK", "WARN", "WARNING", "XXX", "PERF" },
+  MiniHipatternsTodo = { "TODO" },
+  MiniHipatternsNote = { "NOTE", "INFO", "TEST" },
+}
+local todo_keywords = vim.iter(vim.tbl_values(todo_groups)):flatten():totable()
+
+local function todo_vim_pattern(keywords)
+  return [[\v\C<(]] .. table.concat(keywords, "|") .. [[)>:]]
+end
+
+local function todo_rg_pattern(keywords)
+  return [[\b(]] .. table.concat(keywords, "|") .. [[):]]
+end
+
 return {
   {
     "MagicDuck/grug-far.nvim",
@@ -84,29 +101,49 @@ return {
     },
   },
   {
-    "folke/todo-comments.nvim",
+    -- TODOコメントのハイライト。一覧はSnacksのgrep、移動はsearch()で行う。
+    "nvim-mini/mini.hipatterns",
     event = { "BufReadPost", "BufNewFile" },
-    dependencies = { "nvim-lua/plenary.nvim" },
-    opts = {},
+    opts = function()
+      -- todo-commentsと同じく、コロン付きのキーワードだけを対象にする。
+      local highlighters = {}
+      for group, keywords in pairs(todo_groups) do
+        for _, keyword in ipairs(keywords) do
+          highlighters[keyword] = { pattern = "%f[%w]()" .. keyword .. "():", group = group }
+        end
+      end
+      return { highlighters = highlighters }
+    end,
     keys = {
       {
         "]t",
         function()
-          require("todo-comments").jump_next()
+          vim.fn.search(todo_vim_pattern(todo_keywords), "W")
         end,
         desc = "Next Todo Comment",
       },
       {
         "[t",
         function()
-          require("todo-comments").jump_prev()
+          vim.fn.search(todo_vim_pattern(todo_keywords), "bW")
         end,
         desc = "Previous Todo Comment",
       },
       {
+        "<leader>st",
+        function()
+          Snacks.picker.grep({ search = todo_rg_pattern(todo_keywords), live = false, title = "Todo" })
+        end,
+        desc = "Todo",
+      },
+      {
         "<leader>sT",
         function()
-          Snacks.picker.todo_comments({ keywords = { "TODO", "FIX", "FIXME" } })
+          Snacks.picker.grep({
+            search = todo_rg_pattern({ "TODO", "FIX", "FIXME" }),
+            live = false,
+            title = "Todo/Fix/Fixme",
+          })
         end,
         desc = "Todo/Fix/Fixme",
       },

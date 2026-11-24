@@ -41,10 +41,31 @@ return {
     end,
   },
   {
-    "nvim-mini/mini.pairs",
-    event = "VeryLazy",
+    -- 括弧の自動補完と色分けを同じパーサーで行い、対応の取れない括弧も目立たせる。
+    -- cmdlineでの色分けはui2が有効なときだけ働く。
+    "saghen/blink.pairs",
+    -- ビルド済みのバイナリはタグ付きリリースにしか無いので、リリース版に固定してダウンロードする。
+    version = "*",
+    dependencies = { "saghen/blink.lib" },
+    build = function()
+      require("blink.pairs").download():pwait(60000)
+    end,
+    event = { "BufReadPost", "BufNewFile", "InsertEnter", "CmdlineEnter" },
     opts = {
-      modes = { insert = true, command = true, terminal = false },
+      highlights = {
+        -- rainbow-delimitersの既定と同じ順に並べ、見た目を保つ。
+        groups = {
+          "BlinkPairsRed",
+          "BlinkPairsYellow",
+          "BlinkPairsBlue",
+          "BlinkPairsOrange",
+          "BlinkPairsGreen",
+          "BlinkPairsPurple",
+          "BlinkPairsCyan",
+        },
+        -- カーソル位置の対応はvim-matchupがif/endのような単語の対応まで含めて光らせる。
+        matchparen = { enabled = false },
+      },
     },
   },
   {
