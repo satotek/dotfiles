@@ -46,6 +46,9 @@ in
         "ORCA_TELEMETRY_DISABLED=1"
         "DO_NOT_TRACK=1"
       ];
+      # OpenCode Go の usage 表示用キー。sops が配るリポジトリ管理外のファイルで、
+      # 無ければ渡さない。
+      EnvironmentFile = [ "-%h/.config/orca/opencode.env" ];
       Restart = "on-failure";
       RestartSec = 10;
     };

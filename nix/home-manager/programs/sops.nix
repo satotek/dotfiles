@@ -64,6 +64,14 @@ let
       sopsFile = agentsSopsFile;
       target = "${config.home.homeDirectory}/.config/t3code/opencode.env";
     }
+    # Orca も usage 表示のキーを同じ順で探し、最後に OPENCODE_API_KEY を見る。
+    # orca-server の systemd ユニットが EnvironmentFile として読む。
+    {
+      key = "opencode_go_api_key";
+      envVar = "OPENCODE_API_KEY";
+      sopsFile = agentsSopsFile;
+      target = "${config.home.homeDirectory}/.config/orca/opencode.env";
+    }
   ];
 
   secrets = lib.optional pkgs.stdenv.hostPlatform.isDarwin cloudflareSecret ++ agentSecrets;
