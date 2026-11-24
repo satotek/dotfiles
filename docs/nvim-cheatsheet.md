@@ -163,10 +163,11 @@
 
 | キー | 用途 |
 |---|---|
-| `<leader>gd` | 作業ツリー全体の差分を Diffview で開く |
-| `<leader>gH` | リポジトリ全体のコミット履歴を Diffview で開く |
-| `<leader>gF` | 現在のファイルの変更履歴を Diffview で開く |
+| `<leader>gd` | 作業ツリー全体の差分を CodeDiff で開く |
+| `<leader>gH` | リポジトリ全体のコミット履歴を CodeDiff で開く |
+| `<leader>gF` | 現在のファイルの変更履歴を CodeDiff で開く（Visual 選択時は選んだ行の履歴） |
 | `<leader>gg` | Git root で Lazygit を開く |
+| `<leader>gn` | 開いているファイルのリポジトリで Neogit を開く |
 | `]h` / `[h` | 次 / 前の Git hunk へ移動 |
 | `<leader>ghp` | カーソル位置の hunk をインラインプレビュー |
 | `<leader>ghs` / `<leader>ghr` | カーソル位置の hunk をステージ / リセット |

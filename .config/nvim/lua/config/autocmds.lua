@@ -47,7 +47,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 
 vim.api.nvim_create_autocmd("FileType", {
   group = augroup("close_with_q"),
-  pattern = { "checkhealth", "gitsigns-blame", "grug-far", "help", "lspinfo", "qf" },
+  pattern = { "checkhealth", "gitsigns-blame", "help", "lspinfo", "qf" },
   callback = function(event)
     vim.bo[event.buf].buflisted = false
     vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = event.buf, silent = true, desc = "Quit buffer" })
