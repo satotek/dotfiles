@@ -4,7 +4,6 @@
     ast-grep
     bash-language-server
     clang-tools
-    efm-langserver
     lua-language-server
     markdown-oxide
     nixd

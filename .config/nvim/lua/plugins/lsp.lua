@@ -6,7 +6,6 @@ local servers = {
   "clangd",
   "cssls",
   "denols",
-  "efm",
   "eslint",
   "gopls",
   "jsonls",
@@ -23,7 +22,7 @@ local servers = {
   "taplo",
   "terraformls",
   "tflint",
-  "tsgo",
+  "tsc",
   "yamlls",
 }
 

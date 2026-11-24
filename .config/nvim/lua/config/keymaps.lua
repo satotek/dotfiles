@@ -56,9 +56,6 @@ map("n", "]w", diagnostic_jump(1, vim.diagnostic.severity.WARN), { desc = "Next 
 map("n", "[w", diagnostic_jump(-1, vim.diagnostic.severity.WARN), { desc = "Previous Warning" })
 map("n", "[q", "<cmd>cprev<cr>", { desc = "Previous Quickfix" })
 map("n", "]q", "<cmd>cnext<cr>", { desc = "Next Quickfix" })
-map({ "n", "x" }, "<leader>cf", function()
-  vim.lsp.buf.format({ async = true })
-end, { desc = "Format" })
 
 Snacks.toggle.option("spell", { name = "Spelling" }):map("<leader>us")
 Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
