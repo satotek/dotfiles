@@ -13,6 +13,7 @@
     ../programs/herdr-app.nix
     ../programs/omp.nix
     ../programs/opencode.nix
+    ../programs/orca.nix
     ../programs/rtk.nix
     ../programs/t3code.nix
   ];

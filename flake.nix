@@ -29,6 +29,11 @@
       flake = false;
     };
 
+    homebrew-orca-tap = {
+      url = "github:stablyai/homebrew-orca";
+      flake = false;
+    };
+
     llm-agents.url = "github:numtide/llm-agents.nix";
 
     # Rex 公式の prebuilt flake。stable はまだリリースが無いので preview を追う。

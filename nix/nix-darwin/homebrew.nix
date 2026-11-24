@@ -35,6 +35,7 @@ in
     mutableTaps = false;
     taps = {
       "nikitabobko/homebrew-tap" = inputs.homebrew-nikitabobko-tap;
+      "stablyai/homebrew-orca" = inputs.homebrew-orca-tap;
       "nosuke/homebrew-meltype" = meltypeTap;
     };
   };
@@ -66,6 +67,8 @@ in
       "claude"
       "grok-bot"
       "handy" # 音声入力（文字起こし）
+      # 素の `orca` cask は Plotly の画像エクスポーターなので tap 名で指定する。
+      "stablyai/orca/orca" # エージェントを worktree ごとに並べて回す IDE
       "t3-code" # エージェントの GUI。gem-ai のサーバーへは T3 Connect でつなぐ
 
       # エディタ・IDE

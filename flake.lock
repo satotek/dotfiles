@@ -242,6 +242,22 @@
         "type": "github"
       }
     },
+    "homebrew-orca-tap": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1795515691,
+        "narHash": "sha256-8SJtiPuF9ngHYCiQ9dOX1ar0V2p9EA+7W1U1THNgxAA=",
+        "owner": "stablyai",
+        "repo": "homebrew-orca",
+        "rev": "7b86d3150dc1c43f6392c8cff0ffe9f10b6f4f4b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "stablyai",
+        "repo": "homebrew-orca",
+        "type": "github"
+      }
+    },
     "llm-agents": {
       "inputs": {
         "bun2nix": "bun2nix",
@@ -439,6 +455,7 @@
         "herdr-skill": "herdr-skill",
         "home-manager": "home-manager",
         "homebrew-nikitabobko-tap": "homebrew-nikitabobko-tap",
+        "homebrew-orca-tap": "homebrew-orca-tap",
         "llm-agents": "llm-agents",
         "modern-web-guidance-skill": "modern-web-guidance-skill",
         "neorex": "neorex",
