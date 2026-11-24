@@ -84,11 +84,6 @@ in
         subdir = "skills";
       };
 
-      orca = {
-        input = "orca-skills";
-        subdir = "skills";
-      };
-
       # このリポジトリで書いた自作スキル (agents/skills)。
       local = {
         path = localSkillsDir;
@@ -100,11 +95,6 @@ in
     skills.explicit =
       lib.genAttrs localSkillNames (name: {
         from = "local";
-      })
-      # 中身はインストール済み orca CLI から版に合ったガイドを読み込むだけの
-      # スタブなので、skill を固定しても本体の版とずれない。
-      // lib.genAttrs [ "orca-cli" "orchestration" "orca-emulator" ] (name: {
-        from = "orca";
       })
       // {
         find-skills = {

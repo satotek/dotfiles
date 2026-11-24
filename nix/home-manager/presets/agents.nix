@@ -14,6 +14,7 @@
     ../programs/omp.nix
     ../programs/opencode.nix
     ../programs/orca.nix
+    ../programs/orca-skills.nix
     ../programs/rtk.nix
     ../programs/t3code.nix
   ];
