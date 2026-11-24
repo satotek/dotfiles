@@ -14,4 +14,6 @@
   read the returned diff before building on it. Inside T3 Code, use
   `delegate_task` with an explicit `target.model` and pick a model that fits
   the step; outside T3 Code, implement it yourself.
+- Inside Orca, run another agent as an Orca worker through the
+  `orchestration` skill, not a nested CLI of that agent.
 - Review goes to another vendor's model through the `review` skill.
