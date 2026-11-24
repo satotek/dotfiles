@@ -1,9 +1,9 @@
 { pkgs, ... }:
 let
-  # Home Manager は root のデーモンを置けないので、tailscaled を userspace networking で
-  # ユーザーサービスとして動かす。TUN を作らない代わりに、tailnet から来た接続は
-  # このマシンの localhost へ届くので、127.0.0.1 で待ち受けるサーバーもそのまま使える。
-  # 逆にこのマシンから tailnet へ出る通信は SOCKS5 などのプロキシが要るが、今は使わない。
+  # gem-ai から tailnet 上の他マシンへ TCP を出すため、kernel TUN で動かす。
+  # Home Manager は root のサービスを置けないので、ユーザーユニットから sudo -n で
+  # tailscaled を起動する。statedir とソケットはユーザー側のままにし、下の CLI
+  # ラッパーが同じソケットを使えるようにする。
   socket = "\${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/tailscale/tailscaled.sock";
 
   # CLI の既定のソケットは /var/run なので、ユーザーサービスのソケットを渡すラッパーを
@@ -19,7 +19,7 @@ in
   # 以後は起動するだけでつながる。
   systemd.user.services.tailscaled = {
     Unit = {
-      Description = "Tailscale node agent (userspace networking)";
+      Description = "Tailscale node agent (kernel TUN)";
       After = [ "network-online.target" ];
       Wants = [ "network-online.target" ];
     };
@@ -29,7 +29,7 @@ in
       # %S は ~/.local/state、%t は $XDG_RUNTIME_DIR。どちらも systemd が作って権限を揃える。
       StateDirectory = "tailscale";
       RuntimeDirectory = "tailscale";
-      ExecStart = "${pkgs.tailscale}/bin/tailscaled --tun=userspace-networking --statedir=%S/tailscale --socket=%t/tailscale/tailscaled.sock";
+      ExecStart = "/usr/bin/sudo -n ${pkgs.tailscale}/bin/tailscaled --tun=tailscale0 --statedir=%S/tailscale --socket=%t/tailscale/tailscaled.sock";
       Restart = "on-failure";
       RestartSec = 5;
     };
