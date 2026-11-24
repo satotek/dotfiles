@@ -21,6 +21,14 @@
     ];
   };
 
+  # `t3 up` で T3 Code 自身がインストールした unit と同じ環境を揃える。
+  # T3CODE_HOME が無いとデータの置き場所が既定に戻り、T3 Connect のリンクも見つからない。
+  # T3_BOOT_SERVICE_UNIT は起動中に使う unit 名の指定なので、こちらでも同じ名前にする。
+  systemd.user.sessionVariables = {
+    T3CODE_HOME = "${config.home.homeDirectory}/.t3";
+    T3_BOOT_SERVICE_UNIT = "t3code.service";
+  };
+
   # モジュールの service に、このホスト固有の起動条件だけを足す。
   systemd.user.services.t3code = {
     Unit = {
