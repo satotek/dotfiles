@@ -48,9 +48,14 @@ in
         "ORCA_TELEMETRY_DISABLED=1"
         "DO_NOT_TRACK=1"
       ];
-      # OpenCode Go の usage 表示用キー。sops が配るリポジトリ管理外のファイルで、
-      # 無ければ渡さない。
-      EnvironmentFile = [ "-%h/.config/orca/opencode.env" ];
+      # どちらもリポジトリ管理外のファイルで、無ければ渡さない。
+      EnvironmentFile = [
+        # エージェントが az repos / az boards を使う。DevOps の組織は az login と
+        # 別テナントなので、T3 と同じ PAT を渡す。
+        "-%h/.config/azure-devops/env"
+        # OpenCode Go の usage 表示用キー。sops が配る。
+        "-%h/.config/orca/opencode.env"
+      ];
       Restart = "on-failure";
       RestartSec = 10;
     };
