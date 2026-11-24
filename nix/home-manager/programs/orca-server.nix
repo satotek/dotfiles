@@ -44,7 +44,9 @@ in
       ];
       Environment = [
         # エージェントの CLI を探せるよう、セッションへ渡す PATH を明示する。
-        "PATH=${config.systemd.user.sessionVariables.PATH}"
+        # デスクトップ版のブラウザペインは Orca が自分で立てる Xvfb に描くので、
+        # apt に無い Xvfb を Nix から足す。
+        "PATH=${pkgs.xvfb}/bin:${config.systemd.user.sessionVariables.PATH}"
         "ORCA_TELEMETRY_DISABLED=1"
         "DO_NOT_TRACK=1"
       ];
