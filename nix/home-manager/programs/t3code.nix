@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -62,6 +63,15 @@ let
           claudeAgent = {
             displayName = "Claude";
             config.binaryPath = lib.getExe pkgs.llm-agents.claude-code;
+          };
+          # 仕事用アカウント。ID は設定画面が生成したものに合わせる。
+          claudeAgent_claude_work = {
+            driver = "claudeAgent";
+            displayName = "Claude Work";
+            config = {
+              binaryPath = lib.getExe pkgs.llm-agents.claude-code;
+              homePath = "${config.home.homeDirectory}/.claude_work";
+            };
           };
           codex = {
             displayName = "Codex";
