@@ -267,11 +267,11 @@
     "modern-web-guidance-skill": {
       "flake": false,
       "locked": {
-        "lastModified": 1794280113,
-        "narHash": "sha256-bqsUEI1yaGy1sd8DBJzG5cOv4Yv0RSYac6e9egqYFJU=",
+        "lastModified": 1795445662,
+        "narHash": "sha256-UfeLMKMpwfOvJgyuyiysQy+ExGnLEJLY1CG/y4uIJHw=",
         "owner": "GoogleChrome",
         "repo": "modern-web-guidance",
-        "rev": "4dd968349e54ca45a05dd5c818fb035c9054b022",
+        "rev": "2b4aa13a72dd47cd135b06ce5abfccd92e19b24f",
         "type": "github"
       },
       "original": {
@@ -288,11 +288,11 @@
         "zig-overlay": "zig-overlay"
       },
       "locked": {
-        "lastModified": 1794500397,
-        "narHash": "sha256-rTQQ5WKnqi7MY7LCgEg5zGrt+Q1F0cWagbflnUMay3Y=",
+        "lastModified": 1795125667,
+        "narHash": "sha256-UEaKRllZrYN12yGQnsqEI1n7HphQRiomckv+b+cG/Qk=",
         "owner": "alexrlocke",
         "repo": "neorex",
-        "rev": "b3e92161a1f28025033fe4d2d3dd40315ed4be5f",
+        "rev": "dfcefefb4df12b95469781791416dc582eba3e20",
         "type": "github"
       },
       "original": {
@@ -417,10 +417,10 @@
         ]
       },
       "locked": {
-        "lastModified": 1794432956,
-        "narHash": "sha256-ZEAKL3BuXinmLTaHaL2/6HxtgvoiAjaEzsg2Z1wtwvo=",
+        "lastModified": 1795467078,
+        "narHash": "sha256-Q+GqRAQCGrpaERDvjAR7B0T5AMqnQWullUVDCskIQOU=",
         "type": "tarball",
-        "url": "https://pkgs.superlogical.com/rex/nix/preview/0.1.0-preview.16.tar.gz"
+        "url": "https://pkgs.superlogical.com/rex/nix/preview/0.1.0-preview.23.tar.gz"
       },
       "original": {
         "type": "tarball",
