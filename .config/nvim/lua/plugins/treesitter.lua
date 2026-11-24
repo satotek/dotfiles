@@ -1,88 +1,57 @@
--- Parser一覧は言語ごとに分散させず、ここで一元管理する。
+-- Parser一覧はtreesitter-parsers.jsonで一元管理する。Nixのhome-managerも同じ一覧を読む。
+local parsers = vim.json.decode(
+  table.concat(vim.fn.readfile(vim.fs.joinpath(vim.fn.stdpath("config"), "treesitter-parsers.json")), "\n")
+)
+
+-- Nix環境ではhome-managerが、パーサーとクエリを同梱したnvim-treesitterをここへ置く。
+-- パーサーとクエリが同じnixpkgsの版で揃うので、手元でのビルドや版ずれが起きない。
+-- 置かれていない環境(Windowsなど)では従来どおりnvim-treesitterがビルドする。
+local nix_dir = vim.fs.joinpath(vim.fn.stdpath("data"), "nix", "nvim-treesitter")
+local use_nix = vim.uv.fs_stat(nix_dir) ~= nil
+
 return {
   {
     "nvim-treesitter/nvim-treesitter",
+    dir = use_nix and nix_dir or nil,
     branch = "main",
     version = false,
-    build = ":TSUpdate",
+    build = not use_nix and ":TSUpdate" or nil,
     event = { "BufReadPost", "BufNewFile", "VeryLazy" },
     cmd = { "TSInstall", "TSLog", "TSUninstall", "TSUpdate" },
-    opts = function(_, opts)
-      opts = opts or {}
-      opts.ensure_installed = {
-        -- Neovim・基本ファイル
-        "bash",
-        "c",
-        "diff",
-        "lua",
-        "luadoc",
-        "luap",
-        "printf",
-        "query",
-        "regex",
-        "vim",
-        "vimdoc",
-
-        -- Web
-        "html",
-        "javascript",
-        "jsdoc",
-        "json",
-        "json5",
-        "tsx",
-        "typescript",
-        "xml",
-        "yaml",
-
-        -- 言語
-        "go",
-        "gomod",
-        "gosum",
-        "gowork",
-        "haskell",
-        "python",
-        "ron",
-        "rst",
-        "rust",
-        "sql",
-
-        -- 設定・インフラ
-        "dockerfile",
-        "hcl",
-        "nix",
-        "terraform",
-        "toml",
-
-        -- ドキュメント
-        "markdown",
-        "markdown_inline",
-
-        -- Git
-        "git_config",
-        "gitcommit",
-        "git_rebase",
-        "gitignore",
-        "gitattributes",
-      }
-      return opts
+    init = function()
+      -- ヘルプはlazy.nvimに:helptagsを書き込ませないよう、別ディレクトリで渡される。
+      if use_nix then
+        vim.opt.runtimepath:append(vim.fs.joinpath(vim.fn.stdpath("data"), "nix", "nvim-treesitter-doc"))
+      end
     end,
-    config = function(_, opts)
+    config = function()
       local treesitter = require("nvim-treesitter")
       treesitter.setup({})
 
-      local installed = treesitter.get_installed()
-      local missing = vim.tbl_filter(function(parser)
-        return not vim.list_contains(installed, parser)
-      end, opts.ensure_installed)
-      if #missing > 0 then
-        treesitter.install(missing, { summary = true })
+      if not use_nix then
+        local installed = treesitter.get_installed()
+        local missing = vim.tbl_filter(function(parser)
+          return not vim.list_contains(installed, parser)
+        end, parsers)
+        if #missing > 0 then
+          treesitter.install(missing, { summary = true })
+        end
       end
 
+      -- get_installed()はnvim-treesitterのinstall_dirしか見ないので、Nixで置いたパーサーや
+      -- Neovim同梱のパーサーも拾えるようruntimepathから読み込めるかで判定する。
       local function attach(buffer)
         local filetype = vim.bo[buffer].filetype
+        if filetype == "" then
+          return
+        end
         local lang = vim.treesitter.language.get_lang(filetype) or filetype
-        if filetype ~= "" and vim.list_contains(treesitter.get_installed(), lang) then
-          pcall(vim.treesitter.start, buffer, lang)
+        local ok, loaded = pcall(vim.treesitter.language.add, lang)
+        if ok and loaded and pcall(vim.treesitter.start, buffer, lang) then
+          for _, win in ipairs(vim.fn.win_findbuf(buffer)) do
+            vim.wo[win][0].foldmethod = "expr"
+            vim.wo[win][0].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+          end
         end
       end
 
