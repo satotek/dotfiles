@@ -260,5 +260,13 @@ in
       dest = "${homeDir}/.claude/skills";
       structure = "symlink-tree";
     };
+
+    # 既定の dest は IDE 版の ~/.gemini/antigravity/skills。CLI の agy は
+    # ~/.gemini/config/skills しか探さないので、こちらに置く。
+    targets.antigravity = {
+      enable = true;
+      dest = "${homeDir}/.gemini/config/skills";
+      structure = "symlink-tree";
+    };
   };
 }
