@@ -25,6 +25,10 @@
         ../../home-manager/programs/tailscale.nix
         ../../home-manager/programs/zsh-history-check.nix
         {
+          # rex.service はユーザーサービスなので、linger が無いとログアウトで
+          # サーバーごと止まり、セッションも消える。linger はユーザー単位の
+          # システム設定で Home Manager では宣言できないため、手動で
+          # `loginctl enable-linger` を実行済み。VM を作り直したら再実行すること。
           # `rex server tailscale on` は再起動をまたいで残らず、VM の停止ごとに
           # tailnet から消えるので、サーバーの起動フラグで有効にする。
           # 名前を変えると別ノードとして登録し直しになるため、既存の名前に合わせる。
