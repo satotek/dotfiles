@@ -14,12 +14,11 @@ in
   # `orca-ide pair --address <IP>` で、動いているサーバーから接続用リンクを発行する。
   home.packages = [ orcaServer ];
 
-  # Mac の Orca から Remote Orca Server として接続する常駐サーバー。
-  # tailnet の IP だけで待ち受け、Azure の公開 NIC には出さない。
+  # Mac の Orca とスマホから Remote Orca Server として接続する常駐サーバー。
   systemd.user.services.orca-server = {
     Unit = {
       Description = "Orca headless runtime server";
-      # 待ち受ける tailnet の IP は tailscaled が上がるまで存在しない。
+      # リンクに載せる tailnet の IP は tailscaled が上がるまで存在しない。
       After = [
         "network-online.target"
         "tailscaled.service"
@@ -33,9 +32,12 @@ in
     Service = {
       ExecStart = builtins.concatStringsSep " " [
         "${orcaServer}/bin/orca-ide serve"
-        # bind に失敗しても Orca 自身が間隔を延ばしながら再起動する。
+        # 落ちても Orca 自身が間隔を延ばしながら再起動する。
         "--supervise"
-        "--bind ${tailnetAddress}"
+        # スマホ向けのペアリングは待ち受けを全インターフェースへ広げるので、
+        # 特定の IP に固定すると network_exposure_failed で断られる。公開 IP は
+        # Azure の NAT の外にあり、届く公開アドレスも --refuse-public で断る。
+        "--bind 0.0.0.0"
         "--port 6768"
         "--pairing-address ${tailnetAddress}"
         "--refuse-public"
