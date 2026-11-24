@@ -100,6 +100,12 @@
       flake = false;
     };
 
+    # Orca 公式の agent skill。本体は homebrew cask で入れ、ここでは skills だけを取得する。
+    orca-skills = {
+      url = "github:stablyai/orca";
+      flake = false;
+    };
+
     # OpenAI 公式の Claude Code 用 Codex プラグイン。
     codex-plugin-cc = {
       url = "github:openai/codex-plugin-cc";
