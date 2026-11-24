@@ -28,6 +28,23 @@ let
     # 再開時に cache なしで全 context を送り直さないため。
     idleCompaction = "beforeCacheExpires";
 
+    # 委譲した子の thread は自分では settle しないので、既定の 14 日放置ルール
+    # だけでは回収が追いつかない。子は settle 後 1 日と merge で回収し、
+    # 人が使う worktree は週末を挟んでも残るよう放置日数を 5 日にする。
+    # 未コミットの変更とブランチは残る。
+    storageCleanup = {
+      worktreeKeepWhen = "uncommitted-changes";
+      worktreeAfterDays = 5;
+      worktreeSettledAfterDays = 1;
+      worktreeOnMerge = true;
+      worktreeOnDelete = true;
+      worktreeUnchanged = true;
+      browserArtifactsAfterDays = 30;
+      logsAfterDays = 30;
+    };
+    # 旧形式のキーは storageCleanup を丸ごと上書きするので、空にして一本化する。
+    worktreeCleanup = null;
+
     # driver が欠けたインスタンスがあると settings.json 全体が読み込まれないので、
     # 必ず書く。displayName も省かない。解決済みのバイナリパスがラベルとして
     # 保存され、UI に /nix/store/... が出たままマージで残る。
