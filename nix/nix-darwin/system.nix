@@ -32,14 +32,18 @@
       extra-substituters = [
         "https://cache.numtide.com"
         "https://satotek.cachix.org"
+        # deepseek-harness.nix の dsh-tui。非 trusted ユーザーの nix.conf では無視される。
+        "https://deepseek-harness-nix.cachix.org"
       ];
       extra-trusted-substituters = [
         "https://cache.numtide.com"
         "https://satotek.cachix.org"
+        "https://deepseek-harness-nix.cachix.org"
       ];
       extra-trusted-public-keys = [
         "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
         "satotek.cachix.org-1:/2yz7ZHPnRzW91UqChW6XmRSX2Tq0NrNPjKsIUppRFA="
+        "deepseek-harness-nix.cachix.org-1:5NrkwLN9veNMhiINtU5ZeV4isXFhFsOwn6Ms7J1M+TA="
       ];
     };
   };

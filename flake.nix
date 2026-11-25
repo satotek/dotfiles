@@ -36,6 +36,10 @@
 
     llm-agents.url = "github:numtide/llm-agents.nix";
 
+    # @deepseek-harness-tui/dsh-tui。llm-agents は公式 dsh だけを配る。
+    # 公開キャッシュがこの flake 自身の nixpkgs pin で焼かれているので、follows しない。
+    deepseek-harness.url = "github:Moraxyc/deepseek-harness.nix";
+
     # Rex 公式の prebuilt flake。stable はまだリリースが無いので preview を追う。
     # lock にはリリースごとの固定 URL が記録される。
     rex.url = "https://pkgs.superlogical.com/rex/nix/preview.tar.gz";
