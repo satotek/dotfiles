@@ -11,10 +11,12 @@ in
   # profile.nixがsystemdとlaunchdにも渡すので、サーバー経由で動くエージェントにも効く。
   home.sessionVariables.RUSTC_WRAPPER = kache;
 
-  # ディスクは125GB程度なので、キャッシュの上限と空き容量の下限は控えめにする。
+  # ボリュームは926GiBあり、キャッシュはプロジェクトをまたいで依存を共有するほど
+  # 効くので上限は50GiBにする。空き容量の下限は20GiBに置き、回復のために
+  # target/を消しすぎないようにする。
   xdg.configFile."kache/config.toml".source = (pkgs.formats.toml { }).generate "kache-config.toml" {
     cache = {
-      local_max_size = "20GiB";
+      local_max_size = "50GiB";
       auto_clean_idle_targets_days = 14;
       auto_recover_min_free_bytes = "20GiB";
       auto_recover_targets = true;
