@@ -426,6 +426,26 @@
         "type": "github"
       }
     },
+    "paseo": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795603704,
+        "narHash": "sha256-ox9zo8ichwdQ5EqpEjCX7n01JVHfvDLDZYRYTMEEnho=",
+        "owner": "getpaseo",
+        "repo": "paseo",
+        "rev": "c1b43ee571ee15f409b4f1374b279f2f94387448",
+        "type": "github"
+      },
+      "original": {
+        "owner": "getpaseo",
+        "repo": "paseo",
+        "type": "github"
+      }
+    },
     "rex": {
       "inputs": {
         "nixpkgs": [
@@ -463,6 +483,7 @@
         "nix-homebrew": "nix-homebrew",
         "nix-index-database": "nix-index-database",
         "nixpkgs": "nixpkgs_3",
+        "paseo": "paseo",
         "rex": "rex",
         "vercel-agent-skills": "vercel-agent-skills",
         "vercel-skills": "vercel-skills",

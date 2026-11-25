@@ -105,6 +105,11 @@
       url = "github:openai/codex-plugin-cc";
       flake = false;
     };
+
+    # Paseo 公式 flake。daemon/CLI とデスクトップ版を提供する。
+    # macOS はアプリ同梱の CLI を使うため、ここからは Linux の daemon/CLI だけを入れる。
+    paseo.url = "github:getpaseo/paseo";
+    paseo.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =

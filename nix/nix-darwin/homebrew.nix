@@ -67,6 +67,7 @@ in
       "claude"
       "grok-bot"
       "handy" # 音声入力（文字起こし）
+      "paseo" # 複数のエージェントを worktree ごとに並べて回す（daemon と CLI も同梱）
       # 素の `orca` cask は Plotly の画像エクスポーターなので tap 名で指定する。
       "stablyai/orca/orca" # エージェントを worktree ごとに並べて回す IDE
 

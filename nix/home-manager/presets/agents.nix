@@ -15,6 +15,7 @@
     ../programs/opencode.nix
     ../programs/orca.nix
     ../programs/orca-skills.nix
+    ../programs/paseo.nix
     ../programs/rtk.nix
   ];
 }

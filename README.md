@@ -22,7 +22,7 @@ macOSのシステム設定とホーム環境は独立して更新できます。
 - **ターミナル** — Ghostty。macOSではAeroSpace・Karabinerも設定
 - **macOSのアプリ** — Homebrewのformula・caskをnix-homebrewで宣言。Xcodeはxcodesで導入
 - **開発ツール** — Go、Rust、Node.js、Bun、pnpm、Python、uv、各種言語サーバー
-- **AIエージェント** — Claude Code、Codex、Cursor CLI、OpenCode、Antigravity CLI、Grok、Herdr、Hunk
+- **AIエージェント** — Claude Code、Codex、Cursor CLI、OpenCode、Antigravity CLI、Grok、Herdr、Hunk、Paseo
 - **共通基盤** — エージェント向けルール・スキル・MCP設定、sopsによる機密情報の管理
 
 導入するツールはホストごとのプリセットで選択します。
@@ -378,6 +378,24 @@ modは同じ正本を`include`して実ファイルとして配り、`keys.json`
 
 Herdrのリモート運用とSSHポート転送は
 [VMリモート作業手順](docs/vm-remote-workflow.md)を参照してください。
+
+### Paseo
+
+Paseoは複数のコーディングエージェントをworktreeごとに並べて回す開発環境です。
+macOSでは`Paseo.app`をcaskで導入し、daemonとCLIはアプリ同梱のものを使います。
+アプリが自己更新するため、更新はHomebrew側に任せます。
+
+Linuxにはデスクトップ版が無いので、上流の公式flake（`github:getpaseo/paseo`）から
+daemonとCLIを導入し、`systemd.user.services.paseo`で常駐させます。
+エージェントのCLIを起動できるよう、サービスにはHome Managerのセッションと同じ`PATH`を渡します。
+`paseo daemon pair`で表示されるリンクを使うと、Macやスマホのクライアントから接続できます。
+
+`~/.paseo/config.json`はアプリとCLIが設定・実行時状態を書き戻すため、Nixでは宣言しません。
+ただしスキル選択だけは、Paseo同梱スキルを`programs.agent-skills`から配るために空へ固定します。
+Paseo自身のインストーラは`~/.claude`などへ実ファイルをコピーし、Home Managerの`rsync --delete`と
+衝突するためです。オンボーディングのスキル選択はオフのままで構いません。
+
+サーバーでログアウト後もdaemonを動かす場合は、`loginctl enable-linger $USER`を一度実行します。
 
 ## ロールとプリセット
 

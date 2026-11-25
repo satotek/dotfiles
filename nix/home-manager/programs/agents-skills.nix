@@ -74,6 +74,14 @@ in
         subdir = "skills";
       };
 
+      # Paseo の同梱スキル。上流のインストーラは ~/.claude などへ実ファイルを
+      # コピーするため、rsync --delete で管理するこちらとは衝突する。向こうの
+      # インストーラは選択を空にして止め、スキルだけを Nix から配る。
+      paseo = {
+        input = "paseo";
+        subdir = "skills";
+      };
+
       yomiyasu = {
         input = "yomiyasu-skill";
         subdir = "skills";
@@ -194,6 +202,13 @@ in
           from = "yomiyasu";
         };
 
+        # paseo の CLI は macOS ではアプリ同梱、Linux では Nix の paseo。
+        # どちらも PATH 上のコマンドを呼ばせたいので store のパスへ書き換えない。
+        paseo = {
+          from = "paseo";
+          rewriteCommands = false;
+        };
+
         modern-web-guidance = {
           from = "modern-web-guidance";
           packages = [ modernWebGuidance ];
@@ -247,7 +262,20 @@ in
           # The skill calls ./ax; keep the command as written.
           rewriteCommands = false;
         };
-      };
+      }
+      //
+        lib.genAttrs
+          [
+            "paseo-advisor"
+            "paseo-committee"
+            "paseo-handoff"
+            "paseo-help"
+            "paseo-plugin"
+          ]
+          (_: {
+            from = "paseo";
+            rewriteCommands = false;
+          });
 
     targets.agents = {
       enable = true;
