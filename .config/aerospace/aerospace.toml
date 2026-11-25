@@ -52,7 +52,7 @@ on-window-detected = [
     # C: コミュニケーション
     { if = 'test %{app-bundle-id} = com.hnc.Discord || test %{app-bundle-id} = jp.naver.line.mac || test %{app-bundle-id} = com.apple.mail', run = 'move-node-to-workspace C' },
     # D: 開発
-    { if = 'test %{app-bundle-id} = com.google.android.studio || test %{app-bundle-id} = com.t3tools.t3code || test %{app-bundle-id} = dev.zed.Zed || test %{app-bundle-id} = com.microsoft.VSCodeInsiders', run = 'move-node-to-workspace D' },
+    { if = 'test %{app-bundle-id} = com.google.android.studio || test %{app-bundle-id} = dev.zed.Zed || test %{app-bundle-id} = com.microsoft.VSCodeInsiders', run = 'move-node-to-workspace D' },
     # A: AI
     { if = 'test %{app-bundle-id} = com.openai.codex || test %{app-bundle-id} = com.anthropic.claudefordesktop || test %{app-bundle-id} = com.meta.endo || test %{app-bundle-id} = com.anysphere.sand', run = 'move-node-to-workspace A' },
     # M: メディア

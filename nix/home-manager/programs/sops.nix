@@ -39,7 +39,7 @@ let
       target = "${config.home.homeDirectory}/.config/opencode/secrets/commandcode.key";
     }
     # dsh は .credentials.yaml、プロセス環境、$DSH_HOME/.env の順に探す。.env なら
-    # T3 から起動しても端末から起動しても読まれる。キーは opencode と共有し、
+    # 端末から起動しても他のハーネスから起動しても読まれる。キーは opencode と共有し、
     # ローテート先を増やさないよう sops の同じキーから env 変数として追記する。
     {
       key = "opencode_go_api_key";
@@ -55,17 +55,9 @@ let
       sopsFile = agentsSopsFile;
       target = "${config.home.homeDirectory}/.dsh/.env";
     }
-    # T3 Code は OpenCode Go の usage limits を取るときだけキーを自分で探し、
-    # auth.json・opencode.db・環境変数の順に見る。opencode.jsonc の {file:...}
-    # は読まないので、同じ sops キーから env としても配る。
-    {
-      key = "opencode_go_api_key";
-      envVar = "OPENCODE_API_KEY";
-      sopsFile = agentsSopsFile;
-      target = "${config.home.homeDirectory}/.config/t3code/opencode.env";
-    }
-    # Orca も usage 表示のキーを同じ順で探し、最後に OPENCODE_API_KEY を見る。
-    # orca-server の systemd ユニットが EnvironmentFile として読む。
+    # Orca は usage 表示のキーを auth.json・opencode.db・環境変数の順に探し、
+    # 最後に OPENCODE_API_KEY を見る。orca-server の systemd ユニットが
+    # EnvironmentFile として読む。
     {
       key = "opencode_go_api_key";
       envVar = "OPENCODE_API_KEY";

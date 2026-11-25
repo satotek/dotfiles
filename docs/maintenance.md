@@ -70,18 +70,12 @@ Go 依存を更新する場合は `tools/dotbench/` で `go mod tidy` を実行�
 | `sops updatekeys secrets/*.yaml` | `.sops.yaml` の鍵定義変更時に暗号化鍵を更新する |
 | `gcloud auth application-default login` | KMS 復号用の Google Cloud ADC 認証を通す |
 
-## サービスと AI エージェント
+## AeroSpace
 
 | コマンド | 用途 |
 |---|---|
-| `systemctl --user status t3code` | T3 Code サーバー（gem-ai）の稼働状態を確認する |
-| `systemctl --user restart t3code` | T3 Code サーバーを再起動する |
-| `journalctl --user -u t3code -f` | T3 Code サーバーのログをストリーミング表示する |
 | `aerospace reload-config` | AeroSpace の設定を再読み込みする（`nix-switch` 時にも自動実行） |
 | `aerospace run-callback --for-every-window on-window-detected` | AeroSpace のウィンドウ配置ルールを既存ウィンドウへ再適用する |
-
-> [!NOTE]
-> T3 Code サーバーのサービス停止中にクライアント側が自前の managed runtime を起動すると、ポート競合により `ServerAlreadyRunningError` で systemd 側が起動できなくなる。クライアント側のランタイムを停止するか再起動で解消する。
 
 ## 世代整理 (GC)
 

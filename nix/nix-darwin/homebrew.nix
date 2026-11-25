@@ -69,7 +69,6 @@ in
       "handy" # 音声入力（文字起こし）
       # 素の `orca` cask は Plotly の画像エクスポーターなので tap 名で指定する。
       "stablyai/orca/orca" # エージェントを worktree ごとに並べて回す IDE
-      "t3-code" # エージェントの GUI。gem-ai のサーバーへは T3 Connect でつなぐ
 
       # エディタ・IDE
       "android-studio"

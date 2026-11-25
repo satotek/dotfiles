@@ -11,9 +11,7 @@
   summarising, not implementation or design decisions.
 - Implementation may be delegated when the brief is cheaper than the work.
   Write a self-contained brief (files, intended change, how to verify), then
-  read the returned diff before building on it. Inside T3 Code, use
-  `delegate_task` with an explicit `target.model` and pick a model that fits
-  the step; outside T3 Code, implement it yourself.
+  read the returned diff before building on it.
 - Inside Orca, run another agent as an Orca worker through the
   `orchestration` skill, not a nested CLI of that agent.
 - Review goes to another vendor's model through the `review` skill.

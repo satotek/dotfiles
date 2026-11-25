@@ -16,13 +16,12 @@
     "ai"
     "secrets"
   ]
-  # Orca と T3 Code のサーバー、そこへ届く tailnet の口は gem-ai だけ。
+  # Orca のサーバーと、そこへ届く tailnet の口は gem-ai だけ。
   # CLI と settings.json は ai preset で全ホストに入る。
   ++ (
     if hostname == "gem-ai" then
       [
         ../../home-manager/programs/orca-server.nix
-        ../../home-manager/programs/t3code-server.nix
         ../../home-manager/programs/tailscale.nix
         ../../home-manager/programs/zsh-history-check.nix
         {

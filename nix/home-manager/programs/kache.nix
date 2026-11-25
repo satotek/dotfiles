@@ -8,7 +8,7 @@ in
   # rustcの前に挟み、worktreeやプロジェクトをまたいで同じ依存のビルド結果を
   # ハードリンクで使い回す。~/.cargo/config.tomlのbuild.rustc-wrapperではなく
   # 環境変数にするのは、キャッシュを避けたいツールがRUSTC_WRAPPERを外せるようにするため。
-  # profile.nixがsystemdとlaunchdにも渡すので、T3 Codeのサーバーから動くエージェントにも効く。
+  # profile.nixがsystemdとlaunchdにも渡すので、サーバー経由で動くエージェントにも効く。
   home.sessionVariables.RUSTC_WRAPPER = kache;
 
   # ディスクは125GB程度なので、キャッシュの上限と空き容量の下限は控えめにする。

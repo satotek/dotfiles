@@ -7,7 +7,7 @@ let
   socket = "\${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/tailscale/tailscaled.sock";
 
   # CLI の既定のソケットは /var/run なので、ユーザーサービスのソケットを渡すラッパーを
-  # tailscale として置く。t3 serve --tailscale-serve などもこれを PATH から呼ぶ。
+  # tailscale として置く。`tailscale serve` などもこれを PATH から呼ぶ。
   tailscaleCli = pkgs.writeShellScriptBin "tailscale" ''
     exec ${pkgs.tailscale}/bin/tailscale --socket="${socket}" "$@"
   '';

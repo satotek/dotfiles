@@ -4,7 +4,7 @@ Azure 上の VM (`vm` = `172.207.57.61`) や `gem-ai` に対する日常のリ�
 Herdr の運用、SSH 接続共有 (ControlMaster)、および必要な時だけポートを開通する動的フォワード／SOCKS プロキシの仕組みを扱う。
 
 - **ローカル / ホスト**: 手元の Mac（ブラウザや GUI クライアントがある側）
-- **リモート**: Azure VM（コード編集・開発サーバー・T3 Code サーバーが稼働する側）
+- **リモート**: Azure VM（コード編集・開発サーバーが稼働する側）
 
 ---
 
@@ -118,22 +118,7 @@ VM 側で `portless` 等のサブドメインルーティング（例: `a.localh
 
 ---
 
-## 5. T3 Code サーバー (`gem-ai`) との接続
-
-`azureuser@gem-ai` ホストでは、T3 Code の headless server（ポート `3773`）が Home Manager の `programs.t3code.server` により systemd ユーザーサービスとして稼働している。
-
-手元の Mac（GUI クライアント `t3-code`）から接続する方法は2通りある:
-
-1. **T3 Connect（トンネル）経由**:
-   - 初回に VM 上で `t3 connect` を実行してサインインしておくと、サービス起動時に自動でトンネルリンクが維持される。
-   - 手元の T3 Code アプリから組織の T3 アカウント経由で接続する。
-2. **SSH ポートフォワード経由**:
-   - `vmfwd 3773` を実行して `localhost:3773` を手元に引き込む。
-   - 手元の T3 Code クライアントからローカルサーバーとして接続する。
-
----
-
-## 6. Windows での手順
+## 5. Windows での手順
 
 | 機能 | macOS | Windows ネイティブ | WSL |
 |---|---|---|---|
@@ -144,7 +129,7 @@ VM 側で `portless` 等のサブドメインルーティング（例: `a.localh
 Windows ネイティブの OpenSSH は接続多重化（ControlMaster）をサポートしていない（[Win32-OpenSSH #1328](https://github.com/PowerShell/Win32-OpenSSH/issues/1328)）。
 そのため、ネイティブ環境では SOCKS 用 SSH プロセスを常駐させる方式を用いるか、WSL を利用する。
 
-### 6-A. ネイティブ PowerShell
+### 5-A. ネイティブ PowerShell
 
 `%USERPROFILE%\.ssh\config` に `Host vm` を設定し（ControlMaster 設定は除く）、PowerShell プロファイル（`$PROFILE`）に以下を定義する。
 
@@ -177,7 +162,7 @@ function vmbrowse {
 }
 ```
 
-### 6-B. WSL
+### 5-B. WSL
 
 WSL（Ubuntu 等）は Linux ネイティブの OpenSSH が稼働するため、macOS と全く同一の ControlMaster 構成が利用できる。
 本リポジトリの WSL 向け構成（`nosuke@nosuke-windows` / `stko23@stko23-windows`）を適用することで、`vmfwd` や `vmproxy` などの関数がそのまま利用可能になる。

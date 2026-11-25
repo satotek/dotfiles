@@ -199,7 +199,7 @@ let
     "plugins/blocklist.json"
     "plugins/plugin-catalog-cache.json"
   ];
-  # 追加アカウント用の config ディレクトリ (T3 Code の Claude Work インスタンス)。
+  # 追加アカウント用の config ディレクトリ (Claude Work)。
   # 全ホストで同じ設定を参照させるだけなので、認証情報が無いホストでは
   # 単に使われない。
   altConfigDirs = [ "${homeDir}/.claude_work" ];

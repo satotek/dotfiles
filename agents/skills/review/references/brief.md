@@ -28,9 +28,6 @@ Your final message is the review itself. Do not write an implementation plan
 or any file, and do not ask for approval.
 ```
 
-The last paragraph matters for AGY in T3 Code's plan mode, where it otherwise
-answers with an implementation plan and waits for approval.
-
 ## Example
 
 ```text
@@ -43,24 +40,6 @@ Untracked files: agents/skills/review/SKILL.md, agents/skills/review/references/
 
 If the user names a commit, replace the scope with `git show <sha>` and set
 untracked files to `none`.
-
-## Antigravity inside T3 Code
-
-An Antigravity child thread asks for approval before every command, even
-`git diff`, so it cannot fetch the scope itself. Replace the `Scope:` line with
-the diff itself, and say how to read the rest:
-
-```text
-Scope: the diff below. You cannot run commands; read changed, untracked, and
-surrounding files with your file-reading tool.
-
-~~~~~~diff
-<output of git diff HEAD, or of git show <sha> for a named commit>
-~~~~~~
-```
-
-The long tilde fence keeps a diff of Markdown files, which may hold their own
-fences, from closing the block early.
 
 ## Untracked files
 

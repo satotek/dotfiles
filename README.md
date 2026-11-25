@@ -22,11 +22,11 @@ macOSのシステム設定とホーム環境は独立して更新できます。
 - **ターミナル** — Ghostty。macOSではAeroSpace・Karabinerも設定
 - **macOSのアプリ** — Homebrewのformula・caskをnix-homebrewで宣言。Xcodeはxcodesで導入
 - **開発ツール** — Go、Rust、Node.js、Bun、pnpm、Python、uv、各種言語サーバー
-- **AIエージェント** — Claude Code、Codex、Cursor CLI、OpenCode、Antigravity CLI、Grok、Herdr、Hunk、T3 Code
+- **AIエージェント** — Claude Code、Codex、Cursor CLI、OpenCode、Antigravity CLI、Grok、Herdr、Hunk
 - **共通基盤** — エージェント向けルール・スキル・MCP設定、sopsによる機密情報の管理
 
 導入するツールはホストごとのプリセットで選択します。
-たとえば`azureuser`のLinux構成はRustを除外し、T3 Codeのサーバーは`gem-ai`だけに追加します。
+たとえば`azureuser`のLinux構成はRustを除外し、Orcaのサーバーは`gem-ai`だけに追加します。
 
 ## セットアップ
 
@@ -208,7 +208,7 @@ Nixストアの絶対パスで参照します。
 - **シンボリックリンク（out-of-store symlink）** — リポジトリのファイルを直接参照し、編集を即時反映させます。対象は `.config/nvim`、Hunk（`hunk/config.toml`）、Karabiner（`karabiner/karabiner.json`）、Nix（`nix.conf`）です。
 - **Nix ストアへの生成** — AeroSpace の設定は `.config/aerospace/aerospace.toml` から `programs.aerospace.settings` として生成します。ライブ symlink ではないため、TOML の変更後は `nix-switch` が必要です（適用時に `aerospace reload-config` が自動実行されます）。
 - **アプリ所有ファイルへのマージ** — アプリが実行時に設定を書き戻すものは、宣言した値だけを実ファイルへマージします。OpenCode（`opencode.jsonc` / `cli.json`）や omp、Grok は共通ヘルパー（`nix/home-manager/lib/merge-config.nix`）を使って activation でマージします。なお、`programs.opencode` は本リポジトリの session variable の配り方と衝突するため使用していません。
-- **Home Manager モジュールによる可変設定** — T3 Code（`programs.t3code`）や Antigravity CLI（`programs.antigravity-cli`）はモジュールの可変設定オプション（`mutableUserSettings` / `mutableSettings`）を使い、アプリ側の実行時状態（trustedWorkspaces 等）を保持しながらマージします。
+- **Home Manager モジュールによる可変設定** — Antigravity CLI（`programs.antigravity-cli`）はモジュールの可変設定オプション（`mutableSettings`）を使い、アプリ側の実行時状態（trustedWorkspaces 等）を保持しながらマージします。
 
 ### Homebrew
 
@@ -264,17 +264,13 @@ gcloud auth application-default set-quota-project nosuke-net
 | `secrets/agents.yaml` | `~/.config/opencode/secrets/opencode-go.key` | 全環境 |
 | `secrets/agents.yaml` | `~/.config/opencode/secrets/commandcode.key` | 全環境 |
 | `secrets/agents.yaml` | `~/.dsh/.env` | 全環境 |
-| `secrets/agents.yaml` | `~/.config/t3code/opencode.env` | 全環境 |
 | `secrets/cloudflare.yaml` | `~/.config/cloudflare/cloudflare-infra.env` | macOSのみ |
 
 dsh の `.env` には、OpenCode Go のキーが `OPENCODE_GO_API_KEY`、CommandCode の
 キーが `CMD_API_KEY` として追記されます。前者は
 `~/.config/opencode/secrets/opencode-go.key` と同じ sops キーから作るので、
 ローテートは `opencode_go_api_key` の1か所だけです。dsh の provider 設定では
-`apiKeyEnv: CMD_API_KEY` を指定します。T3 Code は usage limits を取るときだけ
-`OPENCODE_API_KEY` をプロセス環境から読み、`opencode.jsonc` の `{file:...}` は
-参照しないため、同じ sops キーから `~/.config/t3code/opencode.env` にも配って
-`t3code` サービスの `EnvironmentFile` で渡します。
+`apiKeyEnv: CMD_API_KEY` を指定します。
 
 OpenCode は `{file:...}`、omp は `models.yml` の `apiKey: "!tr ... < <file>"` で
 復号済みファイルを読みます。
@@ -347,7 +343,6 @@ Home Manager適用時に補完キャッシュを無効化するため、新し�
 
 ### 各エージェントの設定管理
 
-- **T3 Code** — 設定と headless server は Home Manager の `programs.t3code` / `programs.t3code.server` で管理します（自前の jq activation や手書き systemd unit は廃止）。パッケージは `pkgs.llm-agents.t3code` を `providerPackages = []` で使用し、エージェント CLI の同梱を外して各 provider は `llm-agents` の絶対パス `binaryPath` で指定します（同梱の OpenCode v1 による DB 不整合などを回避するため）。Antigravity provider は T3 が管理する公式 ACP ランタイム（`~/.t3/tools/antigravity-acp`）を自動検出し、`binaryPath` は空にしています。サーバーは systemd 管理で、サーバーを有効にしたホスト（gem-ai）で稼働します。サービス停止中に T3 クライアントが自前の managed runtime を起動すると、ポート競合により `ServerAlreadyRunningError` で systemd 側が起動できなくなるため、その場合はクライアントのランタイムを停止するか再起動で解消します。
 - **Antigravity CLI** — `programs.antigravity-cli` モジュールの `mutableSettings = true` で管理し、`trustedWorkspaces` などの実行時状態を残したままマージします。ツール実行の自動承認のため `settings.toolPermission = "always-proceed"` を指定しています。CLI バイナリは `pkgs.llm-agents.antigravity-cli` です。
 - **OpenCode** — 公式 DeepSeek provider は削除済みです（sops のキーは omp 用に残存）。設定は app-owned な `~/.config/opencode/opencode.jsonc` と `cli.json` に activation で宣言値のみをマージします。`programs.opencode` は本リポジトリの session variable の配り方と衝突するため使用していません。
 - **設定マージの共通化** — OpenCode、omp、Grok などの書き戻しが発生する設定ファイルは、共通ヘルパー（`nix/home-manager/lib/merge-config.nix`）を用いて宣言値を安全にマージしています。

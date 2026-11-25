@@ -19,7 +19,7 @@ launchd から起動するAeroSpaceはPATHが限られるため、
 | `W` | ブラウザ | Safari, Google Chrome |
 | `T` | ターミナル | Ghostty |
 | `C` | コミュニケーション | Discord, LINE, メール |
-| `D` | 開発 | Android Studio, T3 Code, Zed, VS Code Insiders |
+| `D` | 開発 | Android Studio, Zed, VS Code Insiders |
 | `A` | AI | ChatGPT, Claude, Muse, Grok Bot |
 | `M` | メディア | ミュージック |
 | `1` / `2` | 一時置き場 | 手動で置く |

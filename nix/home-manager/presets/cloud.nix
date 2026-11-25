@@ -12,7 +12,7 @@
     pkgs.google-cloud-sdk
   ];
 
-  # az devops login が書く PAT と、t3 が読む環境変数ファイル。どちらも秘密。
+  # az devops login が書く PAT と、Orca が読む環境変数ファイル。どちらも秘密。
   home.activation.restrictAzureDevopsPat = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     chmod_if_present() {
       if [ -f "$1" ]; then
