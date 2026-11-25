@@ -9,6 +9,15 @@ let
   # tailnet 上の gem-ai のアドレス。Tailscale の IP はノードを登録し直さない限り
   # 変わらない。ホスト名にすると Orca が公開アドレスからの接続も許してしまうので IP で書く。
   tailnetAddress = "100.98.143.23";
+
+  # Orca の Azure DevOps 連携 (PR・ビルド状況) は ORCA_AZURE_DEVOPS_TOKEN しか読まない。
+  # PAT は az 用の env ファイル 1 か所に置いたまま、同じ値をこの名前でも渡す。
+  orcaServe = pkgs.writeShellScript "orca-serve" ''
+    if [ -n "''${AZURE_DEVOPS_EXT_PAT:-}" ]; then
+      export ORCA_AZURE_DEVOPS_TOKEN="$AZURE_DEVOPS_EXT_PAT"
+    fi
+    exec ${orcaServer}/bin/orca-ide serve "$@"
+  '';
 in
 {
   # `orca-ide pair --address <IP>` で、動いているサーバーから接続用リンクを発行する。
@@ -31,7 +40,7 @@ in
 
     Service = {
       ExecStart = builtins.concatStringsSep " " [
-        "${orcaServer}/bin/orca-ide serve"
+        "${orcaServe}"
         # 落ちても Orca 自身が間隔を延ばしながら再起動する。
         "--supervise"
         # スマホ向けのペアリングは待ち受けを全インターフェースへ広げるので、
@@ -53,7 +62,7 @@ in
       # どちらもリポジトリ管理外のファイルで、無ければ渡さない。
       EnvironmentFile = [
         # エージェントが az repos / az boards を使う。DevOps の組織は az login と
-        # 別テナントなので、T3 と同じ PAT を渡す。
+        # 別テナントなので、Orca 用の PAT を渡す。
         "-%h/.config/azure-devops/env"
         # OpenCode Go の usage 表示用キー。sops が配る。
         "-%h/.config/orca/opencode.env"
