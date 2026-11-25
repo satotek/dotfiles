@@ -3,11 +3,11 @@
     "agent-browser": {
       "flake": false,
       "locked": {
-        "lastModified": 1795470722,
-        "narHash": "sha256-BsnL2q29HhtehBcUoNh1K9Qkvv3BCP2ita3lIa1oFGQ=",
+        "lastModified": 1795577151,
+        "narHash": "sha256-KS1GdQJS08DVbnzSGN2py28Sgey6E7ohkBPZU4q6rho=",
         "owner": "vercel-labs",
         "repo": "agent-browser",
-        "rev": "0a923358ea989d7602f0d06507ad3447c62ffe9b",
+        "rev": "f0a98351ec920bd826b22c98dacf8414f04b9832",
         "type": "github"
       },
       "original": {
@@ -267,11 +267,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1795495638,
-        "narHash": "sha256-hhROWq9062PdIznKMqiQuy3L9F7l4LHwofEVrcncfZM=",
+        "lastModified": 1795534330,
+        "narHash": "sha256-HUVg1F7c3btLD++JDjdTsSAwp50NvrciqTMFdCKEfAg=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "45e6e554481f962d4134021d3a63c96d8755f395",
+        "rev": "d70dfebdbd4616aa852fdb47c16588ec1ba8fc6f",
         "type": "github"
       },
       "original": {
@@ -556,11 +556,11 @@
     "yomiyasu-skill": {
       "flake": false,
       "locked": {
-        "lastModified": 1795387091,
-        "narHash": "sha256-dKl5PQEXqzaxXtB/h/dGyRwjalnQ+ZLjcaKPT8VX1jU=",
+        "lastModified": 1795520160,
+        "narHash": "sha256-df6sdmB1n+UkpMviEhN5Y4HAFtiJPdm3Mwdx1nNtnVw=",
         "owner": "nanaism",
         "repo": "yomiyasu",
-        "rev": "ddf365b5d5b36a7aa4ffab798dce1b694dbb1afd",
+        "rev": "fbd4e420fb71a6ba90f475898cf611ccb6a08cb2",
         "type": "github"
       },
       "original": {
