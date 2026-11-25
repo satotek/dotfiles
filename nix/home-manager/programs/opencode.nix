@@ -31,16 +31,9 @@ let
     # `//` は浅いマージで provider ごと置き換わり settings.apiKey が消えるため、
     # ヘッダーを足すときは recursiveUpdate を使う。
     # DeepSeek 公式のモデルは omp だけで使い、キーは sops が配るがここには含めない。
-    providers =
-      lib.recursiveUpdate
-        (lib.genAttrs [ "google" "opencode-go" "commandcode" ] (name: {
-          settings.apiKey = "{file:~/.config/opencode/secrets/${name}.key}";
-        }))
-        {
-          # ZDR（保持・学習なし）を全リクエストで要求する。ZDR 対応 upstream が
-          # ないモデルは 422 (cmd_zdr_no_providers) で失敗する。
-          commandcode.headers."x-cmd-zdr" = "1";
-        };
+    providers = lib.genAttrs [ "google" "opencode-go" ] (name: {
+      settings.apiKey = "{file:~/.config/opencode/secrets/${name}.key}";
+    });
     mcp.servers = lib.mapAttrs (_name: server: {
       type = "local";
       command = [ server.command ] ++ (server.args or [ ]);
@@ -114,6 +107,10 @@ in
         name = "opencode.jsonc";
         path = "${config.xdg.configHome}/opencode/opencode.jsonc";
         settings = opencodeConfig;
+        # マージはファイル側にしか無いキーを残す。解約中の Command Code は
+        # 宣言から消しても apiKey 参照が残るので、マージ結果から落とす。
+        # 再契約するときは providers に戻し、この del も外す。
+        jqOperation = "($dynamic * $static) | del(.providers.commandcode)";
       });
 
   # 上流のスキーマに追従できているかを確認する。取得に失敗しても switch は止めない。

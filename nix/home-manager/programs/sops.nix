@@ -33,25 +33,12 @@ let
       sopsFile = agentsSopsFile;
       target = "${config.home.homeDirectory}/.config/opencode/secrets/opencode-go.key";
     }
-    {
-      key = "commandcode_goat_api_key";
-      sopsFile = agentsSopsFile;
-      target = "${config.home.homeDirectory}/.config/opencode/secrets/commandcode.key";
-    }
     # dsh は .credentials.yaml、プロセス環境、$DSH_HOME/.env の順に探す。.env なら
     # 端末から起動しても他のハーネスから起動しても読まれる。キーは opencode と共有し、
     # ローテート先を増やさないよう sops の同じキーから env 変数として追記する。
     {
       key = "opencode_go_api_key";
       envVar = "OPENCODE_GO_API_KEY";
-      sopsFile = agentsSopsFile;
-      target = "${config.home.homeDirectory}/.dsh/.env";
-    }
-    # 他のツールと共有するキーを env 変数として追記する。
-    # 変数名は models.dev が CommandCode に割り当てているものに合わせる。
-    {
-      key = "commandcode_goat_api_key";
-      envVar = "CMD_API_KEY";
       sopsFile = agentsSopsFile;
       target = "${config.home.homeDirectory}/.dsh/.env";
     }
@@ -170,6 +157,20 @@ in
 
       umask 077
       ${lib.concatMapStringsSep "\n" installSecret secrets}
+
+      # Command Code は解約中。以前の世代が復号した鍵を残さない。
+      # 再契約するときは agentSecrets に戻し、この削除も外す。
+      ${pkgs.coreutils}/bin/rm -f \
+        ${lib.escapeShellArg "${config.home.homeDirectory}/.config/opencode/secrets/commandcode.key"} \
+        ${lib.escapeShellArg "${config.home.homeDirectory}/.config/opencode/secrets/.sops-commandcode.key.stamp"} \
+        ${lib.escapeShellArg "${config.home.homeDirectory}/.dsh/.sops-CMD_API_KEY.stamp"}
+      dsh_env=${lib.escapeShellArg "${config.home.homeDirectory}/.dsh/.env"}
+      if [ -f "$dsh_env" ]; then
+        tmp="$(${pkgs.coreutils}/bin/mktemp "$(${pkgs.coreutils}/bin/dirname "$dsh_env")/.sops.XXXXXX")"
+        ${pkgs.gnugrep}/bin/grep -v '^CMD_API_KEY=' "$dsh_env" > "$tmp" || true
+        ${pkgs.coreutils}/bin/chmod 0600 "$tmp"
+        ${pkgs.coreutils}/bin/mv -f "$tmp" "$dsh_env"
+      fi
     '';
   };
 }

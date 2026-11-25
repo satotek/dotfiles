@@ -18,16 +18,9 @@ let
   # 実行され、stdout が鍵になる。環境変数に載せないので子プロセスへ漏れない。
   # models.yml の鍵は /login で保存した鍵より優先される。
   modelsConfig = {
-    providers =
-      lib.recursiveUpdate
-        (lib.genAttrs [ "deepseek" "google" "opencode-go" "commandcode" ] (name: {
-          apiKey = "!tr -d '\\n\\r' < \"${secretsDir}/${name}.key\"";
-        }))
-        {
-          # ZDR（保持・学習なし）を全リクエストで要求する。ZDR 対応 upstream が
-          # ないモデルは 422 (cmd_zdr_no_providers) で失敗する。
-          commandcode.headers."x-cmd-zdr" = "1";
-        };
+    providers = lib.genAttrs [ "deepseek" "google" "opencode-go" ] (name: {
+      apiKey = "!tr -d '\\n\\r' < \"${secretsDir}/${name}.key\"";
+    });
   };
 
   mcpConfig = {
@@ -48,7 +41,7 @@ let
     modelRoles.slow = "openai-codex/gpt-6.1-sol";
     modelRoles.plan = "@slow";
     # 会話モデルの provider に検索機能があればそれを使う。無い provider
-    # （deepseek / opencode-go / commandcode）は既定の順（parallel 以降）に落ちる。
+    # （deepseek / opencode-go）は既定の順（parallel 以降）に落ちる。
     modelRoles.web = "web/hosted";
     theme.dark = "dark-catppuccin";
     symbolPreset = "nerd";

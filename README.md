@@ -262,26 +262,22 @@ gcloud auth application-default set-quota-project nosuke-net
 | `secrets/agents.yaml` | `~/.config/opencode/secrets/deepseek.key` | 全環境 |
 | `secrets/agents.yaml` | `~/.config/opencode/secrets/google.key` | 全環境 |
 | `secrets/agents.yaml` | `~/.config/opencode/secrets/opencode-go.key` | 全環境 |
-| `secrets/agents.yaml` | `~/.config/opencode/secrets/commandcode.key` | 全環境 |
 | `secrets/agents.yaml` | `~/.dsh/.env` | 全環境 |
 | `secrets/cloudflare.yaml` | `~/.config/cloudflare/cloudflare-infra.env` | macOSのみ |
 
-dsh の `.env` には、OpenCode Go のキーが `OPENCODE_GO_API_KEY`、CommandCode の
-キーが `CMD_API_KEY` として追記されます。前者は
+dsh の `.env` には、OpenCode Go のキーが `OPENCODE_GO_API_KEY` として追記されます。
 `~/.config/opencode/secrets/opencode-go.key` と同じ sops キーから作るので、
-ローテートは `opencode_go_api_key` の1か所だけです。dsh の provider 設定では
-`apiKeyEnv: CMD_API_KEY` を指定します。
+ローテートは `opencode_go_api_key` の1か所だけです。
 
 OpenCode は `{file:...}`、omp は `models.yml` の `apiKey: "!tr ... < <file>"` で
 復号済みファイルを読みます。
 同じ provider で `opencode auth login` すると credential が優先され、sops のキーは
-使われません。Google と CommandCode は logout したままにします。OpenCode の公式 DeepSeek
+使われません。Google は logout したままにします。OpenCode の公式 DeepSeek
 provider は削除したため、復号された `deepseek.key` は omp のみが参照します。
 
-CommandCode へは ZDR（保持・学習なし）を要求しています。OpenCode は provider の
-`x-cmd-zdr: 1` ヘッダー（omp も同じ）、CLI と pi 拡張は `CMD_ZDR=1` を使います。ZDR 対応の
-upstream がないモデルは 422 (`cmd_zdr_no_providers`) で失敗し、一部のモデルは
-ZDR 対応 upstream に回るぶん通常より高い料金になります。
+Command Code の API キーは解約中のため配っていません。暗号化済みの
+`commandcode_goat_api_key` は `secrets/agents.yaml` に残しています。CLI と pi
+拡張の `CMD_ZDR=1` はそのままです。
 
 復号処理は stamp ファイル（`.sops-*.stamp`）で sops ファイルの store パスとキーを記録しており、両方が変わっていなければ `nix-switch` 時に GCP Cloud KMS を叩き直さずに前回の出力を再利用します。復号先ファイルを削除した場合やシークレットを編集した場合は自動で再復号されます。
 
