@@ -3,8 +3,8 @@
 macOS 用の i3 風タイリングウィンドウマネージャ。
 本体は Nix パッケージ（`programs.aerospace`）、起動は launchd、設定は
 `.config/aerospace/aerospace.toml` から Home Manager が生成する。
-JankyBordersもHome Managerで導入し、AeroSpace起動時に角丸・幅1.5の枠を表示する
-（`order=above`、activeはCatppuccinのmauve `#cba6f7`、inactiveは20%透過の`#494d64`）。
+JankyBordersもHome Managerで導入し、AeroSpace起動時に角丸・幅4（見える太さはRetinaで約1.5pt、等倍で約1pt）の枠を表示する
+（`order=below`、activeはCatppuccinのmauve `#cba6f7`、inactiveは20%透過の`#494d64`）。
 launchd から起動するAeroSpaceはPATHが限られるため、
 `[exec.env-vars]`で`~/.nix-profile/bin`を足して`borders`を解決している。
 ウィンドウ間・画面端の余白は3。

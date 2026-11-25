@@ -5,7 +5,11 @@
 
 config-version = 2
 
-after-startup-command = ['exec-and-forget borders style=round order=above width=1.5 hidpi=on active_color=0xffcba6f7 inactive_color=0x33494d64']
+# order=above だと枠のウィンドウが本体より手前に来て、ウィンドウ単位のスクリーンショット
+# （⌘⇧4 → Space）が中身のない枠だけを撮ってしまう。
+# below では線の内側半分とウィンドウの縁 1px が隠れ、4.0 で見えるのは Retina で約 1.5pt、等倍で約 1pt。
+# 端数の width は枠の位置がずれ、片側だけ消えることがある。
+after-startup-command = ['exec-and-forget borders style=round order=below width=4.0 hidpi=on active_color=0xffcba6f7 inactive_color=0x33494d64']
 
 # 起動は Home Manager の launchd が管理する。このファイルの start-at-login は
 # モジュールが false に上書きするので書かない。
