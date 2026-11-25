@@ -381,8 +381,10 @@ Paseoは複数のコーディングエージェントをworktreeごとに並べ�
 macOSでは`Paseo.app`をcaskで導入し、daemonとCLIはアプリ同梱のものを使います。
 アプリが自己更新するため、更新はHomebrew側に任せます。
 
-Linuxにはデスクトップ版が無いので、上流の公式flake（`github:getpaseo/paseo`）から
+Linuxにはデスクトップ版が無いので、llm-agents.nixのビルド済みパッケージから
 daemonとCLIを導入し、`systemd.user.services.paseo`で常駐させます。
+上流の公式flake（`github:getpaseo/paseo`）はnixpkgsをfollowsするとキャッシュに当たらず
+ローカルビルドになるため、同梱スキルのソースとしてだけ使います。
 エージェントのCLIを起動できるよう、サービスにはHome Managerのセッションと同じ`PATH`を渡します。
 `paseo daemon pair`で表示されるリンクを使うと、Macやスマホのクライアントから接続できます。
 
