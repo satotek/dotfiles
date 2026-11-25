@@ -1,11 +1,18 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 {
   # SSH 署名をローカルで検証（git log --show-signature / verify-commit）するための
   # 対応表。「メール 公開鍵」の行で、コミッタと署名鍵が一致するかを git が確認する。
-  # 署名生成は 1Password(op-ssh-sign)なので Mac 限定でよい。
+  # 検証はこの Mac で行うので Mac 限定。1 行目は旧 1Password 鍵（過去コミットの検証用）、
+  # 2 行目が現行のローカル鍵。
   home.file = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     ".config/git/allowed_signers".text = ''
       konosuke.s0912@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEu/vDcjBdXbzqM6e6V56JX65xkjyK7Z6sDvnfeCTXLU
+      konosuke.s0912@gmail.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICyS7MJj0gVRX1wufGso1kcKIbjfkIW/suHnhxfK99i1
     '';
   };
 
@@ -107,19 +114,20 @@
           # private repo は最初から git@github.com:owner/repo.git で clone する。
           url."git@github.com:".pushInsteadOf = "https://github.com/";
 
-          # コミット署名を 1Password の SSH 鍵で行う。秘密鍵はディスクに出ず、
-          # 署名のたびに op-ssh-sign が 1Password（Touch ID）に依頼する。
-          # signingKey は "Github" 鍵の公開鍵。GitHub 側に Signing key として登録すると
-          # コミットに Verified が付く。
+          # コミット署名は ~/.ssh/id_ed25519（ローカル鍵）で行う。T3 Code などの
+          # エージェントが無人で commit/push できるよう、署名ごとの Touch ID 確認を
+          # 介さない。鍵は GitHub に認証鍵と Signing key の両方として登録してあり、
+          # 1Password の鍵とは独立に失効できる。
           gpg = {
             format = "ssh";
             ssh = {
-              program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+              # PATH に依存しないよう ssh-keygen はストアパスで固定する。
+              program = "${pkgs.openssh}/bin/ssh-keygen";
               # ローカル検証（--show-signature / verify-commit）用の対応表を指す。
               allowedSignersFile = "~/.config/git/allowed_signers";
             };
           };
-          user.signingKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEu/vDcjBdXbzqM6e6V56JX65xkjyK7Z6sDvnfeCTXLU";
+          user.signingKey = "${config.home.homeDirectory}/.ssh/id_ed25519";
           commit.gpgsign = true;
           tag.gpgsign = true;
         }
