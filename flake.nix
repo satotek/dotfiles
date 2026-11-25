@@ -106,10 +106,12 @@
       flake = false;
     };
 
-    # Paseo 公式 flake。daemon/CLI とデスクトップ版を提供する。
-    # macOS はアプリ同梱の CLI を使うため、ここからは Linux の daemon/CLI だけを入れる。
-    paseo.url = "github:getpaseo/paseo";
-    paseo.inputs.nixpkgs.follows = "nixpkgs";
+    # Paseo 同梱の agent skill。daemon/CLI は llm-agents.nix のキャッシュ済みビルドを
+    # 使うので、ここでは skill のソースだけを取得する。
+    paseo = {
+      url = "github:getpaseo/paseo";
+      flake = false;
+    };
   };
 
   outputs =

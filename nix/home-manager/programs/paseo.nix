@@ -2,18 +2,17 @@
   config,
   lib,
   pkgs,
-  inputs,
   ...
 }:
 let
   isLinux = pkgs.stdenv.hostPlatform.isLinux;
-  paseo = inputs.paseo.packages.${pkgs.stdenv.hostPlatform.system}.paseo;
+  paseo = pkgs.llm-agents.paseo;
   paseoHome = "${config.home.homeDirectory}/.paseo";
   mergeConfig = import ../lib/merge-config.nix { inherit pkgs lib; };
 in
 {
   # macOS は homebrew cask の Paseo.app が daemon と CLI を同梱する。
-  # Linux にはデスクトップ版が無いので、上流 flake の daemon/CLI を入れる。
+  # Linux にはデスクトップ版が無いので、llm-agents.nix の daemon/CLI を入れる。
   home.packages = lib.mkIf isLinux [ paseo ];
 
   # Mac やスマホのクライアントから繋ぐための常駐デーモン。起動方法と停止手順は

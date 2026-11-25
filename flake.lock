@@ -427,11 +427,7 @@
       }
     },
     "paseo": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
+      "flake": false,
       "locked": {
         "lastModified": 1795603704,
         "narHash": "sha256-ox9zo8ichwdQ5EqpEjCX7n01JVHfvDLDZYRYTMEEnho=",
