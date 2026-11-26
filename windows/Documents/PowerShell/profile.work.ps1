@@ -22,15 +22,18 @@ function curl {
 
 # --- VM リモート作業 (docs/vm-remote-workflow.md §7-A) ---
 # Windows ネイティブの OpenSSH は ControlMaster 非対応のため、SOCKS 用 ssh を常駐起動する。
+# WinHTTP など SOCKS を使えないクライアント向けに、VM の squid (127.0.0.1:3128) も
+# 同じ接続で転送する。squid は VM に apt で入れたもので、localhost からの接続だけを許す。
 function vmproxy {
-    param([int]$Port = 1080)
+    param([int]$Port = 1080, [int]$HttpPort = 8118)
     $running = Get-CimInstance Win32_Process -Filter "Name='ssh.exe'" |
     Where-Object {
         $_.CommandLine -match "-D\s*${Port}\b"
     }
     if ($running) { Write-Host "already up on :$Port"; return }
-    Start-Process ssh -ArgumentList "-N","-D","$Port","vm" -WindowStyle Hidden
+    Start-Process ssh -ArgumentList "-N","-D","$Port","-L","127.0.0.1:${HttpPort}:127.0.0.1:3128","vm" -WindowStyle Hidden
     Write-Host "SOCKS up: socks5://127.0.0.1:$Port (via vm)"
+    Write-Host "HTTP  up: http://127.0.0.1:$HttpPort (via vm)"
 }
 
 function vmunproxy {

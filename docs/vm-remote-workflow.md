@@ -135,12 +135,13 @@ Windows ネイティブの OpenSSH は接続多重化（ControlMaster）をサ�
 
 ```powershell
 function vmproxy {
-    param([int]$Port = 1080)
+    param([int]$Port = 1080, [int]$HttpPort = 8118)
     $running = Get-CimInstance Win32_Process -Filter "Name='ssh.exe'" |
         Where-Object { $_.CommandLine -match "-D\s+$Port\b" }
     if ($running) { Write-Host "already up on :$Port"; return }
-    Start-Process ssh -ArgumentList "-N","-D","$Port","vm" -WindowStyle Hidden
+    Start-Process ssh -ArgumentList "-N","-D","$Port","-L","127.0.0.1:${HttpPort}:127.0.0.1:3128","vm" -WindowStyle Hidden
     Write-Host "SOCKS up: socks5://127.0.0.1:$Port (via vm)"
+    Write-Host "HTTP  up: http://127.0.0.1:$HttpPort (via vm)"
 }
 
 function vmunproxy {
@@ -161,6 +162,9 @@ function vmbrowse {
         $Url
 }
 ```
+
+`vmproxy` は SOCKS と同じ接続で、VM の squid（`127.0.0.1:3128`、apt で導入済み・localhost のみ許可）も手元の 8118 番に転送する。
+WinHTTP のように SOCKS を扱えないクライアントや PAC からは `http://127.0.0.1:8118` を使う。
 
 ### 5-B. WSL
 
