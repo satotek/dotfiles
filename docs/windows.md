@@ -15,6 +15,7 @@ macOS・Linux・WSLはこれまで通りNixが管理し、chezmoiは使わない
 | `~\.config\git.local` | 初回だけ雛形を作る。名前・メール・プロキシを書く |
 | `~\.config\starship.toml` | `windows/dot_config/starship.toml` |
 | `%LOCALAPPDATA%\lazygit\config.yml` | `windows/AppData/Local/lazygit/config.yml` |
+| `%AppData%\rex\init.lua` | `nix/home-manager/programs/rex/init.lua`をそのまま取り込む。Nixと同じキーバインド |
 | `%LOCALAPPDATA%\nvim` | このリポジトリの`.config/nvim`へのシンボリックリンク |
 | `~\Documents\PowerShell\Microsoft.PowerShell_profile.ps1` | PowerShell 7の既定プロファイル |
 | `~\Documents\PowerShell\profile.work.ps1` | 仕事用PCにだけ配る。cygwin・MSBuildのPATH、`curl`のラッパー、`vmproxy`系の関数 |

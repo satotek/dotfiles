@@ -1,0 +1,2 @@
+{{- /* 正本は Nix の programs.rex.config と共有する nix/home-manager/programs/rex/init.lua。二重管理しないよう include で取り込む。 */ -}}
+{{ include (joinPath .chezmoi.workingTree "nix" "home-manager" "programs" "rex" "init.lua") -}}
